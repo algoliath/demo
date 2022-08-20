@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.template.mybatis.TemplateMapper">
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into template values
+            (#{member_id}, #{name})
+    </insert>
+
+    <select id="findAll" resultType="Template">
+        select *
+        from template
+    </select>
+
+    <select id="findById" resultType="Template">
+        select *
+        from template
+        where id = #{template_id}
+    </select>
+
+    <update id="update">
+        update template
+        set name = #{name}
+        where id = #{template_id}
+    </update>
+</mapper>
+
+

@@ -1,0 +1,130 @@
+:root {
+    /* Color */
+    --color-white: #ffffff;
+    --color-light-white: #eeeeee;
+    --color-dark-white: #bdbdbd;
+    --color-pink: #fe918d;
+    --color-dark-pink: #ff6863;
+    --color-dark-grey: #4d4d4d;
+    --color-grey: #616161;
+    --color-light-grey: #7c7979;
+    --color-blue: #73aace;
+    --color-yellow: #fff7d1;
+    --color-orange: #feb546;
+    --color-black: #000000;
+
+    /* Font size */
+    --font-large: 48px;
+    --font-medium: 28px;
+    --font-regular: 18px;
+    --font-small: 16px;
+    --font-micro: 14px;
+
+    /* Font weight */
+    --weight-bold: 700;
+    --weight-semi-bold: 600;
+    --weight-regular: 400;
+
+    /* Size */
+    --size-border-radius: 16px;
+
+    /* Animation duration */
+    --animation-duration: 300ms;
+}
+
+/* Universal tags */
+* {
+    box-sizing: border-box
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    cursor: default;
+}
+
+a {
+    text-decoration: none;
+    margin: 10px;
+    color: var(--color-dark-grey);
+}
+
+ul {
+    padding-left: 0;
+    list-style: none;
+}
+
+h1 {
+    font-size: var(--font-medium);
+    font-weight: var(--weight-regular);
+    color: var(--color-black);
+    margin: 16px 0;
+}
+
+h2 {
+    font-size: var(--font-medium);
+    font-weight: var(--weight-semi-bold);
+    color: var(--color-black);
+    margin: 8px 0;
+}
+
+h3 {
+    font-size: var(--font-regular);
+    font-weight: var(--weight-semi-bold);
+    color: var(--color-black);
+    margin: 8px 0;
+}
+
+p {
+    font-size: var(--font-regular);
+    font-weight: var(--weight-bold);
+    color: var(--color-black);
+    margin: 8px 0;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0px;
+}
+
+span {
+    padding-left: 0px;
+}
+
+input {
+    font-size: var(--font-regular);
+    color: var(--color-black);
+    text-align: center;
+    margin: 20px;
+}
+
+button {
+    cursor: pointer;
+    outline: none;
+    display: block;
+}
+
+section{
+    margin: 50px 0;
+    border: darkblue;
+}
+
+/* Section */
+.section {
+    margin: 100px;
+    text-align: left;
+}
+
+.section__container {
+    margin: 50px 0;
+    border: black;
+    background-color: beige;
+}
+
+.field-error{
+    color: red;
+}
+
+.btn__inline{
+    display:inline;
+}
