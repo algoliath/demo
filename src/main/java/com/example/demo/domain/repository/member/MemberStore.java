@@ -3,24 +3,22 @@ package com.example.demo.domain.repository.member;
 
 import com.example.demo.domain.member.Member;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-@Repository
-public class MemberRepository {
+@Component
+public class MemberStore {
 
-    private Map<Long, Member> store = new ConcurrentHashMap<>();
-    Long sequence = 0L;
+    private Map<String, Member> store = new ConcurrentHashMap<>();
 
     public void save(Member member){
-        member.setId(sequence);
-        store.put(sequence++, member);
+        store.put(member.getId(), member);
     }
 
-    public Member findById(Long id){
+    public Member findById(String id){
         return store.get(id);
     }
 

@@ -1,6 +1,5 @@
-package com.example.demo.domain.form;
+package com.example.demo.domain.column.form;
 
-import com.example.demo.domain.template.ColumnName;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -12,13 +11,13 @@ public class ColumnSaveForm {
     @NotNull
     @NotBlank
     private String name;
-
     @NotNull
     private String type;
 
+    private String lastName;
 
     public ColumnSaveForm(){
-
+        this.name = "";
     }
 
     public ColumnSaveForm(String name, String type){

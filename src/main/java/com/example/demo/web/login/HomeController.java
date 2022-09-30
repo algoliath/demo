@@ -1,6 +1,7 @@
 package com.example.demo.web.login;
 
 import com.example.demo.domain.member.Member;
+import com.example.demo.domain.repository.template.TemplateStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,8 @@ import static com.example.demo.web.session.SessionConst.*;
 @RequiredArgsConstructor
 public class HomeController {
 
+    private final TemplateStore templateStore;
+
     @GetMapping("/")
     public String homeLoginV4(@SessionAttribute(name=LOGIN_MEMBER, required = false) Member loginMember, Model model){
         // 세션에 회원 데이터가 없으면 home
@@ -24,7 +27,10 @@ public class HomeController {
         }
         // 세션이 유지되면 로그인으로 이동
         model.addAttribute("member", loginMember);
+        model.addAttribute("templates", templateStore.findByMemberId(loginMember.getId()));
         return "login/loginHome";
     }
+
+
 
 }

@@ -1,6 +1,6 @@
-package com.example.demo.util.string;
+package com.example.demo.util.validation;
 
-public class ColumnNameUtils {
+public class ColumnUtils {
 
     public static boolean isValid(String name){
         return isCamelCase(name) || isSingleton(name);
@@ -9,7 +9,7 @@ public class ColumnNameUtils {
     private static boolean isCamelCase(String name){
         boolean isUnderScore = false;
         for(char c: name.toCharArray()){
-            if(!Character.isAlphabetic(c)){
+            if(!Character.isAlphabetic(c) && !Character.isDigit(c)){
                 if(c != '_' ){
                     return false;
                 }

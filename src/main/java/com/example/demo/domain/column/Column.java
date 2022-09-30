@@ -1,21 +1,20 @@
-package com.example.demo.domain.template;
+package com.example.demo.domain.column;
 
 import lombok.Data;
 
 @Data
 public class Column {
 
-    private ColumnName name;
+    private String name;
     private String type;
 
     public Column(){
 
     }
 
-    public Column(ColumnName name, String type) {
+    public Column(String name, String type) {
         this.name = name;
         this.type = type;
     }
-
 
 }

@@ -8,5 +8,4 @@ public class LoginForm {
     String loginId;
     String password;
 
-
 }

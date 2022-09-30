@@ -1,8 +1,9 @@
-package com.example.demo.web.validation;
+package com.example.demo.web.validation.column;
 
-import com.example.demo.domain.template.Column;
-import com.example.demo.domain.form.ColumnSaveForm;
-import com.example.demo.util.string.ColumnNameUtils;
+import com.example.demo.domain.column.ColumnType;
+import com.example.demo.domain.column.form.ColumnUpdateForm;
+import com.example.demo.domain.column.Column;
+import com.example.demo.util.validation.ColumnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-public class ColumnSaveFormValidator implements Validator {
+public class TableColumnValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -26,8 +27,8 @@ public class ColumnSaveFormValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
 
-        ColumnSaveForm saveForm = (ColumnSaveForm) target;
-        Set<String> validTypes = Stream.of(ColumnTypes.values()).map(columnTypes -> columnTypes.name()).collect(Collectors.toSet());
+        ColumnUpdateForm saveForm = (ColumnUpdateForm) target;
+        Set<String> validTypes = Stream.of(ColumnType.values()).map(columnType -> columnType.name()).collect(Collectors.toSet());
 
         String name = saveForm.getName();
         String type = saveForm.getType();
@@ -40,7 +41,7 @@ public class ColumnSaveFormValidator implements Validator {
             errors.rejectValue("name", "required");
         }
 
-        if(!ColumnNameUtils.isValid(name)){
+        if(!ColumnUtils.isValid(name)){
             errors.rejectValue("name", "invalid");
         }
 

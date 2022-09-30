@@ -1,4 +1,4 @@
-package com.example.demo.domain.form;
+package com.example.demo.domain.column.form;
 
 import lombok.Data;
 
@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 public class ColumnUpdateForm {
 
     @NotNull
-    @NotBlank
     private String name;
     @NotNull
     private String type;
@@ -17,7 +16,6 @@ public class ColumnUpdateForm {
     private String mode;
     @NotNull
     private String lastName;
-
 
     public ColumnUpdateForm(){
 
@@ -28,10 +26,6 @@ public class ColumnUpdateForm {
         this.type = type;
         this.mode = mode;
         this.lastName = lastName;
-    }
-
-    public boolean isEmpty(){
-        return this.name == null || this.type == null;
     }
 
 }
