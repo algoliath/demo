@@ -14,19 +14,13 @@ public class ColumnSaveForm {
     @NotNull
     private String type;
 
-    private String lastName;
-
     public ColumnSaveForm(){
-        this.name = "";
-    }
 
-    public ColumnSaveForm(String name, String type){
-        this.name = name;
-        this.type = type;
     }
 
     public boolean isEmpty(){
-        return this.name == null || this.type == null;
+        return name == null || type == null;
     }
 
 }
+

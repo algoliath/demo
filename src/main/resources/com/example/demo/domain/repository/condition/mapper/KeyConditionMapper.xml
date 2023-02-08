@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.condition.mapper.KeyConditionMapper">
+
+    <delete id="delete" parameterType="Long">
+        delete from key_condition where id = #{id};
+    </delete>
+
+    <insert id="save" parameterType="ConditionDTO" useGeneratedKeys="true" keyProperty="condition.id">
+        insert into key_condition (type, column_id)
+        values (#{condition.type}, #{columnId})
+    </insert>
+
+    <insert id="saveBatch" parameterType="ConditionDTO" useGeneratedKeys="true" keyProperty="condition.id">
+        insert into key_condition (type, column_id)
+        values
+        <foreach collection="conditions" item="condition" separator=",">
+            (
+               #{condition.type}, #{condition.columnId}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByColumnId" resultType="ConditionDTO">
+        select *
+        from key_condition
+        where key_condition.column_id = #{columnId}
+    </select>
+
+    <select id="findById" resultType="ConditionDTO">
+        select *
+        from key_condition
+        where id = #{id}
+    </select>
+
+    <update id="updateType" parameterType="Long">
+        update key_condition
+        set type = #{type}
+        where id = #{id}
+    </update>
+</mapper>

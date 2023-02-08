@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.document.mapper.DocumentMapper">
+
+    <resultMap type="com.example.demo.domain.data.dto.DocumentDTO" id="DocumentDTO">
+        <result property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="templateId" column="templateId"/>
+    </resultMap>
+
+    <delete id="delete" parameterType="Long">
+        delete from Document where id = #{id};
+    </delete>
+
+    <insert id="save" parameterType="DocumentDTO">
+        insert into Document (id, type)
+        values (#{entityId}, #{name}, #{type})
+    </insert>
+
+    <insert id="saveBatch" parameterType="DocumentDTO">
+        insert into Document (id, type)
+        values
+        <foreach collection="Documents" item="Document" separator=",">
+            (
+            #{Document.id}, #{Document.type}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByTemplateId" resultMap="DocumentDTO">
+        select *
+        from Document
+        where Document.entity_id = #{templateId}
+    </select>
+
+    <select id="findById" resultMap="DocumentDTO">
+        select *
+        from Document
+        where id = #{id}
+    </select>
+
+    <update id="updateName">
+        update Document
+        set name = #{name}
+        where id = #{id}
+    </update>
+
+    <update id="updateType">
+        update Document
+        set type = #{type}
+        where id = #{id}
+    </update>
+
+</mapper>
+

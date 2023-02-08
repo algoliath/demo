@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.member.mapper.MemberMapper">
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        insert into member (name, file_id, login_id, login_pw)
+        values (#{name}, #{fileId}, #{loginId}, #{loginPw})
+    </insert>
+
+    <select id="findAll" resultType="list">
+        select *
+        from member
+    </select>
+
+    <select id="findByLoginId" parameterType="String" resultType="Member">
+        select *
+        from member
+        where login_id = #{login_id}
+    </select>
+
+    <select id="findById" resultType="Member">
+        select *
+        from member
+        where id = #{id}
+    </select>
+
+    <update id="updateName" parameterType="String">
+        update member
+        set name = #{target}
+        where id = #{id}
+    </update>
+
+    <update id="updateLoginId" parameterType="Long">
+        update member
+        set login_id = #{target}
+        where id = #{id}
+    </update>
+
+    <update id="updateLoginPw" parameterType="Long">
+        update member
+        set login_pw = #{target}
+        where id = #{id}
+    </update>
+</mapper>
+
+

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html th:fragment="layout (add_template, add_columns, update_columns, save_template)" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyToDataBase</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script>
+        // $(document).ready(function(){
+        //     $('.col.container').resizable();
+        //     $('.col.container').draggable();
+        // });
+    </script>
+    <script type="application/javascript" th:inline="javascript">
+
+        <!-- toggle_function -->
+        function toggle_by_class(target_class, flag) {
+            $('.' + target_class).toggle(flag);
+        }
+
+        function toggle_header(header, container){
+
+            let headers = $('.' + header);
+            let containers = $('.' + container);
+
+            if(headers.length == 0||containers.length == 0){
+                console.log("invalid: input size of 0");
+                return;
+            }
+
+            let header_active = false;
+            let container_active = false;
+            headers.each(function(index, element){
+                    if($(element).hasClass('header-show')){
+                        $(element).removeClass('header-show');
+                        $(element).addClass('header-collapse');
+                        header_active = true;
+                    }
+                    else if($(element).hasClass('header-collapse')){
+                        $(element).removeClass('header-collapse');
+                        $(element).addClass('header-show');
+                        header_active = true;
+                    }
+            });
+
+            containers.each(function(index, element){
+                if($(element).hasClass('pop-up')){
+                    $(element).removeClass('pop-up');
+                    $(element).addClass('pop-hide');
+                    container_active = true;
+                }
+                else if($(element).hasClass('pop-hide')){
+                    $(element).removeClass('pop-hide');
+                    $(element).addClass('pop-up');
+                    container_active = true;
+                }
+            });
+
+            if(!header_active){
+               $(headers[0]).addClass('header-show');
+            }
+            if(!container_active){
+               $(containers[0]).addClass('pop-up');
+            }
+        }
+
+        function toggle_popup(anchorClass, targetClass){
+
+            let containers = $('.' + anchorClass);
+            if(containers.length == 0){
+                console.log("invalid input: input size of 0");
+                return;
+            }
+
+            containers.each(function(index, element){
+                console.log($(element));
+                if($(element).hasClass(targetClass) && $(element).css('display')=='none'){
+                    $(element).toggle('slow');
+                    $(element).removeClass('pop-hide');
+                    $(element).addClass('pop-up');
+                }
+                if(!$(element).hasClass(targetClass) && $(element).css('display')!='none') {
+                    $(element).toggle(false);
+                    $(element).removeClass('pop-up');
+                    $(element).addClass('pop-hide');
+                }
+            });
+            //
+            // console.log('anchor_class' + anchorClass);
+            // if(!$('.' + anchorClass + '.' + targetClass).hasClass('pop-up')){
+            //     $(containers[0]).addClass('pop-up');
+            //     $(containers[0]).removeClass('pop-hide');
+            //     $(containers[0]).toggle('slow');
+            // }
+        }
+
+        function confirm_alert(message="저장하시겠습니까: "){
+            confirm(message);
+        }
+
+        <!-- insert -->
+        function insert_by_id(input_id, val){
+            console.log("input_id:" + input_id);
+            console.log("val:" + val);
+            $('#' + input_id).val(val);
+            console.log("input_id:" + input_id);
+            console.log("val:" + val);
+        }
+
+        <!-- focus -->
+        function shift_focus(input_id, type, another_input_id){
+            insert_by_id(input_id, type);
+            $('#' + another_input_id).focus();
+        }
+    </script>
+    <!-- sync form -->
+    <script>
+        function submit_value_form(input_id, value, form_id){
+            insert_by_id(input_id, value);
+            submit_form(form_id);
+        }
+        function submit_form(form_id) {
+            console.log(form_id);
+            $('#' + form_id).submit();
+        }
+    </script>
+    <!-- async form-->
+    <script type="application/javascript" th:inline="javascript">
+        function ajax_form(form_id, form_url, method = "post", table_id = "", content_type='application/x-www-form-urlencoded;charset=UTF-8', message="success") {
+            // var data = $('#' + form_id).serializeArray().reduce(function(x){form_data[x.name] = x.value;});
+            console.log('form_id='+form_id);
+            console.log('form_url='+form_url);
+            console.log('method='+method);
+            console.log('table_id='+table_id);
+            console.log('content_type='+content_type);
+
+            $.ajax({
+                type: method,
+                url: form_url,
+                data: $('#'+form_id).serialize(),
+                contentType: content_type,
+                success: function () {
+                    console.log(message);
+                }
+            }).done(function(fragment) {
+                console.log(fragment);
+                if (!table_id) {
+                    table_id = form_id;
+                }
+                $('#'+table_id).replaceWith(fragment);
+            });
+            return false;
+        }
+    </script>
+    <style>
+        <!-- tag_selector -->
+        :root{
+            --border-line-color: aliceblue;
+        }
+        p{
+            margin-top: 10px;
+            font-size:medium;
+            font-weight:bold;
+        }
+        <!-- class_selector -->
+        .form-control {
+            text-align: left;
+        }
+        .field-error{
+            padding-top: 5px;
+            padding-bottom: 10px;
+            color: red;
+            font-size: small;
+            font-weight: bold;
+        }
+        .accordion-button{
+            background-color: transparent;
+        }
+        .pop-up{
+            display:block;
+        }
+        .pop-hide{
+            display:none;
+        }
+        .header{
+             height: 25px;
+             border:none;
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             text-align: center;
+             font-size: large;
+         }
+        .flex-box-center{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .header-show{
+            border-top: 2px groove var(--border-line-color);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 5px;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .header-collapse{
+            border-bottom: 2px groove var(--border-line-color);
+            border-radius: 20px;
+            background-color: white;
+            color: black;
+            transition: 0.3s;
+        }
+        .topless{
+            border-left: 2px groove var(--border-line-color);
+            border-right: 2px groove var(--border-line-color);
+            border-bottom: 2px groove var(--border-line-color);
+        }
+        .outline{
+            border-radius: 5px;
+            box-shadow: 2px 2px grey;
+        }
+        .img-hover:hover{
+            border-radius: 15px;
+            border: 2px groove black;
+            background-color: aquamarine;
+            width: 200px;
+            height: 200px;
+            transition: 0.4s;
+        }
+        .img-button{
+            font-size:small;
+            width: 50px;
+            height: 30px;
+        }
+        .no-padding{
+            padding: unset;
+        }
+        .col-container{
+            transition: 0.8s;
+            transition-property: width;
+        }
+        .container{
+            margin-bottom: 30px;
+            border: solid 1px #b3d4f5;
+            border-radius:10px;
+            padding: 30px;
+            /*background-color: #b3d4f5;*/
+            font-weight: bold;
+        }
+        .accordion-body{
+            padding: unset;
+        }
+        .accordion-button{
+            background-color:springgreen;
+            color:white;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container p-5 border-white mt-3">
+
+      <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
+          <h2 style="color: black; font-weight: lighter; font-size: 35px;">Build Template</h2>
+          <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
+      </div>
+
+      <!-- 템플릿 설정 -->
+
+      <section th:replace="${add_template}"></section>
+      <br>
+
+      <!-- 추가된 칼럼 목록-->
+      <section th:replace="${update_columns}"></section>
+      <br>
+
+      <!-- 칼럼 추가 -->
+      <section th:replace="${add_columns}" ></section>
+      <br>
+
+      <!--저장 및 페이지 이동-->
+      <section th:replace="${save_template}"></section>
+</div>
+</body>
+</html>

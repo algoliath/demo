@@ -1,6 +1,6 @@
 package com.example.demo.domain.repository.uploadFile;
 
-import com.example.demo.domain.datasource.uploadFile.UploadFile;
+import com.example.demo.domain.source.uploadFile.UploadFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @PropertySource("classpath:settings.properties")
 public class UploadFileRepository {
 
-    @Value("${file.dir}")
+    @Value(value = "${file.dir}")
     private String fileDir;
 
     public List<UploadFile> storeFiles(List<MultipartFile> multipartFiles) throws IOException {
@@ -39,7 +39,6 @@ public class UploadFileRepository {
 
         String originalFilename = multipartFile.getOriginalFilename();
         // image.png
-
         String uuid = UUID.randomUUID().toString();
         // #####.png
 
@@ -50,15 +49,14 @@ public class UploadFileRepository {
         return new UploadFile(originalFilename, storeFilename);
     }
 
-    private String getFullPath(String filename) {
-        return fileDir + filename;
-    }
-
     private String extractExt(String originalFileName) {
         int pos = originalFileName.lastIndexOf(".");
         String ext = originalFileName.substring(pos + 1);
         return ext;
     }
 
+    private String getFullPath(String filename) {
+        return fileDir + filename;
+    }
 
 }

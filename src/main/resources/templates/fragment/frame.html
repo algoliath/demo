@@ -1,0 +1,19 @@
+<div th:fragment="search_template(action, form_id, table_id)">
+    <div class="container" style="width: 500px;">
+        <form th:replace="~{/fragment/form::file-view-form(files=${files}, action=${action}, form_id=${form_id}, table_id=${table_id})}"></form>
+    </div>
+</div>
+
+<div th:fragment="join_template(action, form_id, table_id)">
+    <div class="container" style="width: 400px">
+        <div th:replace="~{/fragment/form::template-view-form(templates=${templates}, action=${action}, form_id=${form_id}, table_id=${table_id})}"></div>
+    </div>
+</div>
+
+<div th:fragment="view_template(sourceId)">
+    <div class="row" th:if="${sourceId}!=null">
+       <div class="col" style="border:none;" th:with="baseUrl=${@spreadSheetUtils.getEmbeddableSpreadSheetURL(sourceId)}">
+           <iframe th:src="${baseUrl}" id="spreadsheet_edit" title="spreadsheet" width="600px" height="500px"></iframe>
+       </div>
+    </div>
+</div>

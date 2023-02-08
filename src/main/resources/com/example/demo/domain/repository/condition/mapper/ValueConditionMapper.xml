@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.domain.repository.condition.mapper.ValueConditionMapper">
+
+    <delete id="delete" parameterType="Long">
+        delete from value_condition where id = #{id};
+    </delete>
+
+    <insert id="save" parameterType="ConditionDTO" useGeneratedKeys="true" keyProperty="condition.id">
+        insert into value_condition (type, term, column_id)
+        values (#{condition.type}, #{condition.term}, #{columnId})
+    </insert>
+
+    <insert id="saveBatch" parameterType="ConditionDTO" useGeneratedKeys="true" keyProperty="condition.id">
+        insert into value_condition (type, term, columnId)
+        values
+        <foreach collection="conditions" item="condition" separator=",">
+            (
+              #{condition.type}, #{condition.term}, #{condition.columnId}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByColumnId" resultType="ConditionDTO">
+        select *
+        from value_condition
+        where column_id = #{columnId}
+    </select>
+
+    <select id="findById" resultType="ConditionDTO">
+        select *
+        from value_condition
+        where id = #{id}
+    </select>
+
+    <update id="updateType" parameterType="Long">
+        update value_condition
+        set type = #{type}
+        where id = #{id}
+    </update>
+
+    <update id="updateTerm" parameterType="Long">
+        update value_condition
+        set term = #{term}
+        where id = #{id}
+    </update>
+
+</mapper>

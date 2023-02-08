@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.template.mapper.QueryMapper">
+
+    <update id="create" parameterType="java.lang.String">
+        ${query}
+    </update>
+
+    <update id="drop" parameterType="java.lang.String">
+        ${query}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        delete from query
+        where id = #{id};
+    </delete>
+
+    <insert id="save">
+        insert into query (id, file_name, file_domain)
+        values (#{id}, #{fileName}, #{fileDomain});
+    </insert>
+
+    <update id="update">
+        update query
+        set name = #{template.name}
+        where id = #{id};
+    </update>
+
+    <select id="findByName" parameterType="String" resultType="queryDTO">
+        select template.id, template.name, template.member_id, file_name, file_domain
+        from query join template on query.id = template.id
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findByMemberId" parameterType="Long" resultType="queryDTO">
+        select template.id, template.name, template.memberId, file_name, file_domain
+        from query join template on query.id = template.id
+        where member_id = #{memberId}
+    </select>
+
+    <select id="findById" parameterType="Long" resultType="queryDTO">
+        select template.id, template.name, template.memberId, file_name, file_domain
+        from query join template on query.id = template.id
+        where id = #{id}
+    </select>
+
+    <select id="findAll" resultType="queryDTO">
+        select *
+        from query join template on query.id = template.id
+    </select>
+
+</mapper>

@@ -1,30 +1,49 @@
 package com.example.demo.web.template;
-
 import com.example.demo.domain.column.Column;
-import com.example.demo.domain.column.ColumnName;
-import com.example.demo.domain.column.ColumnType;
-import com.example.demo.domain.column.ColumnTypeClassifier;
-import com.example.demo.domain.column.form.ColumnSaveForm;
-import com.example.demo.domain.column.form.ColumnUpdateForm;
-import com.example.demo.domain.datasource.Source;
-import com.example.demo.domain.datasource.source.SpreadSheetsSource;
+import com.example.demo.domain.column.property.condition.options.OptionType;
+import com.example.demo.domain.column.property.condition.value.ForeignKey;
+import com.example.demo.domain.column.property.condition.value.ValueConditionType;
+import com.example.demo.domain.column.property.name.ColumnName;
+import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.member.Member;
-import com.example.demo.domain.repository.member.MemberStore;
-import com.example.demo.domain.table.SpreadSheetTable;
-import com.example.demo.domain.template.EntityTemplateForm;
-import com.example.demo.domain.template.TemplateForm;
-import com.example.demo.web.validation.column.ColumnValidator;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import com.example.demo.domain.repository.member.MemberRepository;
+import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
+import com.example.demo.domain.data.dto.EntityDTO;
+import com.example.demo.domain.data.vo.EntityVO;
+import com.example.demo.domain.template.form.TemplateForm;
+import com.example.demo.domain.template.model.Template;
+import com.example.demo.domain.template.type.TemplateType;
+import com.example.demo.domain.validation.EntityValidator;
+import com.example.demo.util.Source;
+import com.example.demo.domain.column.property.condition.key.KeyCondition;
+import com.example.demo.domain.column.property.condition.value.ValueCondition;
+import com.example.demo.domain.column.form.*;
+import com.example.demo.domain.column.property.type.ColumnType;
+import com.example.demo.domain.column.ColumnTypeConverter;
+import com.example.demo.domain.template.service.TemplateService;
+import com.example.demo.domain.source.datasource.SpreadSheetSource;
+import com.example.demo.domain.columnTable.SpreadSheetTable;
+import com.example.demo.domain.template.form.EntityTemplateForm;
+import com.example.demo.domain.template.model.Entity;
+import com.example.demo.util.template.TemplateFormProvider;
+import com.example.demo.web.session.SessionConst;
+import com.github.pagehelper.PageHelper;
+import com.google.api.services.drive.model.File;
 import org.springframework.ui.Model;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
+import static com.example.demo.domain.source.datasource.DataSource.*;
+import static com.example.demo.util.controller.ControllerUtils.*;
+import static com.example.demo.util.datasource.SpreadSheetUtils.getEmbeddableSpreadSheetURL;
+import static com.example.demo.domain.validation.ErrorConst.*;
 
 @Slf4j
 @Controller
@@ -32,159 +51,403 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EntityController {
 
+      private final MemberRepository memberRepository;
+      private final TemplateService templateService;
+      private final ColumnTypeConverter converter;
       private final TemplateFormProvider templateFormProvider;
-      private final ColumnTypeClassifier classifier;
-      private final ColumnValidator validator;
-      private final MemberStore memberStore;
+      private final EntityValidator entityValidator;
 
-      @PostMapping("/add_entity/{memberId}")
-      public String addTemplate(@RequestParam String spreadSheetTitle,
-                                @RequestParam String spreadSheetRange,
-                                @PathVariable String memberId, Model model){
+//      @InitBinder
+//      public void init(WebDataBinder webDataBinder){
+//           log.info("webDataBinder={}", webDataBinder);
+//           webDataBinder.addValidators(entityValidator);
+//      }
 
-            EntityTemplateForm templateForm = getEntityTemplateForm(memberId);
-            model.addAttribute("columnSaveForm", new ColumnSaveForm());
-            model.addAttribute("columns", templateForm.getColumns().values());
+      @GetMapping("/add_entity/{memberId}")
+      public String searchFile(@ModelAttribute("searchForm") SearchForm searchForm,
+                               @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                               @PathVariable String memberId, Model model){
 
-            Source datasource = new Source();
-            Member findMember = memberStore.findById(memberId);
-            datasource.setData("credentials", "/auth/" + findMember.getAttachFile().getOriginalFilename());
-            datasource.setData("spreadSheetTitle", spreadSheetTitle);
-            datasource.setData("spreadSheetRange", spreadSheetRange);
+            String fileName = searchForm.getName();
+            String fragment = searchForm.getFragment();
+            saveEntityForwardModelAttributes(model, templateFormProvider.getEntityTemplateForm(memberId));
+            String fileId = memberRepository.findById(member.getId()).get().getFileId();
+            SpreadSheetSource spreadSheetSource = new SpreadSheetSource(fileId);
 
-            Source<List<List<Object>>> source = spreadSheetsSource.getSource(datasource);
-            SpreadSheetTable spreadSheetTable = new SpreadSheetTable(source);
+            Source<String> paramSource = new Source<>();
+            paramSource.add(FILE_NAME, fileName);
+            paramSource.add(PATTERN_MATCHER, "contains");
 
-            templateForm.setSpreadSheetRange(spreadSheetRange);
-            templateForm.setSpreadSheetTitle(spreadSheetTitle);
-            templateForm.setSpreadSheetTable(spreadSheetTable);
+            List<File> files = spreadSheetSource.getFiles(paramSource);
+            List<EntityVO> entityVOList = new ArrayList<>();
+            for(File file: files){
+                  entityVOList.add(new EntityVO(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
+            }
 
-            model.addAttribute("template", templateForm);
-            model.addAttribute("columnSaveForm", new ColumnSaveForm());
-            model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
-            log.info("-----------[GET END]--------------\n");
-            return "template/templateMain";
+            model.addAttribute("files", entityVOList);
+            saveEntityPostModelAttributes(model, templateFormProvider.getEntityTemplateForm(memberId));
+            return "/template/entity/add::#" + fragment;
       }
 
-      private final SpreadSheetsSource spreadSheetsSource;
+      /* Template Controller */
+      @PostMapping("/add_entity/{memberId}")
+      public String addFile(@ModelAttribute("searchForm") SearchForm searchForm, BindingResult bindingResult,
+                            @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                            @PathVariable String memberId, Model model){
+
+            String credentials = memberRepository.findById(member.getId()).get().getFileId();
+            String fileName = searchForm.getName();
+            String frameId = searchForm.getFragment();
+
+            SpreadSheetSource spreadSheetSource = new SpreadSheetSource(credentials);
+            EntityTemplateForm entityTemplateForm = templateFormProvider.getEntityTemplateForm(memberId);
+
+            entityTemplateForm.setSpreadSheetTitle(fileName);
+            saveEntityForwardModelAttributes(model, entityTemplateForm);
+            Source<String> paramSource = new Source<>(Arrays.asList(FILE_NAME), Arrays.asList(fileName));
+
+            DataSourceId dataSourceId = spreadSheetSource.publish(paramSource, bindingResult);
+            entityTemplateForm.setSourceId(dataSourceId.getOriginalFileId());
+            saveEntityPostModelAttributes(model, entityTemplateForm);
+            log.info("-----------[GET END]--------------\n");
+            return "template/entity/add";
+      }
+
+      @PostMapping("/join_template/{memberId}")
+      public String joinTemplate(@ModelAttribute("searchForm") SearchForm searchForm, BindingResult bindingResult,
+                                 @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                                 @PathVariable String memberId, Model model) {
+
+            Source<List<String>> errors = new Source<>();
+            EntityTemplateForm entityTemplateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            Member loginMember = memberRepository.findById(member.getId()).get();
+            String fileId = loginMember.getFileId();
+            String templateName = searchForm.getName();
+            saveEntityForwardModelAttributes(model, entityTemplateForm);
+
+            if(!errors.isEmpty()){
+                  model.addAttribute("errors", errors);
+                  return "/template/entity/add";
+            }
+
+            List<Template> templateResultSet = templateService.findTemplatesByName(templateName);
+            Entity entity = (Entity) templateResultSet.get(0);
+            entity.setColumns(templateService.findColumnsByTemplateId(entity.getId()));
+
+            SpreadSheetSource spreadSheetSource = new SpreadSheetSource(fileId);
+            spreadSheetSource = new SpreadSheetSource(loginMember.getFileId());
+            DataSourceId dataSourceId = (DataSourceId) spreadSheetSource.getDataSourceIds(new Source(Arrays.asList(FILE_NAME), Arrays.asList(entity.getSheetTitle()))).get(0);
+
+            entity.setSourceId(dataSourceId.getOriginalFileId());
+            entityTemplateForm.getJoinTemplates().add(entity);
+            saveEntityPostModelAttributes(model, templateFormProvider.getEntityTemplateForm(memberId));
+            return "/template/entity/add";
+      }
 
 
-      @PostMapping("/add_column/{memberId}")
-      public String addColumn(@ModelAttribute("columnSaveForm") ColumnSaveForm saveForm, BindingResult bindingResult,
-                              @PathVariable String memberId, Model model){
+      @GetMapping(value="/search_entity/{memberId}", consumes="application/x-www-form-urlencoded;charset=UTF-8;")
+      public String searchTemplate(@ModelAttribute SearchForm searchForm, @PathVariable String memberId, Model model) {
+            TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
+            String templateName = searchForm.getName();
+            String fragment = searchForm.getFragment();
+            templateForm.setName(templateName);
+            templateForm.setType(TemplateType.ENTITY.name());
 
-            EntityTemplateForm templateForm = getEntityTemplateForm(memberId);
-            Map<String, Column> columns = templateForm.getColumns();
+            PageHelper.startPage(1, 1, false);
+            List<Template> templates = templateService.findTemplatesByName(templateName);
+            templates.remove(new Template(templateForm));
+            model.addAttribute("templates", templates);
+            log.info("templates={}", templates);
+            log.info("fragment={}", fragment);
+            return "template/entity/add::#" + fragment;
+      }
 
-            log.info("-----------[POST START]-------------");
-            log.info("[columns]={}", columns);
-            log.info("[columnSaveForm]={}", saveForm);
-
+      @PostMapping("/edit_template/{memberId}")
+      public String editTemplate(@ModelAttribute("template") EntityTemplateForm entityTemplateForm, BindingResult bindingResult,
+                                 @PathVariable String memberId, Model model){
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            templateForm.setSpreadSheetTitle(entityTemplateForm.getSpreadSheetTitle());
+            saveEntityForwardModelAttributes(model, templateForm);
             model.addAttribute("template", templateForm);
-            model.addAttribute("columnSaveForm", saveForm);
-            model.addAttribute("columns", columns.values());
+            model.addAttribute("columns", templateForm.getColumnUpdateForms().getColumnUpdateFormList());
+            saveEntityPostModelAttributes(model, templateForm);
+            return "template/entitiy/update";
+      }
 
-            int i = 0;
-            for(Column column: columns.values()){
-                  model.addAttribute(i+"", column);
-                  i++;
-            }
+      @PostMapping("/sync_entity/{memberId}")
+      public String syncTemplate(@ModelAttribute("template") EntityTemplateForm templateForm, BindingResult bindingResult,
+                                 @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                                 @PathVariable String memberId, Model model){
 
-            SpreadSheetTable table = templateForm.getSpreadSheetTable();
-            String columnName = saveForm.getName();
-            String columnType = saveForm.getType();
-            String findColumnType = classifier.processBatch(table.getColumn(columnName)).name();
+            Source<List<String>> errors = new Source<>();
+            String fileId = memberRepository.findById(member.getId()).get().getFileId();
+            SpreadSheetSource spreadSheetSource = new SpreadSheetSource(fileId);
+            EntityTemplateForm entityTemplateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            String spreadSheetTitle = templateForm.getSpreadSheetTitle();
+            String spreadSheetRange = templateForm.getSpreadSheetRange();
 
-            // 칼럼 검증: 복합 에러
-            if(!ColumnType.matchAny(columnType)){
-                  if(!ColumnType.match(findColumnType, ColumnType.NULL)){
-                        saveForm.setType(findColumnType);
+            entityTemplateForm.setSpreadSheetTitle(spreadSheetTitle);
+            entityTemplateForm.setSpreadSheetRange(spreadSheetRange);
+
+            ColumnUpdateForms columnUpdateForms = new ColumnUpdateForms();
+            saveEntityForwardModelAttributes(model, entityTemplateForm);
+            Source<String> paramSource = new Source<>(Arrays.asList(FILE_NAME, FILE_RANGE), Arrays.asList(spreadSheetTitle, spreadSheetRange));
+            SpreadSheetTable spreadSheetTable = null;
+
+            try {
+                  spreadSheetTable = spreadSheetSource.getSpreadSheetTable(paramSource).get("values").orElse(null);
+                  if(spreadSheetTable == null){
+                        throw new IllegalStateException();
                   }
-                  bindingResult.reject("invalid.columnSaveForm.type");
+            } catch (IOException e) {
+                  errors.get("spreadSheetRange", new ArrayList<>()).get().add("템플릿 스프레드시트 범위가 유효하지 않습니다");
+            } catch (IllegalStateException e) {
+                  errors.get("spreadSheetRange", new ArrayList<>()).get().add("스프레드시트 파일에 값이 존재하지 않습니다");
             }
 
-            if(columns.containsKey(saveForm.getName())){
-                  bindingResult.reject("duplicate.column.add");
+            if(!errors.isEmpty()){
+                  model.addAttribute("errors", errors);
+                  return "template/entity/add";
             }
 
-            if(bindingResult.hasErrors()){
-                  log.info("errors={}", bindingResult);
-                  log.info("-----------[POST END]-------------\n");
-                  return "template/templateMain";
+            Map<String, ColumnType> validTypes = converter.batchGetMap(spreadSheetTable.getColumns(true));
+            spreadSheetTable.getRow(0)
+                    .stream()
+                    .map(value -> new ColumnName(String.valueOf(value)))
+                    .iterator()
+                    .forEachRemaining(columnName -> columnUpdateForms.addForm(new ColumnUpdateForm(columnName, validTypes.get(columnName.getValidName()))));
+
+            entityTemplateForm.setSpreadSheetTable(spreadSheetTable);
+            entityTemplateForm.setColumnUpdateForms(columnUpdateForms);
+            entityValidator.validate(entityTemplateForm, errors);
+            templateFormProvider.setTemplateForm(memberId, entityTemplateForm);
+            saveEntityPostModelAttributes(model, entityTemplateForm);
+            model.addAttribute("errors", errors);
+            return "template/entity/add";
+      }
+
+      @GetMapping("/save_template/{memberId}")
+      public String saveTemplate(@ModelAttribute("templateForm") TemplateForm template, BindingResult bindingResult,
+                                 @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                                 RedirectAttributes redirectAttributes,
+                                 @PathVariable String memberId, Model model){
+
+            Source<List<String>> errors = new Source<>();
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            entityValidator.validate(templateForm, errors);
+            saveEntityForwardModelAttributes(model, templateForm);
+
+            if(!errors.isEmpty()){
+                  model.addAttribute("errors", errors);
+                  return "template/entity/add";
             }
 
-            Column column = new Column(columnName, columnType);
-            columns.put(columnName, column);
-            model.addAttribute("columnSaveForm", new ColumnSaveForm());
-            model.addAttribute("columns", columns.values());
+            Entity entity = new Entity(templateForm);
+            EntityDTO entityDTO = templateService.saveTemplate(entity, member.getId());
+            templateFormProvider.clear(memberId);
+            saveEntityForwardModelAttributes(redirectAttributes, templateForm);
+            saveEntityPostModelAttributes(redirectAttributes, templateForm);
+            return "redirect:/template/template/" + memberId;
+      }
 
-            log.info("[columns]={}", columns);
-            log.info("-----------[POST END]-------------\n");
-            return "template/templateMain";
+      @GetMapping("/update_template/{memberId}")
+      public String updateTemplate(@SessionAttribute(name=SessionConst.TEMPLATE_ID, required = false) Long templateId,
+                                   @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                                   @PathVariable String memberId, Model model){
+
+            Source<List<String>> errors = new Source<>();
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            BindingResult bindingResult = new BeanPropertyBindingResult(templateForm, "columnUpdateForm");
+            entityValidator.validate(templateForm, errors);
+            saveEntityForwardModelAttributes(model, templateForm);
+
+            if(!errors.isEmpty()){
+                  log.info("bindingResult={}", bindingResult);
+                  bindingResult.reject("invalid.template");
+                  return "template/entity/add";
+            }
+
+            Entity entity = new Entity(templateForm);
+            templateService.deleteTemplate(templateId);
+            EntityDTO entitySaveDTO = templateService.saveTemplate(entity, member.getId());
+            saveEntityPostModelAttributes(model, templateForm);
+            templateFormProvider.clear(memberId);
+            log.info("model={}", model);
+            return "/template/template";
       }
 
       @PostMapping("/edit_column/{memberId}")
-      public String editColumn(@ModelAttribute("columnUpdateForm") ColumnUpdateForm updateForm,
+      public String editColumn(@ModelAttribute("columnUpdateForm") ColumnUpdateForm columnUpdateForm, BindingResult bindingResult,
+                               @PathVariable String memberId, Model model){
+
+            Source<List<String>> errors = new Source<>();
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            saveEntityForwardModelAttributes(model, templateForm);
+            ColumnUpdateForm column = templateForm.getColumnUpdateForms().getColumnUpdateForm(columnUpdateForm.getName()).get();
+            column.setType(columnUpdateForm.getType());
+
+            // 실제 테이블 값 기준으로 타입 검증
+            entityValidator.validate(templateForm, errors);
+            if(!errors.isEmpty()){
+                  model.addAttribute("errors", errors);
+                  log.info("bindingResult={}", bindingResult);
+                  log.info("errors={}", errors);
+                  return "/fragment/form::#edit-column";
+            }
+
+            saveEntityPostModelAttributes(model, templateForm);
+            return "/fragment/form::#edit-column";
+      }
+
+      @PostMapping("/join_column/{memberId}")
+      public String joinColumn(@ModelAttribute("joinConditionSaveForm") JoinConditionSaveForm conditionSaveForm,
+                               @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
                                @PathVariable String memberId, BindingResult bindingResult, Model model){
 
-            EntityTemplateForm templateForm = getEntityTemplateForm(memberId);
-            Map<String, Column> columns = templateForm.getColumns();
+            Member loginMember = memberRepository.findById(member.getId()).get();
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            String templateName = conditionSaveForm.getTemplateName();
+            String columnName = new ColumnName(conditionSaveForm.getColumnName()).getValidName();
+            ColumnUpdateForm columnUpdateForm = templateForm.getColumnUpdateForms().getColumnUpdateForm(columnName).get();
+            Entity entity = (Entity) templateService.findTemplatesByName(templateName).get(0);
+            SpreadSheetTable spreadSheetTable = templateForm.getSpreadSheetTable();
+            SpreadSheetTable joinSpreadSheetTable;
+            SpreadSheetSource joinSpreadSheetSource = new SpreadSheetSource(loginMember.getFileId());
+            Source<List<String>> errors = new Source<>();
 
-            log.info("-----------[POST START]-------------");
-            log.info("[columns]={}", columns);
-            log.info("[columnUpdateForm]={}", updateForm);
-
-            model.addAttribute("template", templateForm);
-            model.addAttribute("columnSaveForm", new ColumnSaveForm());
-            model.addAttribute("columns", columns.values());
-
-            int i = 0;
-            for(Column column: columns.values()){
-                  model.addAttribute("column" + i, column);
-                  i++;
+            try {
+                  joinSpreadSheetTable = joinSpreadSheetSource.getSpreadSheetTable(new Source<>(Arrays.asList(FILE_NAME, FILE_RANGE), Arrays.asList(entity.getSheetTitle(), entity.getSheetRange()))).get(SpreadSheetSource.SPREAD_SHEET_VALUES).get();
+                  if(spreadSheetTable == null){
+                        throw new IllegalStateException();
+                  }
+            }
+            catch (IOException e) {
+                  throw new IllegalStateException(e);
             }
 
-            SpreadSheetTable table = templateForm.getSpreadSheetTable();
-            String columnName = updateForm.getName();
-            String columnType = updateForm.getType();
-            String findColumnType = classifier.processBatch(table.getColumn(columnName)).name();
-
-            // 검증 로직 적용: 복합 에러
-            if(!ColumnType.matchAny(columnType)){
-               if(!ColumnType.match(findColumnType, ColumnType.NULL)){
-                     updateForm.setType(findColumnType);
-               }
-               bindingResult.reject("invalid.columnUpdateForm.type");
+            for(Column column: templateService.findColumnsByTemplateId(entity.getId())){
+                  entity.getColumns().add(column);
             }
 
-            if(columns.containsKey(updateForm.getName())){
-                  bindingResult.reject("duplicate.column.add");
+            Column primaryColumn = entity.getPrimaryKeyColumn().orElse(null);
+
+            // PK가 존재하지 않는 경우
+            if(primaryColumn == null){
+                  bindingResult.reject(CONDITION_ERROR_CODE, new Object[]{columnName, ValueConditionType.FOREIGN_KEY, templateForm.getSpreadSheetTable().getColumnRange(columnName)}, "조인할 템플릿에 키 칼럼이 존재하지 않습니다");
             }
 
-            if(bindingResult.hasErrors()){
-                  log.info("errors={}", bindingResult);
-                  log.info("-----------[POST END]-------------\n");
-                  return "template/templateMain";
+            // 조인 칼럼 타입 불일치
+            if(converter.getType(spreadSheetTable.getColumn(columnName, false)) != ColumnType.valueOf(primaryColumn.getType())){
+                  bindingResult.reject(TYPE_ERROR_CODE, new Object[]{columnName, ValueConditionType.FOREIGN_KEY, spreadSheetTable.getColumnRange(columnName)}, "조인할 템플릿의 키 칼럼과 해당 칼럼의 타입이 일치하지 않습니다");
             }
 
-            Column column = new Column(columnName, updateForm.getType());
-            // 메인 로직
-            if(updateForm.getMode().equals("delete")){
-                  columns.remove(columnName);
-            }
-            else{
-                  columns.remove(updateForm.getLastName());
-                  columns.put(columnName, column);
+            // 참조 값 무결성 위반
+            for(Object value: spreadSheetTable.getColumn(columnName, false)){
+                  if(!joinSpreadSheetTable.getColumn(primaryColumn).contains(value)){
+                        bindingResult.reject(CONDITION_ERROR_CODE, new Object[]{columnName, ValueConditionType.FOREIGN_KEY, templateForm.getSpreadSheetTable().getColumnRange(columnName)}, "존재하지 않는 외부키를 갖고 있습니다");
+                  }
             }
 
-            model.addAttribute("columns", columns.values());
-            log.info("[columns]={}", columns);
-            log.info("-----------[POST END]-------------\n");
-            return "template/templateMain";
+            saveEntityForwardModelAttributes(model, templateForm);
+            if(!errors.isEmpty()){
+                  model.addAttribute("errors", errors);
+                  return "fragment/form::#edit-column";
+            }
+
+            String updateMode = conditionSaveForm.getUpdateMode();
+            String deleteMode = conditionSaveForm.getDeleteMode();
+            conditionSaveForm.setJoinColumn(primaryColumn.getColumnName().getValidName());
+
+            if(conditionSaveForm.isValid()){
+                columnUpdateForm.addValueCondition(new ForeignKey(templateName, OptionType.valueOf(updateMode), OptionType.valueOf(deleteMode)));
+                saveEntityPostModelAttributes(model, templateForm);
+            }
+
+            model.addAttribute("joinConditionSaveForm", conditionSaveForm);
+            return "fragment/form::#edit-column";
       }
 
-      private EntityTemplateForm getEntityTemplateForm(String memberId){
-            return templateFormProvider.getEntityTemplateForm(memberId);
+      @PostMapping("/add_condition/{memberId}")
+      public String addCondition(@ModelAttribute("conditionSaveForm") ConditionSaveForm conditionSaveForm, BindingResult bindingResult,
+                                 @PathVariable String memberId, Model model){
+
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            ColumnUpdateForm column = templateForm.getColumnUpdateForms().getColumnUpdateForm(conditionSaveForm.getColumnName()).get();
+            saveEntityForwardModelAttributes(model, templateForm);
+            Source<List<String>> errors = new Source<>();
+
+            if(conditionSaveForm.isValidKeyCondition()) {
+                  KeyCondition target = column.getKeyConditions().stream()
+                          .filter(keyCondition -> keyCondition.getConditionType()
+                                  .match(conditionSaveForm.getKeyConditionType())).findAny().orElse(null);
+                  if (target == null) {
+                        column.addKeyCondition(new KeyCondition(conditionSaveForm.getKeyConditionType()));
+                  } else {
+                        bindingResult.rejectValue("keyConditionType", "duplicate", null);
+                  }
+            }
+            else {
+                  ValueCondition target = column.getValConditions().stream()
+                          .filter(valCondition->valCondition.getConditionType()
+                                  .match(conditionSaveForm.getValueConditionType())).findAny().orElse(null);
+                  if(target == null){
+                        column.addValueCondition(new ValueCondition(conditionSaveForm.getValueConditionType(), conditionSaveForm.getValueConditionTerm()));
+                  } else{
+                        bindingResult.rejectValue("valueConditionType", "duplicate", null);
+                  }
+            }
+
+            if(!errors.isEmpty()) {
+                  model.addAttribute("errors", errors);
+                  return "/fragment/form::#edit-column";
+            }
+
+            saveEntityPostModelAttributes(model, templateForm);
+            return "/fragment/form::#edit-column";
       }
 
+      @PostMapping("/delete_condition/{memberId}")
+      public String deleteCondition(@ModelAttribute("conditionSaveForm") ConditionSaveForm conditionSaveForm, BindingResult bindingResult,
+                                    @PathVariable String memberId, Model model){
+
+            Source<List<String>> errors = new Source<>();
+            EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
+            ColumnUpdateForm column = templateForm.getColumnUpdateForms().getColumnUpdateForm(conditionSaveForm.getColumnName()).get();
+            saveEntityForwardModelAttributes(model, templateForm);
+
+            if(conditionSaveForm.isValidKeyCondition()){
+                  KeyCondition target = column.getKeyConditions().stream().filter(keyCondition -> keyCondition.getConditionType().match(conditionSaveForm.getKeyConditionType()))
+                          .findAny().get();
+                  column.deleteKeyCondition(target);
+            }
+            else {
+                  ValueCondition target = column.getValConditions().stream().filter(valCondition->valCondition.getConditionType().match(conditionSaveForm.getValueConditionType()))
+                          .findAny().get();
+                  column.deleteValueCondition(target);
+            }
+
+            // 타입 검증 + 조건 검증
+            entityValidator.validate(templateForm, errors);
+            model.addAttribute("errors", errors);
+            saveEntityPostModelAttributes(model, templateForm);
+            return "/fragment/form::#edit-column";
+      }
 }
+
+
+//      @ResponseBody
+//      @GetMapping(value="/search_entity/list/{memberId}", consumes="application/x-www-form-urlencoded;charset=UTF-8;")
+//      public PageInfo<Template> searchTemplates(@ModelAttribute FileSearchForm fileSearchForm, @PathVariable Long memberId, Model model) {
+//
+//            String templateName = fileSearchForm.getFileName();
+//            String frameId = fileSearchForm.getTableName();
+//            List<Template> templates = new ArrayList<>();
+//            PageHelper.startPage(1, 1, false);
+//            if (StringUtils.hasText(templateName)) {
+//                  templates = templateService.findTemplatesByName(templateName);
+//                  model.addAttribute("templates", templates);
+//                  log.info("templates={}", templates);
+//            }
+//            return new PageInfo(templates, 1);
+//      }
+

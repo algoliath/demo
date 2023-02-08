@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+      <div th:fragment="sidebar" class="d-flex d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px; height: 1200px;">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+          <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+          <span class="fs-4">EasyToDataBase</span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto accordion">
+          <li class="nav-item accordion-item" style="border: none">
+            <h2 class="accordion-header bg-dark" id="panelsStayOpen-headingOne">
+              <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                 Template Builder
+              </button>
+              <!--<a th:href="|/template/add_template/${memberId}|" class="nav-link active" aria-current="page">-->
+              <!--<svg class="bi me-2" width="16" height="16"></svg>-->
+              <!--</a>-->
+            </h2>
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
+              <div class="accordion-body bg-dark">
+                <div class="sidebar">
+                  <img src="/images/drive.png" width="40" height="40" class="d-inline-block"><a>Google Drive</a>
+                  <hr>
+                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_file/${memberId}|, table_id='sidebar-join-section', form_id='drive-search-form', anchor_class='sidebar')}"></div>
+                  <br>
+                  <div id="sidebar-join-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${files}, action=|/template/search_file/${memberId}|, table_id='sidebar-join-section', form_id='drive-file-form')}"></div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a th:href="|/template/add_template/${memberId}|" class="nav-link text-white">
+              <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"/></svg>
+              Document Builder
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link text-white" onclick="toggle_popup('sidebar', 'pop-hide')">
+              <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"/></svg>
+              Google Driver
+            </a>
+          </li>
+        </ul>
+        <hr>
+        <div class="dropdown">
+          <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+            <strong>Joey</strong>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+            <li><a class="dropdown-item" href="#">New project...</a></li>
+            <li><a class="dropdown-item" href="#">Settings</a></li>
+            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+</body>
+</html>

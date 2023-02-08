@@ -1,7 +1,7 @@
 package com.example.demo.domain.login;
 
 import com.example.demo.domain.member.Member;
-import com.example.demo.domain.repository.member.MemberStore;
+import com.example.demo.domain.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final MemberStore memberRepository;
+    private final MemberRepository memberRepository;
 
     public Member login(String loginId, String password){
         return memberRepository.findByLoginId(loginId)
-                .filter(member -> member.getPassword().equals(password))
+                .filter(member -> member.getLoginPw().equals(password))
                 .orElse(null);
     }
 

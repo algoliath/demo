@@ -1,18 +1,28 @@
 package com.example.demo.domain.repository.template.model;
 
-import com.example.demo.domain.column.form.ColumnUpdateForm;
-import com.example.demo.domain.template.Entity;
-import com.example.demo.domain.template.Table;
+import com.example.demo.domain.data.dto.EntityDTO;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface EntityRepository {
 
-    void save(Entity entity);
+    EntityDTO save(EntityDTO template);
 
-    void update(Long id, ColumnUpdateForm updateParam);
+    void delete(Long templateId);
 
-    List<Table> findByMemberId(Long memberId);
+    void update(EntityDTO template, Long id);
 
-    Table findById(Long id);
+    void createEntity(String query);
+
+    void dropEntity(String name);
+
+    List<EntityDTO> findByMemberId(Long memberId);
+
+    List<EntityDTO> findByName(String name);
+
+    List<EntityDTO> findAll();
+    Optional<EntityDTO> findById(Long id);
+
 
 }

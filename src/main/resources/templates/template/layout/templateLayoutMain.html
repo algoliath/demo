@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html th:replace="~{template/layout/templateLayout :: layout(~{::section#add_template}, ~{::section#add_columns},~{::section#update_columns}, ~{::section#save_template})}"
+      lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<!-- 템플릿 설정 -->
+<section id="add_template">
+    <div class="container" style="width: 380px; border: 3px solid; background-color:aquamarine">
+        <form id="template-form" th:action="|/template/add_template/${memberId}|" th:object="${template}" method="POST">
+            <div class="row">
+                <div class="col">
+                    <label for="name" th:text="#{template.name}"></label>
+                    <input type="text" id="name" class="form-control" th:field="*{name}" th:errorclass="field-error" th:placeholder="#{template.name}">
+                    <div class="field-error" th:errors="*{name}"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <br>
+                    <label for="type" th:text="#{template.type}"></label>
+                    <input type="hidden" id="type" class="form-control" th:field="*{type}" th:placeholder="#{template.type}">
+                    <div th:insert="/fragment/table::formTable(name='템플릿 타입', items=${templateTypes}, input_id='type', form_id='template-form')"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <br>
+</section>
+<section id="update_columns"></section>
+<section id="add_columns"></section>
+<section id="save_template"></section>
+<br>
+</body>
+</html>

@@ -3,28 +3,56 @@
 
 <mapper namespace="com.example.demo.domain.repository.template.mapper.TemplateMapper">
 
+    <update id="create" parameterType="java.lang.String">
+        ${query}
+    </update>
+
+    <update id="drop" parameterType="java.lang.String">
+        ${query}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        delete from template
+        where id = #{id};
+    </delete>
+
     <insert id="save" useGeneratedKeys="true" keyProperty="id">
-        insert into template values
-            (#{template.name}, #{template.memberId})
+        insert into template (name, member_id)
+        values (#{name}, #{memberId});
     </insert>
 
-    <select id="findAll" resultType="List">
-        select *
+    <update id="update">
+        update template
+        set name = #{template.name}
+        where id = #{id};
+    </update>
+
+    <select id="findByName" parameterType="String" resultType="TemplateDTO">
+        select id, name, member_id
+        from template
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findByMemberId" parameterType="Long" resultType="TemplateDTO">
+        select id, name, member_id
         from template
         where member_id = #{memberId}
     </select>
 
-    <select id="findById" resultType="Template">
-        select *
+    <select id="findById" parameterType="Long" resultType="TemplateDTO">
+        select id, name, member_id
         from template
-        where id = #{template_id}
+        where id = #{id}
     </select>
 
-    <update id="update">
-        update template
-        set name = #{updateParam.name}
-        where id = #{id}
-    </update>
+    <select id="findAll" resultType="TemplateDTO">
+        select *
+        from template
+    </select>
 
 </mapper>
 

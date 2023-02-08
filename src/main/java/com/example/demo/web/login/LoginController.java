@@ -22,10 +22,8 @@ public class LoginController {
 
     @GetMapping("/login")
     public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
-        return "login/loginForm";
+        return "login/home";
     }
-
-
     @PostMapping("/login")
     public String loginFormV3(@ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult,
                               @RequestParam(defaultValue = "/") String redirectURL, HttpServletRequest request){
@@ -36,14 +34,19 @@ public class LoginController {
 
         // 1차 검증 (필드값 확인)
         if(bindingResult.hasErrors()){
-            return "login/loginForm";
+            return "/login/home";
         }
 
         Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
         // 2차 검증 (식별값 확인)
         if(loginMember == null){
-            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다");
-            return "login/loginForm";
+            bindingResult.rejectValue("loginId", "invalid");
+            bindingResult.reject("loginFail.loginForm", "아이디 또는 비밀번호가 맞지 않습니다");
+        }
+
+        if(bindingResult.hasErrors()){
+            log.info("bindingResult={}", bindingResult);
+            return "/login/home";
         }
 
         //세션이 있으면 있는 세션 반환, 없으면 신규 세션을 생성해서 반환

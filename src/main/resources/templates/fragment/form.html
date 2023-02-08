@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+    <form th:fragment="entity(url)" id='edit-template' method="POST" th:object="${template}">
+        <label for="entity-name" th:text="#{template.name}"></label>
+        <input type="text" id="entity-name" class="w-50 form-control" th:field="*{name}" th:errorclass="field-error" th:placeholder="#{template.name}">
+        <div class="field-error" th:errors="*{name}"></div>
+        <br>
+        <label for="entity-type" style="display:block;" th:text="#{template.type}"></label>
+        <input type="text" id="entity-type" class="w-50 form-control" th:field="*{type}" th:placeholder="#{template.type}" readonly>
+        <div class="row">
+            <div class="col">
+                <label for="entity-sheet-title" th:text="#{spreadsheet.title}"></label>
+                <input id="entity-sheet-title" class="w-50 form-control d-inline-block" th:field="*{spreadSheetTitle}" th:errorclass="field-error">
+                <div th:if="${errors ne null and errors.get('spreadSheetTitle').isPresent()}" class="field-error" th:text="${errors.get('spreadSheetTitle').get()}"></div>
+                <button style="width:120px; height:40px;" type="button" data-anchor-class="template-form" class="btn btn-primary btn-sm" onclick="toggle_popup(this.getAttribute('data-anchor-class'), 'add')">파일 불러오기</button>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col">
+                <label for="search-range" th:text="#{spreadsheet.range}"></label>
+                <input type="text" id="search-range" class="w-50 form-control d-inline-block" th:field="*{spreadSheetRange}" th:errorclass="field-error" th:placeholder="#{required.spreadsheet.range}">
+                <div th:if="${errors ne null and errors.get('spreadSheetRange').isPresent()}" class="field-error" th:text="${errors.get('spreadSheetRange').get()}"></div>
+                <button style="width:120px; height:40px;" type="submit" class="btn btn-primary btn-sm" onclick="confirm_alert()">파일 동기화</button>
+            </div>
+        </div>
+        <br>
+        <button class="w-50 btn btn-primary" type="button" data-anchor-class="template-form" onclick="toggle_popup(this.getAttribute('data-anchor-class'), 'join')">템플릿 조인</button>
+        <div th:if="${#fields.hasErrors()}">
+            <p class="field-error" th:each="err : ${#fields.allErrors()}" th:text="${err}">전체 오류 메시지</p>
+        </div>
+    </form>
+
+    <form th:fragment="query(form_url)" id="" th:action="${form_url}" method="POST" th:object="${template}">
+        <label for="query-name" th:text="#{template.name}"></label>
+        <input type="text" id="query-name" class="w-50 form-control" th:field="*{name}" th:placeholder="#{template.name}" readonly>
+        <br>
+        <label for="query-type" style="display:block;" th:text="#{template.type}"></label>
+        <input type="text" id="query-type" class="w-50 form-control" th:field="*{type}" th:placeholder="#{template.type}" readonly>
+        <div class="row">
+            <div class="col">
+                <label for="query-sheet-title" th:text="#{spreadsheet.title}"></label>
+                <input id="query-sheet-title" class="w-50 form-control d-inline-block" th:field="*{spreadSheetTitle}">
+                <button style="width:120px; height:40px;" type="button" data-anchor-class="template-form" class="btn btn-dark btn-sm" onclick="toggle_popup(this.getAttribute('data-anchor-class'), 'add')">파일 불러오기</button>
+                <br>
+                <br>
+                <form id="result_query" th:action="|/template/query/convert_to_query/${memberId}|" method="post" th:object="${template.SQLForm}">
+                    <input type="hidden" class="form-check-input form-control" th:name="sqlBlockList">
+                    <button type="submit" class="w-50 btn-dark btn">최종 SQL 쿼리</button>
+                </form>
+               </div>
+        </div>
+    </form>
+
+    <div th:fragment="column" id="edit-column">
+        <div th:each="column, stat: ${template.columnUpdateForms.columnUpdateFormList}" th:if="${template}" style="border:none;">
+            <div class="row" style="height: 50px; border: none;">
+                <span style="font-size: small; width: 50px;">조건 추가</span><button class="img-button img-hover bg-transparent" style="width: 50px; height:30px; border:none;" type="button" th:anchor-class="|column_option_${stat.index}|" onclick="toggle_popup(this.getAttribute('anchor-class'), 'add')" ><img src="/images/fold.png" style="width:25px; height:30px;" alt="no image"></button>
+                <span style="font-size: small; width: 50px;">칼럼 조인</span><button class="img-button img-hover bg-transparent" style="width: 50px; height:30px; border:none;" type="button" th:anchor-class="|column_option_${stat.index}|" onclick="toggle_popup(this.getAttribute('anchor-class'), 'join')" ><img src="/images/join.png" style="width:25px; height:30px;" alt="no image"></button>
+                <span style="font-size: small; width: 50px;">칼럼 수정</span><button class="img-button img-hover bg-transparent" style="width: 50px; height:30px; border:none;" type="button" th:anchor-class="|column_option_${stat.index}|" onclick="toggle_popup(this.getAttribute('anchor-class'), 'edit')" ><img src="/images/edit.png" style="width:25px; height:30px;" alt="no image"></button>
+                <br>
+                <br>
+            </div>
+            <div class="row" width="1300px">
+                <div class="col container">
+                    <div class="row">
+                         <div class="col">
+                             <form th:id="|edit-form${stat.index}|" th:action="|/template/entity/edit_column/${memberId}|" method="post" th:object="${columnUpdateForm}" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                 <div class="row">
+                                     <div class="col">
+                                         <label th:text="#{column.name}"></label>
+                                         <br>
+                                         <input type="text" name="name" th:value="${column.name}" class="w-50 form-control" readonly="readonly">
+                                         <label th:for="|update__type__${stat.index}|" th:text="#{column.type}"></label>
+                                         <input type="text" th:value="${column.type}" th:id="|update__type__${stat.index}|" class="w-50 form-control" name="type">
+                                         <br>
+                                         <div style="width: 200px;" th:with="input_id=|update__type__${stat.index}|" th:insert="/fragment/table::formTable(name='칼럼 타입', items=${columnTypes}, input_id=${input_id}, form_id=|edit-form${stat.index}|)"></div>
+                                     </div>
+                                     <br>
+                                 </div>
+                                 <div class="col">
+                                     <div th:if="${errors ne null and !errors.isEmpty()}">
+                                         <div class="field-error" th:each="error : ${errors.getParamMap()}">
+                                             <p th:each="err: ${error.value}" th:text="${err}" th:if="${|rrorsMappingUtils.matchColumn(err, column.name)}"></p>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </form>
+                             <br>
+                             <br>
+                         </div>
+                        <div class="col">
+                             <div class="row" th:each="keyCondition, substat: ${column.keyConditions}">
+                                <form th:id="|delete-key-form${stat.index}_${substat.index}|" th:action="|/template/entity/delete_condition/${memberId}|" method="post" th:object="${conditionSaveForm}" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                    <input type="hidden" name="columnName" th:value="${column.name}">
+                                    <h6 th:if="${!#lists.isEmpty(column.keyConditions)}">등록된 키 조건</h6>
+                                    <hr th:if="${!#lists.isEmpty(column.keyConditions)}">
+                                    <label th:text="#{column.keyCondition}"></label>
+                                    <br>
+                                    <input class="form-control-sm" th:id="|update_key_condition_type${stat.index + '-' + substat.index}|" th:name="keyConditionType" th:value="${column.keyConditions[__${substat.index}__].conditionType}">
+                                    <img src="/images/minus.gif" width="25" height="25" style="margin-top:20px;" th:data-form-id="|delete-key-form${stat.index}_${substat.index}|" th:data-value="${column.keyConditions[__${substat.index}__].conditionType}" th:data-input="|update_key_condition_type${stat.index + '-' + substat.index}|" onclick="submit_value_form(this.getAttribute('data-input'), this.getAttribute('data-value'), form_id=this.getAttribute('data-form-id'))">
+                                </form>
+                            </div>
+                            <div class="row" th:each="valueCondition, substat: ${column.valConditions}">
+                                <form th:id="|delete-value-form${stat.index}_${substat.index}|" th:action="|/template/entity/delete_condition/${memberId}||" method="post" th:object="${conditionSaveForm}" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                    <input type="hidden" name="columnName" th:value="${column.name}">
+                                    <h6 th:if="${!#lists.isEmpty(column.valConditions)}">등록된 키-값 조건</h6>
+                                    <hr th:if="${!#lists.isEmpty(column.valConditions)}">
+                                    <label th:for="|update_val_condition_type${stat.index + '-' + substat.index}|" th:text="#{column.valueConditionType}"></label>
+                                    <br>
+                                    <input th:id="|update_val_condition_type${stat.index + '-' + substat.index}|" th:name="valueConditionType" th:value="${column.valConditions[__${substat.index}__].conditionType}" class="form-control-sm">
+                                    <br>
+                                    <label for="update_val_condition_term" th:text="#{column.valueConditionTerm}"></label>
+                                    <br>
+                                    <input id="update_val_condition_term" th:name="valueConditionTerm" th:value="${column.valConditions[__${substat.index}__].conditionTerm.argument}" class="form-control-sm">
+                                    <img src="/images/minus.gif" width="25" height="25" style="margin-top:20px;" th:data-form-id="|delete-value-form${stat.index}_${substat.index}|" th:data-input="|update_val_condition_type${stat.index + '-' + substat.index}|" th:data-value="${column.valConditions[__${substat.index}__].conditionType}" onclick="submit_value_form(this.getAttribute('data-input'), this.getAttribute('data-value'), form_id=this.getAttribute('data-form-id'))">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:class="|col-4 container column_option_${stat.index}|" style="background-color: mediumspringgreen"></div>
+                <div th:class="|col-5 container column_option_${stat.index} add pop-hide|" th:insert="fragment/form::condition(${stat.index})"></div>
+                <div th:class="|col-9 container column_option_${stat.index} edit pop-hide|" th:insert="fragment/form::validation"></div>
+                <div th:class="|col-6 container column_option_${stat.index} join pop-hide|" th:insert="~{fragment/form::join-column-form(${stat.index})}"></div>
+            </div>
+        </div>
+    </div>
+
+    <form th:fragment="condition(index)" th:id='|condition-save-form${index}|' th:action="|/template/entity/add_condition/${memberId}|" method='post' th:object="${conditionSaveForm}"
+          onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+        <div>
+            <input type="hidden" name="columnName" th:value="${column.name}">
+            <div class="topless border-white" style="border:none; background-color: var(--border-line-color);">
+                <div class="row" style="padding:unset;">
+                    <div class="col">
+                        <div th:class="|header column_${index} header-show|" th:data-toggle="|condition_${index}|" th:data-header="|header.column_${index}|" onclick="toggle_header(this.getAttribute('data-header'), this.getAttribute('data-toggle'))">key 조건 추가</div>
+                    </div>
+                    <div class="col">
+                        <div th:class="|header column_${index} header-collapse|" th:data-toggle="|condition_${index}|" th:data-header="|header.column_${index}|"  onclick="toggle_header(this.getAttribute('data-header'), this.getAttribute('data-toggle'))">value 조건 추가</div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div th:class="|condition_${index} border-white pop-up|">
+                <!-- ADD KEY CONDITION FORM -->
+                <label th:for="|key_condition_type${index}|" th:text="#{column.keyCondition}" class="form-check-label"></label>
+                <br>
+                <input th:id="|key_condition_type${index}|" th:field="*{keyConditionType}" th:error-class="field-error" th:placeholder="#{required.conditionSaveForm.keyConditionTypes}" style="width:170px;" class="form-control-sm">
+                <button class="w-25 btn btn-primary">등록</button>
+                <div class="field-error" th:errors="*{keyConditionType}"></div>
+                <hr>
+                <div style="width:200px;" th:insert="/fragment/table::promptTable (name='key 조건 타입', items=${keyConditionTypes}, input_id=|key_condition_type${index}|, another_input_id=|key_condition_type${index}|)"></div>
+            </div>
+            <div th:class="|condition_${index} border-white pop-hide|">
+                <br>
+                <!-- ADD VALUE CONDITION FORM -->
+                <label th:for="|val_condition_type${index}|" th:text="#{column.valueConditionType}" class="form-check-label"></label>
+                <br>
+                <input th:id="|val_condition_type${index}|" th:field="*{valueConditionType}" th:errorclass="field-error" class="w-50 form-control-sm" th:placeholder="#{required.conditionSaveForm.valueConditionTypes}">
+                <div class="field-error" th:errors="*{valueConditionType}"></div>
+                <label th:for="|val_condition_term${index}|" class="form-check-label"></label>
+                <br>
+                <input th:id="|val_condition_term${index}|" th:field="*{valueConditionTerm}" th:errorclass="field-error" class="w-50 form-control-sm" th:placeholder="#{required.conditionSaveForm.valueConditionTerms}">
+                <div class="field-error" th:errors="*{valueConditionTerm}"></div>
+                <button class="w-25 btn btn-primary">등록</button>
+                <hr>
+                <div style="width:200px;" th:insert="/fragment/table::promptTable (name='value 조건 타입', items=${valueConditionTypes}, input_id=|val_condition_type${index}|, another_input_id=|val_condition_term${index}|)"></div>
+            </div>
+        </div>
+    </form>
+
+    <form th:fragment="validation" id="validation-form" th:action="|/template/entity/edit_column/${memberId}|" th:object="${columnUpdateForm}" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'))">
+        <div class="row">
+            <div class="col">
+                <div th:insert="fragment/frame::view_template(${sourceId})"></div>
+            </div>
+            <div class="col">
+                <div th:if="${errors ne null and !errors.isEmpty()}">
+                    <div class="field-error" th:each="error : ${errors.getParamMap()}">
+                        <p th:each="err: ${error.value}" th:text="${err}" th:if="${|rrorsMappingUtils.matchColumn(err, column.name)}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form th:fragment="file-search-form(action, table_id, form_id, anchor_class)" th:id="${form_id}" th:data-table="${table_id}" method="get" th:action="${action}" th:object="${searchForm}"
+          onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+<!--         <img src="/images/return.png" style="width: 30px; height: 30px;" class="img-hover" th:data-anchor-class="${anchor_class}" onclick="toggle_popup(this.getAttribute('data-anchor-class'), 'base')"></img>-->
+         <br>
+         <input id="search-input" th:field="*{name}" class="w-75 form-control d-inline-block" th:data-form-id="${form_id}" oninput="submit_form(this.getAttribute('data-form-id'))" th:placeholder="#{required.template.name}">
+         <input type='hidden' name="fragment" th:value="${table_id}">
+         <button type="button" style="background-color:white;"><img src="/images/search.gif" style="width:25px;" alt="missing"></button>
+    </form>
+
+    <form th:fragment="sidebar-file-search-form(action, table_id, form_id, anchor_class)" th:id="${form_id}" th:data-table="${table_id}" method="get" th:action="${action}" th:object="${searchForm}"
+          onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+          <input id="sidebar-search-input" th:field="*{name}" class="w-75 form-control d-inline-block" th:data-form-id="${form_id}" oninput="submit_form(this.getAttribute('data-form-id'))" th:placeholder="#{required.template.name}">
+          <input type='hidden' name="fragment" th:value="${table_id}">
+          <button type="button" style="background-color:white;"><img src="/images/search.gif" style="width:25px;" alt="missing"></button>
+    </form>
+
+    <!--  폼 기능 x -->
+    <form th:fragment="sidebar-file-view-form(files, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
+        <div class="flex-box-center">
+            <input type="hidden" id="sidebar-search-file" name="name" value="">
+            <input type='hidden' name="fragment" th:value="${table_id}">
+            <table th:replace="~{/fragment/table::sideBarFileTable(files=${files}, input_id='sidebar-search-file', form_id=${form_id})}"></table>
+        </div>
+    </form>
+
+    <!--  폼 기능 x -->
+    <form th:fragment="file-view-form(files, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
+         <input type="hidden" id="search-file" name="name" value="">
+         <input type='hidden' name="fragment" th:value="${table_id}">
+         <table th:replace="~{/fragment/table::fileTable(files=${files}, input_id='search-file', form_id=${form_id})}"></table>
+    </form>
+
+    <form th:fragment="template-view-form(templates, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
+         <input type="hidden" th:id="|input-${form_id}|" name="name" value="">
+         <input type='hidden' name="fragment" th:value="${table_id}">
+         <table th:replace="~{/fragment/table::templateTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
+    </form>
+
+    <form th:fragment="template-display-form(templates, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
+        <input type="hidden" th:id="|input-${form_id}|" name="name" value="">
+        <input type='hidden' name="fragment" th:value="${table_id}">
+        <table th:replace="~{/fragment/table::templateViewTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
+    </form>
+
+    <form th:fragment="async-template-view-form(templates, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
+          onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+        <table th:replace="~{/fragment/table::templateViewTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
+        <input type='hidden' name="fragment" th:value="${table_id}">
+        <input type="hidden" th:id="|input-${form_id}|" name="templateName" value="">
+        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+        <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+    </form>
+
+    <form th:fragment="column-radio-form(templateName, items, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
+        onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+        <table th:replace="~{/fragment/table::radioFormTable(name='선택 칼럼', columns=${columns}, form_id=${form_id})}"></table>
+        <input type="hidden" name="sqlBlockType" th:value="${block.sqlBlockType}">
+        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+        <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+        <input type="hidden" name="templateName" th:value="${templateName}">
+    </form>
+
+    <!--  폼 기능 x -->
+    <form th:fragment="column-check-form(templateName, items, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
+        onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+        <table th:replace="~{/fragment/table::checkFormTable(name='선택 칼럼', columns=${columns}, form_id=${form_id})}"></table>
+        <input type="hidden" name="sqlBlockType" th:value="${block.sqlBlockType}">
+        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+        <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+        <input type="hidden" id="name" name="templateName" th:value="${templateName}">
+    </form>
+
+    <form th:fragment="join-column-form(index)" th:id="|join-column${index}|" method="post" th:action="|/template/entity/join_column/${memberId}|" data-table="edit-column" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method='post', table_id=this.getAttribute('data-table'))" th:object="${joinConditionSaveForm}">
+        <input type="hidden" name="columnName" th:value="${column.name}">
+        <hr>
+        <div th:insert="~{/fragment/table::templateTable(templates=${joinTemplates}, input_id=|foreign-key-term-${index}|, form_id=|join-column${index}|)}"></div>
+        <hr>
+        <label th:for="|foreign-key-type-${index}|">외부 키 조건</label>
+        <input th:id="|foreign-key-type-${index}|" th:name="conditionType" value="FOREIGN_KEY" class="form-control-sm" th:placeholder="#{required.conditionSaveForm.foreignKeyConditionType}">
+        <br>
+        <label style="margin-top: 15px;" th:for="|foreign-key-term-${index}|">외부 키 사항</label>
+        <input th:id="|foreign-key-term-${index}|" th:field="*{templateName}" class="form-control-sm" th:placeholder="#{required.conditionSaveForm.foreignKeyConditionTerm}">
+        <br>
+        <label style="margin-top: 15px;" th:for="|join-column-name-${index}|">조인 칼럼</label>
+        <input th:id="|join-column-name-${index}|" th:field="*{joinColumn}" class="form-control-sm" th:placeholder="#{required.conditionSaveForm.joinTemplate}">
+        <hr>
+        <label style="margin-top: 15px;" th:for="|join-update-mode-${index}|">수정 모드</label>
+        <input th:id="|join-update-mode-${index}|" th:field="*{updateMode}" class="form-control-sm" th:placeholder="#{required.conditionSaveForm.updateMode}">
+        <div style="width:300px; margin-top: 15px;" th:insert="~{/fragment/table::promptTable(name='joinOptions', items=${updateOptionTypes}, input_id=|join-update-mode-${index}|, another_input_id=|join-delete-mode-${index}|)}"></div>
+        <hr>
+        <label th:for="|join-delete-mode-${index}|">삭제 모드</label>
+        <input th:id="|join-delete-mode-${index}|" th:field="*{deleteMode}" class="form-control-sm" th:placeholder="#{required.conditionSaveForm.deleteMode}">
+        <div style="width:300px; margin-top: 15px;" th:insert="~{/fragment/table::formTable(name='joinOptions', items=${deleteOptionTypes}, input_id=|join-delete-mode-${index}|, form_id=|join-column${index}|)}"></div>
+    </form>
+</body>
+</html>

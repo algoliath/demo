@@ -1,50 +1,38 @@
 package com.example.demo.domain.member;
 
 import lombok.Data;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
 import java.util.UUID;
 
 @Data
+@Component
 public class Member {
 
-    // repository
-    private final String id;
+    private Long id;
+    private String randomUUID = UUID.randomUUID().toString().substring(0, 20);
     private String name;
-
-    // login form
+    private String fileId;
     private String loginId;
-    private String password;
+    private String loginPw;
     private MultipartFile attachFile;
 
-    public Member(String name, String loginId, String password, MultipartFile attachFile) {
-        this.id = UUID.randomUUID().toString();
+    public Member(){
+    }
+    public Member(String name, String loginId, String loginPw, MultipartFile attachFile) {
         this.name = name;
         this.loginId = loginId;
-        this.password = password;
+        this.loginPw = loginPw;
         this.attachFile = attachFile;
+        this.fileId = attachFile.getOriginalFilename();
     }
 
-    public Member(){
-        this.id = UUID.randomUUID().toString();
+    public Member(String name, String fileId, String loginId, String loginPw) {
+        this.name = name;
+        this.fileId = fileId;
+        this.loginId = loginId;
+        this.loginPw = loginPw;
     }
 
-    public boolean matchId(String memberId){
-        return id.equals(memberId);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return id.equals(member.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

@@ -1,6 +1,8 @@
 package com.example.demo.web;
 
 import com.example.demo.web.interceptor.LoginCheckInterceptor;
+import com.example.demo.web.selenium.Selenium;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -15,6 +17,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/", "/members/add", "/error", "/login", "/logout", "/css/**", "/*.ico");
     }
-
 
 }

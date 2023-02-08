@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.repository.column.mapper.ColumnMapper">
+
+    <resultMap type="com.example.demo.domain.data.dto.ColumnDTO" id="ColumnDTO">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="templateId" column="entity_id"/>
+    </resultMap>
+
+    <delete id="delete" parameterType="Long">
+        delete from column where id = #{id};
+    </delete>
+
+    <insert id="save" parameterType="ColumnDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into column (entity_id, name, type)
+        values (#{templateId}, #{name}, #{type})
+    </insert>
+
+    <insert id="saveBatch" parameterType="ColumnDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into column (entity_id, name, type)
+        values
+        <foreach collection="columns" item="column" separator=",">
+            (
+               #{column.templateId}, #{column.name}, #{column.type}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByTemplateId" resultMap="ColumnDTO">
+        select *
+        from column
+        where column.entity_id = #{templateId}
+    </select>
+
+    <select id="findById" resultMap="ColumnDTO">
+        select *
+        from column
+        where id = #{id}
+    </select>
+
+    <update id="updateName">
+        update column
+        set name = #{name}
+        where id = #{id}
+    </update>
+
+    <update id="updateType">
+        update column
+        set type = #{type}
+        where id = #{id}
+    </update>
+
+</mapper>
+
