@@ -17,11 +17,11 @@ public class QueryTemplateForm extends TemplateForm{
 
     @NotBlank
     private String spreadSheetTitle;
-    private SQLForm SQLForm;
+    private SQLForm SQLForm = new SQLForm();
     private SpreadSheetTable spreadSheetTable;
     private String sourceId;
     private List<Entity> joinTemplates = new ArrayList<>();
-    private List<Entity> subQueryTemplates = new ArrayList<>();
+    private List<SQLBlock> subQueryBlocks = new ArrayList<>();
 
     public QueryTemplateForm(){
 

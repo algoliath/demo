@@ -1,9 +1,8 @@
-package com.example.demo.domain.database.mapper;
+package com.example.demo.domain.database.querybuilder;
 
 import com.example.demo.domain.template.model.Entity;
-import com.example.demo.domain.template.model.Template;
 
-public interface DynamicSQLMapper {
+public interface DynamicSQLBuilder {
 
     String createTableQuery(Entity template);
 

@@ -118,8 +118,6 @@
             const data = event.dataTransfer.getData("text/plain");
             console.log('data:'+data);
             submit_value_form('file-name', data, 'drag-template-form');
-            // Get the id of the target and add the moved element to the target's DOM
-            event.target.appendChild(document.getElementById(data));
         }
     </script>
     <style>
@@ -168,6 +166,9 @@
                 <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}">
                     <img src="/images/plus.png" id="drop-box" class="img-hover" width="30" height="30" th:text="#{add.template}">
                 </a>
+                <a>
+                    <img src="/images/logout.png" class="img-hover" width="30" height="30" th:text="#{logout}" onclick="location.href='home.html'" th:onclick="|location.href='@{/logout}'|"></img>
+                </a>
             </div>
             <form id="drag-template-form" th:action="|template/entity/add_entity/${memberId}|" method="post" th:object="${searchForm}">
                 <input type="hidden" id="file-name" name="name">
@@ -196,18 +197,6 @@
         <br>
         <br>
         <br>
-        <div class="container border-white" style="width: 400px; padding-left: 60px; position:sticky">
-            <div class="row">
-                <div class="col">
-                    <button type="button" class="w-100 btn btn-dark btn-lg" onclick="location.href='home.html'" th:onclick="|location.href='@{/logout}'|" th:text="#{logout}"></button>
-                </div>
-                <div class="col">
-                    <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}">
-                        <button type="button" class="w-100 btn btn-dark btn-lg" th:text="#{add.template}"></button>
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 </body>

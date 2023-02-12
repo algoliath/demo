@@ -1,6 +1,7 @@
 package com.example.demo.domain.database.model;
 
 import com.example.demo.domain.database.SQLOperator;
+import com.example.demo.util.validation.QueryUtils;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -37,11 +38,11 @@ public class SQLBlockData {
     @Override
     public String toString() {
         if(sqlBlockType == null){
-            return "toString() failed";
+            return "";
         }
         switch(sqlBlockType){
             case SELECT -> {
-                return targetColumns.stream().map(column ->  getTemplateName() + "." + column).collect(Collectors.joining(", ")) + " FROM " + templateName;
+                return targetColumns.stream().map(column ->  getTemplateName() + "." + column).collect(Collectors.joining(", "));
             }
             case GROUP_BY -> {
                 return templateName;
@@ -61,4 +62,7 @@ public class SQLBlockData {
         }
     }
 
+    public String getTargetColumn(int i) {
+        return targetColumns.get(i);
+    }
 }

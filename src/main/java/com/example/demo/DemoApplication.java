@@ -1,24 +1,17 @@
 package com.example.demo;
 
-import com.example.demo.aop.aspectJ.AspectV1;
-import com.example.demo.aop.postbeanprocessor.AutoProxyConfig;
-import com.example.demo.domain.column.ColumnTypeConverter;
-import com.example.demo.domain.validation.EntityValidator;
+import com.example.demo.aop.aspectJ.TemplateAspect;
 import com.example.demo.web.WebConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.validation.Validator;
 
 @SpringBootApplication(scanBasePackages = "com.example.demo")
-@Import({WebConfig.class, AspectV1.class})
+@Import({WebConfig.class, TemplateAspect.class})
 @Slf4j
 public class DemoApplication {
 

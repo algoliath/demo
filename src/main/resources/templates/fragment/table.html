@@ -37,7 +37,6 @@
         <thead>
             <tr>
                 <th><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</th>
-                <hr>
             </tr>
         </thead>
         <tbody>
@@ -122,7 +121,7 @@
            <div id="accordion-panel-check-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                    <div class="accordion-body">
                        <div th:each="column: ${columns}">
-                           <input type="checkbox"  class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
+                           <input type="checkbox" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
                            <label th:for="${#ids.prev('targetColumns')}" th:text="${column}" class="form-check-label"></label>
                        </div>
                    </div>
@@ -139,25 +138,15 @@
             <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
                 <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-radio-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
             </h3>
-            <div id="accordion-panel-radio-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
+            <div id="accordion-panel-radio-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                 <div class="accordion-body">
                     <div th:each="column: ${columns}">
                         <input type="radio" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
                         <label th:for="${#ids.prev('targetColumns')}" th:text="${column}" class="form-check-label"></label>
                     </div>
                 </div>
-                <hr>
-                <label th:for="|operator${stat.index}|"></label>
-                <input th:id="|operator${stat.index}|" class="form-control-sm" name="operator">
                 <br>
-                <label th:for="|operand${stat.index}|"></label>
-                <input th:id="|operand${stat.index}|" class="form-control-sm" name="operand">
-                <br>
-                <div th:insert="~{/fragment/table::promptTable(name='연산자 타입', items=${operators}, input_id=|operator${stat.index}|, another_input_id=|operand${stat.index}|)}"></div>
-                <div th:if="${columns}">
-                    <button class="btn btn-dark" th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))" th:text="#{save}"></button>
-                </div>
-            </div>
+             </div>
         </div>
     </div>
 

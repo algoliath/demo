@@ -10,6 +10,7 @@ import com.example.demo.domain.column.property.condition.value.ValueConditionTyp
 import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.column.form.ColumnUpdateForms;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
+import com.example.demo.domain.database.querybuilder.EntityDynamicSQLBuilder;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.source.datasource.SpreadSheetSource;
@@ -30,12 +31,12 @@ import static com.example.demo.domain.source.datasource.SpreadSheetSource.*;
 
 @Slf4j
 @SpringBootTest
-class EntityDynamicSQLMapperTest {
+class EntityDynamicSQLBuilderTest {
 
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
-    private EntityDynamicSQLMapper entityDynamicSQLMapper;
+    private EntityDynamicSQLBuilder entityDynamicSQLMapper;
     private EntityTemplateForm templateForm;
     private SpreadSheetSource spreadSheetSource;
 

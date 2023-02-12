@@ -14,7 +14,7 @@ import com.example.demo.domain.template.form.EntityTemplateForm;
 import com.example.demo.util.Source;
 import com.example.demo.util.message.MessageConverter;
 import com.example.demo.util.validation.NamingUtils;
-import com.example.demo.util.validation.SQLUtils;
+import com.example.demo.util.validation.QueryUtils;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -151,7 +151,7 @@ public class EntityValidator {
                     }
                     case LIKE -> {
                         indices = columnValues.stream().map(val -> (String)val)
-                                .filter(value -> !SQLUtils.sqlPatternMatch(value, NamingUtils.parseString(argument)))
+                                .filter(value -> !QueryUtils.sqlPatternMatch(value, NamingUtils.parseString(argument)))
                                 .map(val -> spreadSheetTable.getCellRange(finalColumnName, val))
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){

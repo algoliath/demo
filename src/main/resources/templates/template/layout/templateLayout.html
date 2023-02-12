@@ -268,29 +268,27 @@
 
 </head>
 <body>
-
-<div class="container p-5 border-white mt-3">
-
-      <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
-          <h2 style="color: black; font-weight: lighter; font-size: 35px;">Build Template</h2>
-          <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
-      </div>
-
-      <!-- 템플릿 설정 -->
-
-      <section th:replace="${add_template}"></section>
-      <br>
-
-      <!-- 추가된 칼럼 목록-->
-      <section th:replace="${update_columns}"></section>
-      <br>
-
-      <!-- 칼럼 추가 -->
-      <section th:replace="${add_columns}" ></section>
-      <br>
-
-      <!--저장 및 페이지 이동-->
-      <section th:replace="${save_template}"></section>
+<div class="row">
+    <div class="col border-white no-padding">
+        <div th:insert="~{fragment/sidebar::sidebar}"></div>
+    </div>
+    <div class="col-9 container p-5 border-white mt-3">
+          <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
+              <h2 style="color: black; font-weight: lighter; font-size: 35px;">Build Template</h2>
+              <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
+          </div>
+          <!-- 템플릿 설정 -->
+          <section th:replace="${add_template}"></section>
+          <br>
+          <!-- 추가된 칼럼 목록-->
+          <section th:replace="${update_columns}"></section>
+          <br>
+          <!-- 칼럼 추가 -->
+          <section th:replace="${add_columns}" ></section>
+          <br>
+          <!--저장 및 페이지 이동-->
+          <section th:replace="${save_template}"></section>
+    </div>
 </div>
 </body>
 </html>

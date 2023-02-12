@@ -1,10 +1,9 @@
-package com.example.demo.domain.database.mapper;
+package com.example.demo.domain.database.querybuilder;
 
 import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.condition.value.ForeignKey;
 import com.example.demo.domain.column.property.condition.key.KeyCondition;
 import com.example.demo.domain.column.property.condition.value.ValueCondition;
-import com.example.demo.domain.column.property.condition.value.ValueConditionType;
 import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.template.model.Entity;
 import com.example.demo.util.validation.NamingUtils;
@@ -17,11 +16,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import static com.example.demo.util.validation.SQLUtils.*;
+import static com.example.demo.util.validation.QueryUtils.*;
 import static com.example.demo.domain.column.property.condition.value.ValueConditionType.*;
 
 @Component
-public class EntityDynamicSQLMapper implements DynamicSQLMapper{
+public class EntityDynamicSQLBuilder implements DynamicSQLBuilder {
 
     private static String extractValueConditions(Column column) {
         return column.getValueConditions().stream()
@@ -65,7 +64,7 @@ public class EntityDynamicSQLMapper implements DynamicSQLMapper{
 
             String constraints = entity.getColumns().stream()
                     .filter(column -> !column.getValueConditions().isEmpty() && column.hasValueConditionOtherThan(FOREIGN_KEY))
-                    .map(EntityDynamicSQLMapper::extractValueConditions)
+                    .map(EntityDynamicSQLBuilder::extractValueConditions)
                     .collect(Collectors.joining(" AND "));
 
             if(!primaryKeys.isEmpty()){

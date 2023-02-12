@@ -1,7 +1,6 @@
 package com.example.demo.web.template;
 
 import com.example.demo.domain.column.Column;
-import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.database.form.*;
 import com.example.demo.domain.database.model.SQLBlock;
@@ -17,12 +16,14 @@ import com.example.demo.domain.template.service.TemplateService;
 import com.example.demo.domain.template.type.TemplateType;
 import com.example.demo.util.Source;
 import com.example.demo.util.template.TemplateFormProvider;
+import com.example.demo.util.validation.QueryUtils;
 import com.example.demo.web.session.SessionConst;
 import com.github.pagehelper.PageHelper;
 import com.google.api.services.sheets.v4.model.Sheet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -122,13 +123,11 @@ public class QueryController {
     public String addColumn(@ModelAttribute SQLBlockData sqlBlockData, BindingResult bindingResult,
                             @PathVariable String memberId, Model model){
 
-        QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         log.info("sqlBlockData={}", sqlBlockData);
+        QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
 
         SQLBlock sqlBlock = queryTemplateForm.getSQLBlock(sqlBlockData.getSqlBlockOrder());
-        sqlBlock.setSqlBlockType(sqlBlockData.getSqlBlockType());
-
         SQLBlockData target = sqlBlock.getDataHolder().get(sqlBlockData.getSqlDataOrder());
         target.setTargetColumns(sqlBlockData.getTargetColumns());
         target.setTemplateName(sqlBlockData.getTemplateName());
@@ -140,6 +139,7 @@ public class QueryController {
             }
         }
 
+        log.info("target={}", target);
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return "template/query/add::#add_template";
     }
@@ -156,10 +156,10 @@ public class QueryController {
         }
 
         SQLBlock sqlBlock = queryTemplateForm.getSQLForm().getSqlBlockList().get(sqlBlockOrder);
-        sqlBlockData.setSqlBlockType(sqlBlock.getSqlBlockType());
-        sqlBlockData.setSqlDataOrder(sqlBlockData.getSqlDataOrder()+1);
+        SQLBlockData addSQLBlockData = new SQLBlockData(sqlBlock.getSqlBlockType(), sqlBlockData.getSqlBlockOrder(), sqlBlockData.getSqlDataOrder()+1);
         List<SQLBlockData> dataHolder = sqlBlock.getDataHolder();
-        dataHolder.add(sqlBlockData);
+        dataHolder.add(addSQLBlockData);
+        sendQueryPostModelAttributes(model, queryTemplateForm);
         return "/template/query/add::#add_template";
     }
 
@@ -194,25 +194,23 @@ public class QueryController {
         return "/template/query/add::#add_template";
     }
 
-    @PostMapping("/add_sub_block/{memberId}")
-    public String addSubBlock(@ModelAttribute SQLBlock sqlBlock, BindingResult bindingResult,
+    @PostMapping("/add_sub_query/{memberId}")
+    public String addSubQuery(@ModelAttribute SQLForm sqlForm, BindingResult bindingResult,
                               @PathVariable String memberId, Model model){
+
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
-        SQLBlock targetSQLBlock = queryTemplateForm.getSQLForm().getSqlBlockList().get(sqlBlock.getOrder());
-        for(SQLBlockData data: targetSQLBlock.getDataHolder()){
-            Entity entity = new Entity();
-            entity.setName(data.getTemplateName());
-            List<Column> columns = new ArrayList<>();
-            for(String columnName: data.getTargetColumns()){
-                Column column = new Column();
-                column.setColumnName(new ColumnName(columnName));
-                columns.add(column);
-            }
-            entity.setColumns(columns);
-            queryTemplateForm.getSubQueryTemplates().add(entity);
+
+        Entity entity = new Entity();
+        entity.setName(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));
+        queryTemplateForm.getJoinTemplates().add(entity);
+
+        for(SQLBlock sqlBlock: sqlForm.getSqlBlockList()){
+            queryTemplateForm.getSQLForm().getSqlBlockList().remove(sqlBlock);
         }
-        queryTemplateForm.getSQLForm().getSqlBlockList().remove(sqlBlock);
+
+        log.info("sqlForm={}", sqlForm);
+        sendQueryPostModelAttributes(model, queryTemplateForm);
         return "/template/query/add::#add_template";
     }
 
@@ -248,44 +246,10 @@ public class QueryController {
         return "/template/query/add::#add_template";
     }
 
-    @PostMapping("/convert_block/{memberId}")
-    public String convertBlock(@Validated @ModelAttribute SQLBlock sqlBlock, BindingResult bindingResult,
+    @PostMapping("/execute_query/{memberId}")
+    public String executeQuery(@ModelAttribute SQLForm sqlForm, BindingResult bindingResult,
+                               @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
                                @PathVariable String memberId, Model model){
-        QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
-        sendQueryForwardModelAttributes(model, queryTemplateForm);
-        String partialQuery = "";
-
-        log.info("sqlBlock={}", sqlBlock);
-        SQLForm sqlForm = queryTemplateForm.getSQLForm();
-        SQLBlock targetSQLBlock = sqlForm.getSQLBlock(sqlBlock.getOrder());
-
-        switch (sqlBlock.getSqlBlockType()){
-            case JOIN -> {
-                partialQuery = "JOIN " + targetSQLBlock.getDataHolder().get(1).getTemplateName() + " ON " + targetSQLBlock.getDataHolder().stream().map(blockData -> blockData.toString()).collect(Collectors.joining(" = "));
-            }
-            case SELECT -> {
-                partialQuery = "SELECT " +targetSQLBlock.getDataHolder().stream().map(blockData -> blockData.toString()).collect(Collectors.joining(", "));
-            }
-            case WHERE -> {
-                partialQuery = "WHERE " + targetSQLBlock.getDataHolder().stream().map(blockData -> blockData.toString()).collect(Collectors.joining(" AND "));
-            }
-            case HAVING -> {
-                partialQuery = "HAVING " + targetSQLBlock.getDataHolder().stream().map(blockData -> blockData.toString()).collect(Collectors.joining(" AND "));
-            }
-            case GROUP_BY -> {
-                partialQuery = "GROUP BY (" + targetSQLBlock.getDataHolder().stream().map(blockData -> blockData.toString()).collect(Collectors.joining(", "));
-            }
-        }
-
-        targetSQLBlock.setSqlQuery(partialQuery);
-        sqlForm.buildSQLQuery();
-        return "/template/query/add::#add_template";
-    }
-
-    @PostMapping("/convert_to_query/{memberId}")
-    public String convertToQuery(@ModelAttribute SQLForm sqlForm, BindingResult bindingResult,
-                                 @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
-                                 @PathVariable String memberId, Model model){
 
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         PreparedStatement preparedStatement;

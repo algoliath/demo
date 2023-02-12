@@ -11,8 +11,8 @@
             <div class="col container">
                 <div th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
             </div>
-            <div class="col-4 container" style="background-color: mediumspringgreen;">
-                <div th:insert="~{/fragment/form::entity(${form_url})}"></div>
+            <div class="col-4 container" style="background-color: mediumspringgreen;" th:with="form_url=${sourceId}? '/template/entity/sync_entity/' + ${memberId} + '':'/template/entity/add_entity/' + ${memberId} + ''">
+                <div th:insert="~{/fragment/form::entity(${form_url})}" ></div>
 <!--                <div th:insert="~{/fragment/form::entity(${form_url})}></div>-->
             </div>
         </div>

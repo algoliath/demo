@@ -15,6 +15,7 @@ import com.example.demo.domain.database.model.SQLBlockData;
 import com.example.demo.domain.database.model.SQLBlockType;
 import com.example.demo.domain.template.form.EntityTemplateForm;
 import com.example.demo.domain.template.form.QueryTemplateForm;
+import com.example.demo.util.validation.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 
@@ -69,6 +70,9 @@ public class ControllerUtils {
         model.addAttribute("template", queryTemplateForm);
         model.addAttribute("sourceId", queryTemplateForm.getSourceId());
         model.addAttribute("joinTemplates", queryTemplateForm.getJoinTemplates());
+        SQLForm sqlForm = queryTemplateForm.getSQLForm();
+        sqlForm.setSqlQuery(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));
+        sqlForm.getSqlBlockList().stream().iterator().forEachRemaining(sqlBlock -> sqlBlock.setSqlQuery(QueryUtils.convertSQLBlock(sqlBlock)));
         log.info("queryTemplateForm={}", queryTemplateForm);
     }
 

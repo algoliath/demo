@@ -6,16 +6,20 @@ import com.example.demo.domain.column.property.condition.value.ValueCondition;
 import com.example.demo.domain.column.property.condition.value.ValueConditionTerm;
 import com.example.demo.domain.column.property.condition.value.ValueConditionType;
 import com.example.demo.domain.column.property.type.ColumnType;
+import com.example.demo.domain.database.model.SQLBlock;
+import com.example.demo.domain.database.model.SQLBlockData;
+import com.example.demo.domain.database.model.SQLBlockType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
-import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class SQLUtils {
+public class QueryUtils {
 
     public static boolean sqlPatternMatch(String value, String sqlTerm){
         sqlTerm = ".*" + sqlTerm + ".*";
@@ -74,4 +78,75 @@ public class SQLUtils {
         log.info("sql={}", sql);
         return sb.substring(1);
     }
+
+
+    public static String convertSQLBlocks(List<SQLBlock> targetSQLBlockList){
+        StringBuilder queryBuilder = new StringBuilder();
+        int n_select = 0;
+        for(SQLBlock sqlBlock: targetSQLBlockList){
+            if(sqlBlock.getSqlBlockType() == SQLBlockType.SELECT){
+                n_select++;
+            }
+            for(int i=1; i<n_select; i++){
+                queryBuilder.append(" ");
+            }
+            queryBuilder.append(sqlBlock.getSqlQuery());
+            queryBuilder.append("\n");
+        }
+        return queryBuilder.toString();
+    }
+
+    public static String convertSQLBlock(SQLBlock targetSQLBlock){
+
+        if(targetSQLBlock.getSqlBlockType() == null){
+            return "";
+        }
+
+        String partialQuery = "";
+
+        switch (targetSQLBlock.getSqlBlockType()){
+            case JOIN -> {
+                List<String> joins = new ArrayList<>();
+                for(int i=0; i+1<targetSQLBlock.getDataHolder().size(); i++){
+                    SQLBlockData prev = targetSQLBlock.getDataHolder().get(i);
+                    SQLBlockData current = targetSQLBlock.getDataHolder().get(i+1);
+                    if(prev.getTemplateName()!=null && current.getTemplateName()!=null){
+                        joins.add("JOIN " + current.getTemplateName() + " ON " + prev.getTargetColumn(0) + "=" + current.getTargetColumn(0));
+                    }
+                }
+                partialQuery = joins.stream().collect(Collectors.joining("AND \n"));
+            }
+            case SELECT -> {
+                partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
+                                .map(sqlBlockData -> sqlBlockData + " FROM " +  sqlBlockData.getTemplateName()).collect(Collectors.joining(", "));
+            }
+            case GROUP_BY -> {
+                partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
+                        .map(sqlBlockData ->  sqlBlockData.getTemplateName()).collect(Collectors.joining(", "));
+            }
+            case WHERE, HAVING -> {
+                partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
+                        .map(blockData -> blockData.toString()).collect(Collectors.joining(" AND "));
+            }
+            case SUBQUERY -> {
+                partialQuery = targetSQLBlock.getSqlQuery();
+            }
+        }
+
+        switch (targetSQLBlock.getSqlBlockType()){
+            case SELECT, WHERE, HAVING -> {
+                if(StringUtils.hasText(partialQuery)){
+                   partialQuery = targetSQLBlock.getSqlBlockType() + " " + partialQuery;
+                }
+            }
+            case GROUP_BY -> {
+                if(StringUtils.hasText(partialQuery)){
+                    partialQuery = targetSQLBlock.getSqlBlockType() + " (" + partialQuery + ")";
+                }
+            }
+        }
+
+        return partialQuery;
+    }
+
 }

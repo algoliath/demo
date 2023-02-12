@@ -17,20 +17,34 @@ public class TemplateFormProvider {
         templateMap.put(memberUUID, templateForm);
     }
 
+    public void setQueryTemplateForm(String memberUUID, QueryTemplateForm queryTemplateForm){
+        templateMap.put(memberUUID, queryTemplateForm);
+    }
+
+    public void setEntityTemplateForm(String memberUUID, EntityTemplateForm entityTemplateForm){
+        templateMap.put(memberUUID, entityTemplateForm);
+    }
+
     public TemplateForm getTemplateForm(String memberId){
         templateMap.putIfAbsent(memberId, new TemplateForm());
         return templateMap.get(memberId);
     }
 
-    public QueryTemplateForm getQueryTemplateForm(String memberId) {
-        templateMap.putIfAbsent(memberId, new QueryTemplateForm());
-        QueryTemplateForm queryTemplateForm = (QueryTemplateForm) getTemplateForm(memberId);
+    public QueryTemplateForm getQueryTemplateForm(String memberUUID) {
+        if(!(templateMap.get(memberUUID) instanceof QueryTemplateForm)){
+            templateMap.clear();
+        }
+        templateMap.putIfAbsent(memberUUID, new QueryTemplateForm());
+        QueryTemplateForm queryTemplateForm = (QueryTemplateForm) getTemplateForm(memberUUID);
         return queryTemplateForm;
     }
 
-    public EntityTemplateForm getEntityTemplateForm(String memberId) {
-        templateMap.putIfAbsent(memberId, new EntityTemplateForm());
-        EntityTemplateForm entityTemplateForm = (EntityTemplateForm) getTemplateForm(memberId);
+    public EntityTemplateForm getEntityTemplateForm(String memberUUID) {
+        if(!(templateMap.get(memberUUID) instanceof EntityTemplateForm)){
+            templateMap.clear();
+        }
+        templateMap.putIfAbsent(memberUUID, new EntityTemplateForm());
+        EntityTemplateForm entityTemplateForm = (EntityTemplateForm) getTemplateForm(memberUUID);
         return entityTemplateForm;
     }
 

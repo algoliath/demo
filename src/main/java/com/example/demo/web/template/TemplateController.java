@@ -82,6 +82,7 @@ public class TemplateController {
             model.addAttribute("memberId", memberId);
             model.addAttribute("columnSaveForm", new ColumnSaveForm());
             model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
+            model.addAttribute("searchForm", new SearchForm());
             model.addAttribute("template", new TemplateForm());
             model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
             return "/template/layout/templateLayoutMain";
@@ -93,13 +94,15 @@ public class TemplateController {
 
             String templateName = templateForm.getName();
             String templateType = templateForm.getType();
+            model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
             log.info("-----------[POST START]-------------");
             log.info("memberId={}", memberId);
             log.info("templateForm={}", templateForm);
-            model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
 
-            List<TemplateDTO> byName = templateMapper.findByName(templateName);
-            if(!byName.isEmpty()){
+            List<TemplateDTO> identicalNames = templateMapper.findByName(templateName);
+
+            // 이름 중복 방지 로직
+            if(!identicalNames.isEmpty()){
                  bindingResult.rejectValue("name", "duplicate", new Object[]{templateName}, null);
             }
 
@@ -114,21 +117,19 @@ public class TemplateController {
             switch(TemplateType.valueOf(templateType)){
                   case ENTITY -> {
                         EntityTemplateForm entityTemplateForm = new EntityTemplateForm(templateForm);
-                        templateFormProvider.setTemplateForm(memberId, entityTemplateForm);
+                        templateFormProvider.setEntityTemplateForm(memberId, entityTemplateForm);
                         saveEntityForwardModelAttributes(model, entityTemplateForm);
                         return "/template/entity/add";
                   }
                   case QUERY -> {
-                        // 이름 중복 방지 로직
                         QueryTemplateForm queryTemplateForm = new QueryTemplateForm(templateForm);
                         queryTemplateForm.setSQLForm(new SQLForm());
-                        templateFormProvider.setTemplateForm(memberId, queryTemplateForm);
+                        log.info("queryTemplateForm={}", queryTemplateForm);
+                        templateFormProvider.setQueryTemplateForm(memberId, queryTemplateForm);
                         sendQueryForwardModelAttributes(model, queryTemplateForm);
                         return "/template/query/add";
                   }
             }
-
-            System.out.println("templateType = " + templateType);
             return "/template/layout/templateLayoutMain";
       }
 

@@ -44,7 +44,6 @@ public class UploadFileRepository {
 
         String ext = extractExt(originalFilename);
         String storeFilename = uuid + "." + ext;
-
         multipartFile.transferTo(new File(getFullPath(storeFilename)));
         return new UploadFile(originalFilename, storeFilename);
     }

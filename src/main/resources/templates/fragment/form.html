@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <form th:fragment="entity(url)" id='edit-template' method="POST" th:object="${template}">
+    <form th:fragment="entity(url)" th:action="${url}" id='edit-template' method="POST" th:object="${template}">
         <label for="entity-name" th:text="#{template.name}"></label>
         <input type="text" id="entity-name" class="w-50 form-control" th:field="*{name}" th:errorclass="field-error" th:placeholder="#{template.name}">
         <div class="field-error" th:errors="*{name}"></div>
@@ -51,10 +51,6 @@
                 <button style="width:120px; height:40px;" type="button" data-anchor-class="template-form" class="btn btn-dark btn-sm" onclick="toggle_popup(this.getAttribute('data-anchor-class'), 'add')">파일 불러오기</button>
                 <br>
                 <br>
-                <form id="result_query" th:action="|/template/query/convert_to_query/${memberId}|" method="post" th:object="${template.SQLForm}">
-                    <input type="hidden" class="form-check-input form-control" th:name="sqlBlockList">
-                    <button type="submit" class="w-50 btn-dark btn">최종 SQL 쿼리</button>
-                </form>
                </div>
         </div>
     </form>
@@ -211,7 +207,7 @@
 
     <!--  폼 기능 x -->
     <form th:fragment="sidebar-file-view-form(files, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
-        <div class="flex-box-center">
+        <div>
             <input type="hidden" id="sidebar-search-file" name="name" value="">
             <input type='hidden' name="fragment" th:value="${table_id}">
             <table th:replace="~{/fragment/table::sideBarFileTable(files=${files}, input_id='sidebar-search-file', form_id=${form_id})}"></table>
@@ -249,15 +245,38 @@
     <form th:fragment="column-radio-form(templateName, items, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
         onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
         <table th:replace="~{/fragment/table::radioFormTable(name='선택 칼럼', columns=${columns}, form_id=${form_id})}"></table>
+        <!-- LIST FORM -->
+        <div th:each="column: ${data.targetColumns}">
+            <input class="form-control" th:value="${column}">
+        </div>
         <input type="hidden" name="sqlBlockType" th:value="${block.sqlBlockType}">
         <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
         <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
         <input type="hidden" name="templateName" th:value="${templateName}">
+        <br>
+        <div style="width: 150px;" th:insert="~{/fragment/table::promptTable(name='연산자 타입', items=${operators}, input_id=|operator${stat.index}|, another_input_id=|operand${stat.index}|)}"></div>
+        <br>
+        <label th:for="|operator${stat.index}|">조건</label>
+        <br>
+        <input th:id="|operator${stat.index}|" class="form-control-sm" name="operator">
+        <br>
+        <label th:for="|operand${stat.index}|">값</label>
+        <br>
+        <input th:id="|operand${stat.index}|" class="form-control-sm" name="operand">
+        <br>
+        <div th:if="${columns}">
+            <button class="btn btn-dark" th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))" th:text="#{save}"></button>
+        </div>
+        <br>
     </form>
 
     <!--  폼 기능 x -->
-    <form th:fragment="column-check-form(templateName, items, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
+    <form th:fragment="column-check-form(templateName, columns, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
         onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+        <!-- LIST FORM -->
+        <div th:each="column: ${data.targetColumns}">
+            <input class="form-control" th:value="${column}">
+        </div>
         <table th:replace="~{/fragment/table::checkFormTable(name='선택 칼럼', columns=${columns}, form_id=${form_id})}"></table>
         <input type="hidden" name="sqlBlockType" th:value="${block.sqlBlockType}">
         <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">

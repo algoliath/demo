@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(exclude = {"sqlBlockType", "sqlQuery", "dataHolder"})
+@EqualsAndHashCode(exclude = {"sqlQuery", "dataHolder"})
 public class SQLBlock {
 
     private SQLBlockType sqlBlockType;
@@ -20,13 +20,14 @@ public class SQLBlock {
     }
 
     public SQLBlock(Integer sqlBlockOrder) {
-        this();
+        this.dataHolder.add(new SQLBlockData(order, sqlBlockOrder));
         this.order = sqlBlockOrder;
     }
 
     public SQLBlock(SQLBlockType sqlBlockType, Integer sqlBlockOrder) {
-        this.dataHolder.add(new SQLBlockData(sqlBlockType, order, sqlBlockOrder));
+        this.order = sqlBlockOrder;
         this.sqlBlockType = sqlBlockType;
+        this.dataHolder.add(new SQLBlockData(sqlBlockType, order, sqlBlockOrder));
     }
 
     public void clear() {

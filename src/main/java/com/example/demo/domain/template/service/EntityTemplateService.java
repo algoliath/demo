@@ -6,7 +6,7 @@ import com.example.demo.domain.column.property.condition.value.ValueCondition;
 import com.example.demo.domain.data.dto.ColumnDTO;
 import com.example.demo.domain.data.dto.ConditionDTO;
 import com.example.demo.domain.data.dto.TemplateDTO;
-import com.example.demo.domain.database.mapper.EntityDynamicSQLMapper;
+import com.example.demo.domain.database.querybuilder.EntityDynamicSQLBuilder;
 import com.example.demo.domain.repository.condition.mapper.KeyConditionMapper;
 import com.example.demo.domain.repository.condition.mapper.ValueConditionMapper;
 import com.example.demo.domain.data.dto.EntityDTO;
@@ -35,7 +35,7 @@ public class EntityTemplateService implements TemplateService {
     private final TemplateMapper templateMapper;
     private final KeyConditionMapper keyConditionMapper;
     private final ValueConditionMapper valConditionMapper;
-    private final EntityDynamicSQLMapper sqlMapper;
+    private final EntityDynamicSQLBuilder sqlMapper;
 
     @Transactional
     public List<Template> getTemplates(Long memberId){
