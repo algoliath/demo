@@ -10,7 +10,18 @@ import java.util.List;
 @Data
 public class SQLForm {
 
+    private static final SQLForm empty = new SQLForm();
+
+    static {
+        empty.clear();
+    }
+
+    public static SQLForm getEmptyInstance(){
+        return empty;
+    }
+
     private List<SQLBlock> sqlBlockList = new ArrayList<>();
+    private List<Integer> indices = new ArrayList();
     private String sqlError;
     private String sqlQuery;
 
@@ -28,5 +39,8 @@ public class SQLForm {
         throw new IllegalStateException(String.format("sql 블록 리스트의 인덱스 범위 {%s~%s}를 벗어났습니다", 0, sqlBlockList.size()-1));
     }
 
+    public void clear(){
+        sqlBlockList.clear();
+    }
 
 }

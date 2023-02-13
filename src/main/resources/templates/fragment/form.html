@@ -230,18 +230,18 @@
     <form th:fragment="template-display-form(templates, action, form_id, table_id)" th:id="${form_id}" method="post" th:action="${action}" th:object="${searchForm}">
         <input type="hidden" th:id="|input-${form_id}|" name="name" value="">
         <input type='hidden' name="fragment" th:value="${table_id}">
-        <table th:replace="~{/fragment/table::templateViewTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
+        <table th:replace="~{/fragment/table::templateTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
     </form>
 
-    <form th:fragment="async-template-view-form(templates, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
+    <form th:fragment="query-template-view-form(templates, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
           onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
-        <table th:replace="~{/fragment/table::templateViewTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
+        <table th:replace="~{/fragment/table::queryTemplateTable(templates=${templates}, input_id=|input-${form_id}|, form_id=${form_id})}"></table>
         <input type='hidden' name="fragment" th:value="${table_id}">
         <input type="hidden" th:id="|input-${form_id}|" name="templateName" value="">
         <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
         <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
     </form>
-
+0
     <form th:fragment="column-radio-form(templateName, items, action, form_id, table_id)" th:id="${form_id}" th:data-table="${table_id}" method="post" th:action="${action}" th:object="${sqlBlockData}"
         onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
         <table th:replace="~{/fragment/table::radioFormTable(name='선택 칼럼', columns=${columns}, form_id=${form_id})}"></table>

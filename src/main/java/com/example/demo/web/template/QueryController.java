@@ -1,10 +1,12 @@
 package com.example.demo.web.template;
 
 import com.example.demo.domain.column.Column;
+import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.database.form.*;
 import com.example.demo.domain.database.model.SQLBlock;
 import com.example.demo.domain.database.model.SQLBlockData;
+import com.example.demo.domain.database.model.SQLBlockType;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.source.datasource.SpreadSheetSource;
@@ -74,6 +76,18 @@ public class QueryController {
         return "template/query/add::#" + fragment;
     }
 
+    @GetMapping(value="/delete_template/{memberId}/{templateName}")
+    public String deleteTemplate(@PathVariable String memberId, @PathVariable String templateName, Model model){
+        QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
+        sendQueryForwardModelAttributes(model, queryTemplateForm);
+
+        List<Entity> joinTemplates = queryTemplateForm.getJoinTemplates();
+        Entity targetEntity = queryTemplateForm.getJoinTemplates().stream().filter(template -> template.getName().equals(templateName)).findAny().get();
+        joinTemplates.remove(targetEntity);
+        sendQueryPostModelAttributes(model, queryTemplateForm);
+        return "template/query/add";
+    }
+
     @PostMapping(value="/add_entity/{memberId}")
     public String addTemplate(@ModelAttribute SearchForm searchForm, @PathVariable String memberId, Model model) {
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
@@ -88,6 +102,9 @@ public class QueryController {
 
         List<Template> templates = templateService.findTemplatesByName(templateName);
         Entity template = (Entity) templates.get(0);
+
+        List<Column> columns = templateService.findColumnsByTemplateId(template.getId());
+        template.setColumns(columns);
         queryTemplateForm.getJoinTemplates().add(template);
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return "template/query/add";
@@ -101,18 +118,11 @@ public class QueryController {
         sendQueryForwardModelAttributes(model, queryTemplateForm);
 
         String templateName = sqlBlockData.getTemplateName();
-        PageHelper.startPage(1, 1, false);
-
-        List<Template> templates = templateService.findTemplatesByName(templateName);
-        if(templates.size() != 1){
-            throw new IllegalStateException();
-        }
-
-        Entity template = (Entity) templates.get(0);
+        Entity entity = queryTemplateForm.getJoinTemplates().stream().filter(template -> template.getName().equals(templateName)).findAny().get();
         SQLBlockData target = queryTemplateForm.getSQLBlock(sqlBlockData.getSqlBlockOrder()).getDataHolder().get(sqlBlockData.getSqlDataOrder());
         target.setTemplateName(templateName);
-        List<Column> columns = templateService.findColumnsByTemplateId(template.getId());
-        List<String> parsedColumns = columns.stream().map(column -> column.getColumnName().getValidName()).collect(Collectors.toList());
+
+        List<String> parsedColumns = entity.getColumns().stream().map(column -> column.getColumnName().getValidName()).collect(Collectors.toList());
         target.setColumns(parsedColumns);
         model.addAttribute("columns",parsedColumns);
         sendQueryPostModelAttributes(model, queryTemplateForm);
@@ -123,10 +133,8 @@ public class QueryController {
     public String addColumn(@ModelAttribute SQLBlockData sqlBlockData, BindingResult bindingResult,
                             @PathVariable String memberId, Model model){
 
-        log.info("sqlBlockData={}", sqlBlockData);
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
-
         SQLBlock sqlBlock = queryTemplateForm.getSQLBlock(sqlBlockData.getSqlBlockOrder());
         SQLBlockData target = sqlBlock.getDataHolder().get(sqlBlockData.getSqlDataOrder());
         target.setTargetColumns(sqlBlockData.getTargetColumns());
@@ -199,16 +207,35 @@ public class QueryController {
                               @PathVariable String memberId, Model model){
 
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
+        List<SQLBlock> sqlBlockList = queryTemplateForm.getSQLForm().getSqlBlockList();
         sendQueryForwardModelAttributes(model, queryTemplateForm);
 
-        Entity entity = new Entity();
-        entity.setName(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));
-        queryTemplateForm.getJoinTemplates().add(entity);
+        List<SQLBlock> targetSQLBlockList = sqlForm.getIndices()
+                .stream()
+                .map(index -> sqlBlockList.get(index))
+                .collect(Collectors.toList());
 
-        for(SQLBlock sqlBlock: sqlForm.getSqlBlockList()){
-            queryTemplateForm.getSQLForm().getSqlBlockList().remove(sqlBlock);
+        for(SQLBlock targetSQLBlock: targetSQLBlockList){
+            sqlBlockList.remove(targetSQLBlock);
         }
 
+        Entity entity = new Entity();
+        entity.setName(QueryUtils.convertSQLBlocks(targetSQLBlockList));
+        for(SQLBlock sqlBlock: targetSQLBlockList){
+            if(sqlBlock.getSqlBlockType() == SQLBlockType.SELECT){
+                for(SQLBlockData sqlBlockData: sqlBlock.getDataHolder()){
+                    List<Column> columns = new ArrayList<>();
+                    for(String columnName: sqlBlockData.getColumns()){
+                        Column column = new Column();
+                        column.setColumnName(new ColumnName(sqlBlockData.getTemplateName() + "." + columnName));
+                        columns.add(column);
+                    }
+                    entity.setColumns(columns);
+                }
+            }
+        }
+
+        queryTemplateForm.getJoinTemplates().add(entity);
         log.info("sqlForm={}", sqlForm);
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return "/template/query/add::#add_template";

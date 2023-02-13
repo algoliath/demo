@@ -33,7 +33,7 @@
         </tbody>
     </table>
 
-    <table th:fragment="templateViewTable(templates, input_id, form_id)">
+    <table th:fragment="queryTemplateTable(templates, input_id, form_id)">
         <thead>
             <tr>
                 <th><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</th>
@@ -50,6 +50,9 @@
                         </div>
                         <div class="col">
                             <a href="template.html" class='view-template' th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}" th:text="${item.name}"></a>
+                        </div>
+                        <div class="col">
+                            <a href="template.html" class='delete-template' th:href="@{/template/query/delete_template/{memberId}/{templateName}(memberId=${memberId}, templateName=${item.name})}">삭제</a>
                         </div>
                     </div>
                 </td>

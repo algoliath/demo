@@ -56,7 +56,7 @@ public class ControllerUtils {
         model.addAttribute("searchForm", new SearchForm());
         model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
         model.addAttribute("conditionSaveForm", new ConditionSaveForm());
-        model.addAttribute("sqlForm", new SQLForm());
+        model.addAttribute("sqlForm", SQLForm.getEmptyInstance());
         model.addAttribute("sqlBlockTypes", Arrays.stream(SQLBlockType.values()).toList());
         model.addAttribute("operators", Arrays.stream(SQLOperator.mainQueryOperator()).toList());
         model.addAttribute("subQueryOperators", Arrays.stream(SQLOperator.subQueryOperator()).toList());

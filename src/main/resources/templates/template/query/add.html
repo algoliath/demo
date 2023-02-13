@@ -8,12 +8,18 @@
     <script>
         function toggle_checkbox(checkbox_id) {
             const checkbox = $('#' + checkbox_id);
-            const checked = checkbox.is('checked');
+            const checked = checkbox.is(':checked');
+            console.log(checked);
             if (checked) {
                 checkbox.prop('checked', false);
             } else {
                 checkbox.prop('checked', true);
             }
+        }
+        function toggle_form(toggle_id, form_id){
+            console.log(this);
+            $('#' + toggle_id).toggle('slow');
+            submit_form(form_id);
         }
     </script>
     <!-- ADD TEMPLATE ATTRIBUTE -->
@@ -22,7 +28,7 @@
             <div class="col container" style="background-color: lightyellow">
                 <textarea rows="15" cols="90" style="border: solid 5px floralwhite" th:placeholder="${template.SQLForm.sqlQuery}"></textarea>
             </div>
-            <div class="col-4 container">
+            <div class="col-3 container">
                 <div th:insert="~{/fragment/form::query(${form_url})}" th:with="form_url=|/template/query/execute_query/${memberId}|"></div>
                 <form id="result_query" th:action="|/template/query/convert_to_query/${memberId}|" method="post"
                       th:object="${template.SQLForm}">
@@ -32,7 +38,7 @@
                     <button type="submit" class="w-50 btn-dark btn">최종 SQL 쿼리</button>
                     <br>
                </form>
-                <button type="submit" class="w-50 btn-dark btn" onclick="submit_form('add-sub-query-form')">서브 쿼리 빌드</button>
+               <br>
             </div>
         </div>
         <div class="row">
@@ -40,32 +46,30 @@
                 <div style="height: 100px;">
                     <form id="add-sub-query-form" th:action="|/template/query/add_sub_query/${memberId}|" method="post" th:object="${sqlForm}"
                           th:data-table-id="add_template" onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table-id'))">
-                          <div th:each="block, stat: ${template.SQLForm.sqlBlockList}">
-                               <input type="checkbox" th:field="*{sqlBlockList}" th:value="${block}">
-                               <label th:for="${#ids.prev('sqlBlockList')}" th:text="${block}" class="form-check-label"></label>
-                          </div>
+                          <span class="invisible" th:each="block, stat: ${template.SQLForm.sqlBlockList}">
+                               <input type="checkbox" class="form-check-input" th:field="*{indices}" th:value="${stat.index}">
+                               <label th:for="${#ids.prev('indices')}" class="form-check-label" th:text="${stat.index}"></label>
+                          </span>
                     </form>
+                    <form id="block-add-form-default" th:action="|/template/query/add_block/${memberId}|" th:object="${sqlBlock}" th:data-table="add_template" method="get"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="order" value="0">
+                    </form>
+                    <img style="width:40px; height: 40px;" src="/images/plus.png" data-form-id="block-add-form0" onclick="submit_form('block-add-form-default')">
+                    <button type="submit" class="w-10 btn-dark btn" onclick="submit_form('add-sub-query-form')">서브 쿼리 빌드</button>
                 </div>
-                <script>
-                    function toggle_form(toggle_id, form_id){
-                        console.log(this);
-                        $('#' + toggle_id).toggle('slow');
-                        submit_form(form_id);
-                    }
-                </script>
+                <br>
                 <br>
                 <div th:id="|toggle-block${stat.index}|" th:each="block, stat: ${template.SQLForm.SqlBlockList}">
                     <div class="d-inline-flex">
-                        <img style="width:40px; height: 40px;" src="/images/minus.png" th:data-form-id="|block-delete-form${stat.index}|" th:data-toggle-id="|toggle-block${stat.index}|"
-                             onclick="toggle_form(this.getAttribute('data-toggle-id'), this.getAttribute('data-form-id'))">
                         <img style="width:40px; height: 40px;" src="/images/plus.png" th:data-form-id="|block-add-form${stat.index}|"
                              onclick="submit_form(this.getAttribute('data-form-id'))">
+                        <img style="width:40px; height: 40px;" src="/images/minus.png" th:data-form-id="|block-delete-form${stat.index}|" th:data-toggle-id="|toggle-block${stat.index}|"
+                             onclick="toggle_form(this.getAttribute('data-toggle-id'), this.getAttribute('data-form-id'))">
+                         <label class="form-check-label">서브쿼리 포함</label>
+                        <input type="checkbox" class="form-check-input" th:data-check-form-id="|indices${stat.index+1}|" onclick="toggle_checkbox(this.getAttribute('data-check-form-id'))" th:value="${stat}">
                     </div>
                     <div class="row">
-                        <div style="height: 50px;">
-                            <input type="checkbox" class="form-check-input" th:data-check-form-id="|form-check-input${stat.index}|" onchange="toggle_checkbox(this.getAttribute('data-check-form-id'))" th:value="${stat}">
-                            <label class="form-check-label">서브쿼리 포함</label>
-                        </div>
                         <div class="col-3 container border-white" style="background-color: lightyellow">
                             <form th:id="|block-add-form${stat.index}|"
                                   th:action="|/template/query/add_block/${memberId}|" th:object="${sqlBlock}"
@@ -141,28 +145,28 @@
                                               onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), 'add-template')">
                                             <input type="hidden" name="order" th:value="${stat.index}">
                                         </form>
-                                        <div th:insert="~{/fragment/form::async-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
+                                        <div th:insert="~{/fragment/form::query-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                         <!-- ADD FORM -->
                                         <div th:insert="~{/fragment/form::column-check-form(templateName=${data.templateName}, columns=${data.columns}, action=|/template/query/add_columns/${memberId}|, form_id=|column-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                     </div>
                                     <div th:if="${#strings.equals(block.sqlBlockType,'WHERE') or #strings.equals(block.sqlBlockType,'HAVING')}">
-                                        <div th:insert="~{/fragment/form::async-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
+                                        <div th:insert="~{/fragment/form::query-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                         <div th:insert="~{/fragment/form::column-radio-form(templateName=${data.templateName}, items=${data.columns}, action=|/template/query/add_columns/${memberId}|, form_id=|column-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                     </div>
                                     <div th:if="${#strings.equals(block.sqlBlockType,'JOIN')}">
-                                        <div th:insert="~{/fragment/form::async-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
+                                        <div th:insert="~{/fragment/form::query-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                         <div th:insert="~{/fragment/form::column-radio-form(templateName=${data.templateName}, items=${data.columns}, action=|/template/query/add_columns/${memberId}|, form_id=|column-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                     </div>
                                     <div th:if="${#strings.equals(block.sqlBlockType,'GROUP_BY')}">
-                                        <div th:insert="~{/fragment/form::async-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
+                                        <div th:insert="~{/fragment/form::query-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                     </div>
                                     <div th:if="${#strings.equals(block.sqlBlockType,'SUBQUERY')}">
-                                        <div th:insert="~{/fragment/form::async-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
+                                        <div th:insert="~{/fragment/form::query-template-view-form(templates=${template.joinTemplates}, action=|/template/query/search_column/${memberId}|, form_id=|entity-view-form${stat.index}-${substat.index}|, table_id='add_template')}"></div>
                                         <br>
                                         <div th:insert="~{/fragment/table::promptTable(name='서브쿼리 연산자 타입', items=${subQueryOperators}, input_id=|operator${stat.index}-${substat.index}|, another_input_id=|operand${stat.index}-${substat.index}|)}"></div>
                                     </div>
