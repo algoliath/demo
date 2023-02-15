@@ -167,18 +167,7 @@ public class SpreadSheetSource implements DataSource {
         return dataSourceIds.get(0);
     }
 
-    public Sheet createFile(Source<String> paramSource){
-        String title = paramSource.get(DataSource.FILE_NAME).orElse(null);
-        String pattern = paramSource.get(DataSource.PATTERN_MATCHER).orElse("=");
-        File fileMetadata = new File();
-        fileMetadata.setName(title);
-        fileMetadata.setMimeType(MimeTypes.SHEETS.toString());
-        File file = new DriveSource.Builder(MimeTypes.SHEETS)
-                .setTitle(title)
-                .setFields("id", "name")
-                .setPattern(pattern)
-                .setCredentials(credentials)
-                .build().createFile(fileMetadata);
+    public Sheet getSpreadSheet(File file){
         Sheet sheet;
         try{
             Sheets sheets = SheetsConnection.getConnection(credentials);
@@ -191,6 +180,21 @@ public class SpreadSheetSource implements DataSource {
             throw new RuntimeException(e);
         }
         return sheet;
+    }
+
+    public File createFile(Source<String> paramSource){
+        String title = paramSource.get(DataSource.FILE_NAME).orElse(null);
+        String pattern = paramSource.get(DataSource.PATTERN_MATCHER).orElse("=");
+        File fileMetadata = new File();
+        fileMetadata.setName(title);
+        fileMetadata.setMimeType(MimeTypes.SHEETS.toString());
+        File file = new DriveSource.Builder(MimeTypes.SHEETS)
+                .setTitle(title)
+                .setFields("id", "name")
+                .setPattern(pattern)
+                .setCredentials(credentials)
+                .build().createFile(fileMetadata);
+        return file;
     }
 
 

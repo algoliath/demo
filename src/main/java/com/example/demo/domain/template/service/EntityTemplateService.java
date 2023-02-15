@@ -147,7 +147,7 @@ public class EntityTemplateService implements TemplateService {
         }
         Entity entity = new Entity(entityDAO.get());
         columnRepository.delete(templateId);
-        entityRepository.delete(templateId);
+        templateMapper.delete(templateId);
         entityRepository.dropEntity(sqlMapper.deleteTableQuery(entity));
     }
 

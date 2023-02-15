@@ -162,7 +162,7 @@
                 <h3 style="color: black; font-weight: lighter; font-size: 40px;">EasyToDataBase</h3>
                 <img src="/images/template.png" width="70px" height="70px">
             </div>
-            <div class="d-flex" style="flex-flow: row-reverse" ondragover="dragover_handler(event)" ondragend="dragend_handler(event)" ondrop="drop_handler(event)">
+            <div class="d-flex justify-content-evenly" style="flex-flow: row-reverse" ondragover="dragover_handler(event)" ondragend="dragend_handler(event)" ondrop="drop_handler(event)">
                 <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}">
                     <img src="/images/plus.png" id="drop-box" class="img-hover" width="30" height="30" th:text="#{add.template}">
                 </a>

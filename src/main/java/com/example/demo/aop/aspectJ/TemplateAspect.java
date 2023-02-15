@@ -36,7 +36,7 @@ public class TemplateAspect {
         this.templateFormProvider = templateFormProvider;
     }
 
-    @Pointcut("execution(* com.example.demo.web.template.QueryController.add*(..))," +
+    @Pointcut("execution(* com.example.demo.web.controller.QueryController.add*(..))," +
               "execution(* com.example.demo.web.template.QueryController.remove*(..))" +
               "execution(* com.example.demo.web.template.QueryController.edit*(..))")
     private void queryController(){

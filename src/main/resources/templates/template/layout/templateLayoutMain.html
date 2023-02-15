@@ -5,12 +5,18 @@
 <body>
 <!-- 템플릿 설정 -->
 <section id="add_template">
+    <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
+        <h2 style="color: black; font-weight: lighter; font-size: 35px;">BUILD ENTITY</h2>
+        <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
+    </div>
     <div class="container" style="width: 380px; border: 3px solid; background-color:aquamarine">
-        <form id="template-form" th:action="|/template/add_template/${memberId}|" th:object="${template}" method="POST">
+        <form id="template-form" th:action="|/template/add_template/${memberId}|" th:object="${template}"
+              method="POST">
             <div class="row">
                 <div class="col">
                     <label for="name" th:text="#{template.name}"></label>
-                    <input type="text" id="name" class="form-control" th:field="*{name}" th:errorclass="field-error" th:placeholder="#{template.name}">
+                    <input type="text" id="name" class="form-control" th:field="*{name}" th:errorclass="field-error"
+                           th:placeholder="#{template.name}">
                     <div class="field-error" th:errors="*{name}"></div>
                 </div>
             </div>
@@ -18,13 +24,13 @@
                 <div class="col">
                     <br>
                     <label for="type" th:text="#{template.type}"></label>
-                    <input type="hidden" id="type" class="form-control" th:field="*{type}" th:placeholder="#{template.type}">
+                    <input type="hidden" id="type" class="form-control" th:field="*{type}"
+                           th:placeholder="#{template.type}">
                     <div th:insert="/fragment/table::formTable(name='템플릿 타입', items=${templateTypes}, input_id='type', form_id='template-form')"></div>
                 </div>
             </div>
         </form>
     </div>
-    <br>
 </section>
 <section id="update_columns"></section>
 <section id="add_columns"></section>

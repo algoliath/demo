@@ -1,4 +1,4 @@
-package com.example.demo.web.template;
+package com.example.demo.web.controller;
 
 import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.column.form.ColumnSaveForm;

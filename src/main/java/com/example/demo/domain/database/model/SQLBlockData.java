@@ -14,13 +14,14 @@ public class SQLBlockData {
     private Integer sqlBlockOrder;
     private Integer sqlDataOrder;
     private String templateName;
+    private String templateAlias;
     private List<String> targetColumns = new ArrayList<>();
     private List<String> columns = new ArrayList<>();
     private String operator;
     private String operand;
     private SQLBlockType sqlBlockType;
 
-    public SQLBlockData(){
+    public SQLBlockData() {
 
     }
 
@@ -29,7 +30,7 @@ public class SQLBlockData {
         this.sqlBlockOrder = sqlBlockOrder;
     }
 
-    public SQLBlockData(SQLBlockType sqlBlockType, Integer sqlBlockOrder, Integer sqlDataOrder){
+    public SQLBlockData(SQLBlockType sqlBlockType, Integer sqlBlockOrder, Integer sqlDataOrder) {
         this(sqlBlockOrder, sqlDataOrder);
         this.sqlBlockType = sqlBlockType;
     }
@@ -37,21 +38,27 @@ public class SQLBlockData {
 
     @Override
     public String toString() {
-        if(sqlBlockType == null){
-            return "";
+
+        if (sqlBlockType == null) {
+            return "MISSING";
         }
-        switch(sqlBlockType){
+
+        switch (sqlBlockType) {
+
             case SELECT -> {
-                return targetColumns.stream().map(column ->  getTemplateName() + "." + column).collect(Collectors.joining(", "));
+                if (templateAlias != null) {
+                    return targetColumns.stream().map(column -> getTemplateAlias() + "." + column).collect(Collectors.joining(", "));
+                }
+                return targetColumns.stream().map(column -> getTemplateName() + "." + column).collect(Collectors.joining(", "));
             }
             case GROUP_BY -> {
                 return templateName;
             }
             case WHERE, HAVING -> {
-                return targetColumns.stream().map(column ->  getTemplateName() + "." + column + " " + SQLOperator.valueOf(operator).getSign() + " " + getOperand()).collect(Collectors.joining(""));
+                return targetColumns.stream().map(column -> getTemplateName() + "." + column + " " + SQLOperator.valueOf(operator).getSign() + " " + getOperand()).collect(Collectors.joining(""));
             }
             case JOIN -> {
-                return targetColumns.stream().map(column ->  getTemplateName() + "." + column).collect(Collectors.joining(""));
+                return targetColumns.stream().map(column -> getTemplateName() + "." + column).collect(Collectors.joining(""));
             }
             case SUBQUERY -> {
                 return getOperator() + "(" + getOperand() + ")";

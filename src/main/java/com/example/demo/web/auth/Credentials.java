@@ -21,8 +21,7 @@ public class Credentials {
 
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final List<String> SCOPES =
-            List.of(DriveScopes.DRIVE);
+    private static final List<String> SCOPES = List.of(DriveScopes.DRIVE);
     private static Credential credential = null;
 
     /**

@@ -13,11 +13,14 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(exclude = {"id"})
 public class Template {
+
     private Long id;
+    private String uuid;
     private String name;
     private TemplateType templateType;
 
     public Template(){
+        uuid = UUID.randomUUID().toString();
     }
 
     public Template(TemplateForm templateForm) {

@@ -3,6 +3,7 @@ package com.example.demo.util.template;
 import com.example.demo.domain.template.form.EntityTemplateForm;
 import com.example.demo.domain.template.form.QueryTemplateForm;
 import com.example.demo.domain.template.form.TemplateForm;
+import com.example.demo.domain.template.type.TemplateType;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -36,6 +37,7 @@ public class TemplateFormProvider {
         }
         templateMap.putIfAbsent(memberUUID, new QueryTemplateForm());
         QueryTemplateForm queryTemplateForm = (QueryTemplateForm) getTemplateForm(memberUUID);
+        queryTemplateForm.setType(TemplateType.QUERY.name());
         return queryTemplateForm;
     }
 
@@ -45,6 +47,7 @@ public class TemplateFormProvider {
         }
         templateMap.putIfAbsent(memberUUID, new EntityTemplateForm());
         EntityTemplateForm entityTemplateForm = (EntityTemplateForm) getTemplateForm(memberUUID);
+        entityTemplateForm.setType(TemplateType.ENTITY.name());
         return entityTemplateForm;
     }
 

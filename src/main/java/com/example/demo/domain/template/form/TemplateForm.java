@@ -12,9 +12,9 @@ import java.util.Map;
 @Data
 public class TemplateForm {
 
-//    @NotBlank
+    @NotBlank
     private String name;
-//    @NotBlank
+    @NotBlank
     private String type;
 
     public TemplateForm(){

@@ -9,7 +9,8 @@
     <table th:fragment="templateTable(templates, input_id, form_id)">
         <thead>
             <tr>
-                <th class="pb-1"><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</th>
+                <img src="/images/sheet.png" style="width:30px; height:30px;">
+                <th class="pb-1">템플릿 목록</th>
             </tr>
         </thead>
         <tbody>
@@ -121,7 +122,7 @@
            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
                <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-check-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
            </h3>
-           <div id="accordion-panel-check-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
+           <div id="accordion-panel-check-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                    <div class="accordion-body">
                        <div th:each="column: ${columns}">
                            <input type="checkbox" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
@@ -148,7 +149,6 @@
                         <label th:for="${#ids.prev('targetColumns')}" th:text="${column}" class="form-check-label"></label>
                     </div>
                 </div>
-                <br>
              </div>
         </div>
     </div>

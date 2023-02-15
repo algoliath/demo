@@ -1,4 +1,4 @@
-package com.example.demo.web.template;
+package com.example.demo.web.controller;
 
 import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.name.ColumnName;
@@ -21,11 +21,11 @@ import com.example.demo.util.template.TemplateFormProvider;
 import com.example.demo.util.validation.QueryUtils;
 import com.example.demo.web.session.SessionConst;
 import com.github.pagehelper.PageHelper;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.Sheet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -51,6 +51,8 @@ public class QueryController {
     private final MemberRepository memberRepository;
     private final TemplateFormProvider templateFormProvider;
     private final TemplateService templateService;
+
+    private static final String ASYNC_VIEW_URL = "template/query/add::#add_template";
 
     @Autowired
     public QueryController(MemberRepository memberRepository, TemplateFormProvider templateFormProvider, TemplateService templateService) {
@@ -92,7 +94,6 @@ public class QueryController {
     public String addTemplate(@ModelAttribute SearchForm searchForm, @PathVariable String memberId, Model model) {
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
-
         TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
         String templateName = searchForm.getName();
 
@@ -102,7 +103,6 @@ public class QueryController {
 
         List<Template> templates = templateService.findTemplatesByName(templateName);
         Entity template = (Entity) templates.get(0);
-
         List<Column> columns = templateService.findColumnsByTemplateId(template.getId());
         template.setColumns(columns);
         queryTemplateForm.getJoinTemplates().add(template);
@@ -117,16 +117,26 @@ public class QueryController {
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
 
-        String templateName = sqlBlockData.getTemplateName();
-        Entity entity = queryTemplateForm.getJoinTemplates().stream().filter(template -> template.getName().equals(templateName)).findAny().get();
+        String templateName = sqlBlockData.getTemplateName().trim();
+        log.info("templateName={}", templateName);
+        log.info("joinTemplates={}", queryTemplateForm.getJoinTemplates().stream().map(Template::getName).collect(Collectors.toList()));
+        Entity entity = queryTemplateForm.getJoinTemplates().stream().filter(template -> template.getName().trim().equals(templateName)).findAny().get();
         SQLBlockData target = queryTemplateForm.getSQLBlock(sqlBlockData.getSqlBlockOrder()).getDataHolder().get(sqlBlockData.getSqlDataOrder());
         target.setTemplateName(templateName);
 
+        List<Template> templates = templateService.findTemplatesByName(templateName);
+        target.setTemplateName(templateName);
+
+        // 서브 쿼리 타입
+        if(templates.isEmpty()){
+            target.setTemplateAlias("SUB_QUERY" + "_" + target.getSqlBlockOrder() + "_" + target.getSqlDataOrder());
+        }
+
         List<String> parsedColumns = entity.getColumns().stream().map(column -> column.getColumnName().getValidName()).collect(Collectors.toList());
         target.setColumns(parsedColumns);
-        model.addAttribute("columns",parsedColumns);
+        model.addAttribute("columns", parsedColumns);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @PostMapping("/add_columns/{memberId}")
@@ -149,7 +159,7 @@ public class QueryController {
 
         log.info("target={}", target);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @GetMapping("/add_query_data/{memberId}")
@@ -160,7 +170,7 @@ public class QueryController {
         sendQueryForwardModelAttributes(model, queryTemplateForm);
 
         if(bindingResult.hasErrors()){
-            return "/template/query/add::#add_template";
+            return ASYNC_VIEW_URL;
         }
 
         SQLBlock sqlBlock = queryTemplateForm.getSQLForm().getSqlBlockList().get(sqlBlockOrder);
@@ -168,14 +178,14 @@ public class QueryController {
         List<SQLBlockData> dataHolder = sqlBlock.getDataHolder();
         dataHolder.add(addSQLBlockData);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @GetMapping("/delete_query_data/{memberId}")
     public String removeData(@Validated @ModelAttribute SQLBlockData sqlBlockData, BindingResult bindingResult,
                              @PathVariable String memberId, Model model){
         if(bindingResult.hasErrors()){
-            return "/template/query/add::#add_template";
+            return ASYNC_VIEW_URL;
         }
         int sqlBlockOrder = sqlBlockData.getSqlBlockOrder();
         int sqlDataOrder = sqlBlockData.getSqlDataOrder();
@@ -187,7 +197,7 @@ public class QueryController {
         List<SQLBlockData> dataHolder = sqlBlock.getDataHolder();
         dataHolder.remove(sqlDataOrder);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @GetMapping("/add_block/{memberId}")
@@ -199,7 +209,7 @@ public class QueryController {
         int sqlBlockOrder = sqlBlock.getOrder();
         sqlBlockList.add(sqlBlockOrder, new SQLBlock(sqlBlockOrder+1));
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @PostMapping("/add_sub_query/{memberId}")
@@ -212,8 +222,12 @@ public class QueryController {
 
         List<SQLBlock> targetSQLBlockList = sqlForm.getIndices()
                 .stream()
-                .map(index -> sqlBlockList.get(index))
+                .map(sqlBlockList::get)
                 .collect(Collectors.toList());
+
+        if(targetSQLBlockList.isEmpty()){
+            return ASYNC_VIEW_URL;
+        }
 
         for(SQLBlock targetSQLBlock: targetSQLBlockList){
             sqlBlockList.remove(targetSQLBlock);
@@ -221,6 +235,8 @@ public class QueryController {
 
         Entity entity = new Entity();
         entity.setName(QueryUtils.convertSQLBlocks(targetSQLBlockList));
+        log.info("entity={}", entity.getName());
+
         for(SQLBlock sqlBlock: targetSQLBlockList){
             if(sqlBlock.getSqlBlockType() == SQLBlockType.SELECT){
                 for(SQLBlockData sqlBlockData: sqlBlock.getDataHolder()){
@@ -238,14 +254,14 @@ public class QueryController {
         queryTemplateForm.getJoinTemplates().add(entity);
         log.info("sqlForm={}", sqlForm);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @GetMapping("/delete_block/{memberId}")
     public String removeBlock(@Validated @ModelAttribute SQLBlock sqlBlock, BindingResult bindingResult,
                               @PathVariable String memberId, Model model){
         if(bindingResult.hasErrors()){
-            return "/template/query/add::#add_template";
+            return ASYNC_VIEW_URL;
         }
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
@@ -253,7 +269,7 @@ public class QueryController {
         int sqlBlockOrder = sqlBlock.getOrder();
         sqlBlockList.remove(sqlBlockOrder);
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @PostMapping("/edit_block/{memberId}")
@@ -261,16 +277,20 @@ public class QueryController {
                             @PathVariable String memberId, Model model){
         QueryTemplateForm queryTemplateForm = templateFormProvider.getQueryTemplateForm(memberId);
         sendQueryForwardModelAttributes(model, queryTemplateForm);
+
         if(bindingResult.hasErrors()){
             log.info("bindingResult={}", bindingResult);
-            return "/template/query/add::#add_template";
+            return ASYNC_VIEW_URL;
         }
+
         List<SQLBlock> sqlBlockList = queryTemplateForm.getSQLForm().getSqlBlockList();
-        SQLBlock targetSqlBlock = sqlBlockList.get(sqlBlock.getOrder());
-        targetSqlBlock.clear();
-        targetSqlBlock.setSqlBlockType(sqlBlock.getSqlBlockType());
+        SQLBlock targetSQLBlock = sqlBlockList.get(sqlBlock.getOrder());
+        targetSQLBlock.setSqlBlockType(sqlBlock.getSqlBlockType());
+        for (SQLBlockData sqlBlockData: targetSQLBlock.getDataHolder()) {
+             sqlBlockData.setSqlBlockType(sqlBlock.getSqlBlockType());
+        }
         sendQueryPostModelAttributes(model, queryTemplateForm);
-        return "/template/query/add::#add_template";
+        return ASYNC_VIEW_URL;
     }
 
     @PostMapping("/execute_query/{memberId}")
@@ -304,7 +324,7 @@ public class QueryController {
 
             while(resultSet.next()){
                 log.info("result={}", resultSet);
-                List<Object> row = new ArrayList();
+                List<Object> row = new ArrayList<>();
                 resultList.add(row);
                 for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
                      row.add(resultSet.getObject(columnIndex));
@@ -316,17 +336,21 @@ public class QueryController {
             SpreadSheetSource spreadSheetSource = new SpreadSheetSource(loginMember.getFileId());
 
             Source<String> paramSource = new Source<>();
-            paramSource.add(FILE_NAME, "QUERY_"+loginMember.getLoginId());
-            Sheet sheet = spreadSheetSource.createFile(paramSource);
+            paramSource.add(FILE_NAME, "QUERY_"+loginMember.getRandomUUID());
+            File targetFile = null;
+            List<File> files = spreadSheetSource.getFiles(paramSource);
+            targetFile = (files.isEmpty())? files.get(0): spreadSheetSource.createFile(paramSource);
+
+            Sheet sheet = spreadSheetSource.getSpreadSheet(targetFile);
             String sheetRange = sheet.getProperties().getTitle() + "!A0:" + (char)('A'+columnCount) + "" + (char)('0'+rowCount);
             paramSource.add(FILE_RANGE, sheetRange);
-
-            spreadSheetSource.createFile(paramSource);
             spreadSheetSource.writeSpreadSheetTable(paramSource, resultList);
+            model.addAttribute("sourceId", targetFile.getId());
 
         } catch (SQLException e) {
             sqlForm.setSqlError(e.getSQLState());
         }
+
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return "/template/query/add";
     }

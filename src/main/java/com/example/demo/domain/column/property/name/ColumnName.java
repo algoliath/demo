@@ -19,4 +19,8 @@ public class ColumnName {
         return validName;
     }
 
+    @Override
+    public String toString() {
+        return validName;
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.demo.web.member;
+package com.example.demo.web.controller;
 
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.member.form.MemberForm;
@@ -29,16 +29,19 @@ public class MemberController {
     @GetMapping("/add")
     public String addMemberForm(@ModelAttribute("member") MemberForm memberForm, Model model){
         model.addAttribute("member", memberForm);
-        return "members/add";
+        return "/member/add";
     }
 
     @PostMapping("/add")
     public String addMember(@Validated @ModelAttribute("member") MemberForm memberForm, BindingResult bindingResult) throws IOException {
         log.info("member={}",memberForm);
         String loginId = memberForm.getLoginId();
-        if(bindingResult.hasErrors() && memberRepository.findByLoginId(loginId).isPresent()){
+        if(memberRepository.findByLoginId(loginId).isPresent()){
+            bindingResult.rejectValue(loginId,"duplicate");
+        }
+        if(bindingResult.hasErrors()){
             log.info("bindingResult={}", bindingResult);
-            return "members/add";
+            return "/member/add";
         }
         fileRepository.storeFile(memberForm.getAttachFile());
         Member member = new Member(memberForm.getName(), memberForm.getLoginId(), memberForm.getPassword(), memberForm.getAttachFile());

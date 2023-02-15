@@ -1,4 +1,4 @@
-package com.example.demo.web.login;
+package com.example.demo.web.controller;
 
 import com.example.demo.domain.login.LoginService;
 import com.example.demo.domain.member.Member;

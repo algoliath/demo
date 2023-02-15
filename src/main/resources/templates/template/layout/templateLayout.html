@@ -233,8 +233,8 @@
             border-radius: 15px;
             border: 2px groove black;
             background-color: aquamarine;
-            width: 200px;
-            height: 200px;
+            width: 105%;
+            height: 105%;
             transition: 0.4s;
         }
         .img-button{
@@ -273,10 +273,6 @@
         <div th:insert="~{fragment/sidebar::sidebar}"></div>
     </div>
     <div class="col-9 container p-5 mt-3" style="border:none;">
-          <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
-              <h2 style="color: black; font-weight: lighter; font-size: 35px;">Build Template</h2>
-              <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
-          </div>
           <!-- 템플릿 설정 -->
           <section th:replace="${add_template}"></section>
           <br>

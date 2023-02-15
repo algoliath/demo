@@ -7,7 +7,11 @@
 <section id="add_template">
     <!-- ADD TEMPLATE ATTRIBUTE -->
     <div class="template-form base pop-up">
-        <div class="row" width="1300px">
+        <div class="row" style="width: 1200px;">
+            <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
+                <h2 style="color: black; font-weight: lighter; font-size: 35px;">BUILD ENTITY</h2>
+                <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
+            </div>
             <div class="col container">
                 <div th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
             </div>

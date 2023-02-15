@@ -132,6 +132,7 @@ public class EntityValidator {
                     case GREATER_THAN -> {
                         indices = columnValues.stream().map(val -> (String)val)
                                 .filter(val -> StringUtils.isNumeric(val) && Integer.parseInt(val) <= Integer.parseInt(argument))
+                                .map(val -> spreadSheetTable.getCellRange(finalColumnName, val))
                                 .collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
@@ -142,6 +143,7 @@ public class EntityValidator {
                     case LESS_THAN -> {
                         indices = columnValues.stream().map(val -> (String)val)
                                 .filter(val -> StringUtils.isNumeric(val) && Integer.parseInt(val) >= Integer.parseInt(argument))
+                                .map(val -> spreadSheetTable.getCellRange(finalColumnName, val))
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";

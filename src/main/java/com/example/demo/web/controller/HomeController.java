@@ -1,4 +1,4 @@
-package com.example.demo.web.login;
+package com.example.demo.web.controller;
 
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.repository.member.MemberRepository;

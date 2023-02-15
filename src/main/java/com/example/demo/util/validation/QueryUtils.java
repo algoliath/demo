@@ -118,7 +118,10 @@ public class QueryUtils {
             }
             case SELECT -> {
                 partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
-                                .map(sqlBlockData -> sqlBlockData + " FROM " +  sqlBlockData.getTemplateName()).collect(Collectors.joining(", "));
+                                .map(sqlBlockData -> (sqlBlockData.getTemplateAlias() != null)?
+                                        (sqlBlockData + " FROM (" + sqlBlockData.getTemplateName() + ") " + sqlBlockData.getTemplateAlias())
+                                        :(sqlBlockData + " FROM " +  sqlBlockData.getTemplateName()))
+                                .collect(Collectors.joining());
             }
             case GROUP_BY -> {
                 partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
