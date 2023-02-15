@@ -1,4 +1,4 @@
-# demo
+# EasyToDataBase
 This is a demo of a website project that enables goolge drive users to use google drive files as databases
 
 ## prerequisites
