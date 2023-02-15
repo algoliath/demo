@@ -1,5 +1,5 @@
 # EasyToDataBase
-This is a demo of a website project that enables goolge drive users to use google drive files as databases
+This is a demo of a website project that enables google drive users to use google drive files as databases
 
 ### prerequisites
 - Credentials are required to access into the users' drive. (https://console.cloud.google.com/apis/credentials)
