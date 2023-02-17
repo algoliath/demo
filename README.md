@@ -1,5 +1,5 @@
 # EasyToDataBase
-This is a demo of a website project that enables google drive users to use google drive files as databases
+This is a demo of a website project that provides service for google drive users to build databases with one's google drive files
 
 ### prerequisites
 - Credentials are required to access into the users' Google Driver
