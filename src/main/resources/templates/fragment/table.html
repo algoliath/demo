@@ -7,11 +7,8 @@
 
 <body>
     <table th:fragment="templateTable(templates, input_id, form_id)">
+        <span><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</span>
         <thead>
-            <tr>
-                <img src="/images/sheet.png" style="width:30px; height:30px;">
-                <th class="pb-1">템플릿 목록</th>
-            </tr>
         </thead>
         <tbody>
             <tr th:each="item:${templates}">
@@ -34,31 +31,34 @@
         </tbody>
     </table>
 
-    <table th:fragment="queryTemplateTable(templates, input_id, form_id)">
-        <thead>
-            <tr>
-                <th><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="item:${templates}">
-                <td th:if="${item}!=null" >
-                    <div class="row justify-content-center align-items-center">
-                        <div class="col">
-                            <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 10px;"
-                                 th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
-                                 onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
-                        </div>
-                        <div class="col">
-                            <a href="template.html" class='view-template' th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}" th:text="${item.name}"></a>
-                        </div>
-                        <div class="col">
-                            <a href="template.html" class='delete-template' th:href="@{/template/query/delete_template/{memberId}/{templateName}(memberId=${memberId}, templateName=${item.name})}">삭제</a>
+    <table th:fragment="queryTemplateTable(name, templates, input_id, form_id)">
+        <div class="accordion-item">
+            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
+                <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" th:text="${name}" data-bs-target="#accordion-panel-template-form" aria-controls="accordion-panel-ft" aria-expanded="false" style="background-color: black; border-radius: 5px; color: white;"></button>
+            </h3>
+            <div id="accordion-panel-template-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
+                <div class="accordion-body">
+                    <div th:each="item:${templates}">
+                        <div th:if="${item}!=null" >
+                            <div class="row justify-content-center align-items-center">
+                                <div class="col">
+                                    <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 10px;"
+                                         th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
+                                         onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
+                                </div>
+                                <div class="col">
+                                    <a href="template.html" class='view-template' th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}" th:text="${item.name}"></a>
+                                </div>
+                                <div class="col">
+                                    <a href="template.html" class='delete-template' th:href="@{/template/query/delete_template/{memberId}/{templateName}(memberId=${memberId}, templateName=${item.name})}">삭제</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </td>
-            </tr>
-        </tbody>
+                </div>
+                <br>
+            </div>
+        </div>
     </table>
 
     <table th:fragment="sideBarFileTable(files, input_id, form_id)">
@@ -120,9 +120,9 @@
    <div th:fragment="checkFormTable(name, columns, form_id)" class="accordion" id="accordion_check_form_type">
        <div class="accordion-item">
            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-check-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+               <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-check-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
            </h3>
-           <div id="accordion-panel-check-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
+           <div id="accordion-panel-check-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                    <div class="accordion-body">
                        <div th:each="column: ${columns}">
                            <input type="checkbox" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
@@ -140,9 +140,9 @@
     <div th:fragment="radioFormTable(name, columns, form_id)" id="accordion_radio_form_type">
         <div class="accordion-item">
             <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-                <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-radio-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+                <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-radio-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
             </h3>
-            <div id="accordion-panel-radio-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
+            <div id="accordion-panel-radio-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                 <div class="accordion-body">
                     <div th:each="column: ${columns}">
                         <input type="radio" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
@@ -156,7 +156,7 @@
     <div th:fragment="formTable(name, items, input_id, form_id)" id="accordion_form_type">
        <div class="accordion-item">
            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+               <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
            </h3>
            <div id="accordion-panel-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                <div th:each="item: ${items}">
@@ -171,7 +171,7 @@
    <div th:fragment="promptTable(name, items, input_id, another_input_id)" id="accordion_prompt_type">
        <div class="accordion-item">
            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-1" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-prompt" aria-expanded="false" aria-controls="accordion-panel-vt" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+               <button class="accordion-button p-1 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-prompt" aria-expanded="false" aria-controls="accordion-panel-vt" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
            </h3>
            <div id="accordion-panel-prompt" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
                <div th:each="item: ${items}">
@@ -197,7 +197,8 @@
 <!--            </h2>-->
 <!--            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">-->
 <!--                <div class="accordion-body">-->
-<!--                    <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.-->
+<!--                    <strong>This is the first item's accordion b
+ody.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.-->
 <!--                </div>-->
 <!--            </div>-->
 <!--        </div>-->

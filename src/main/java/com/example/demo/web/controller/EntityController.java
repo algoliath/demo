@@ -110,7 +110,7 @@ public class EntityController {
         saveEntityForwardModelAttributes(model, entityTemplateForm);
         Source<String> paramSource = new Source<>(Arrays.asList(FILE_NAME), Arrays.asList(fileName));
 
-        DataSourceId dataSourceId = spreadSheetSource.publish(paramSource, bindingResult);
+        DataSourceId dataSourceId = spreadSheetSource.publish(paramSource);
         entityTemplateForm.setSourceId(dataSourceId.getOriginalFileId());
         saveEntityPostModelAttributes(model, entityTemplateForm);
         log.info("-----------[GET END]--------------\n");
@@ -237,9 +237,9 @@ public class EntityController {
     }
 
     @GetMapping("/save_template/{memberId}")
-    public String saveTemplate(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Member member,
-                               RedirectAttributes redirectAttributes,
-                               @PathVariable String memberId, Model model) {
+    public String saveTemplate(@PathVariable String memberId,
+                               @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Member member,
+                               Model model) {
 
         Source<List<String>> errors = new Source<>();
         EntityTemplateForm templateForm = templateFormProvider.getEntityTemplateForm(memberId);
@@ -255,14 +255,17 @@ public class EntityController {
         EntityDTO entityDTO;
         try {
             entityDTO = templateService.saveTemplate(entity, member.getId());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new IllegalStateException("알 수 없는 오류로 서비스가 중단되었습니다");
+        } finally {
+            log.info("finished");
         }
 
         templateFormProvider.clear(memberId);
-        saveEntityForwardModelAttributes(redirectAttributes, templateForm);
-        saveEntityPostModelAttributes(redirectAttributes, templateForm);
-        return "redirect:/template/" + entityDTO.getId();
+        saveEntityPostModelAttributes(model, templateForm);
+        String url = "/template/" + memberId+ "/" + entityDTO.getId();
+        log.info("url={}", url);
+        return "redirect:" + url;
     }
 
     @GetMapping("/update_template/{memberId}")
@@ -301,7 +304,6 @@ public class EntityController {
         ColumnUpdateForm column = templateForm.getColumnUpdateForms().getColumnUpdateForm(columnUpdateForm.getName()).get();
         column.setType(columnUpdateForm.getType());
 
-        // 실제 테이블 값 기준으로 타입 검증
         entityValidator.validate(templateForm, errors);
 
         if (!errors.isEmpty()) {
@@ -402,6 +404,8 @@ public class EntityController {
                             .match(conditionSaveForm.getKeyConditionType())).findAny().orElse(null);
             if (target != null) {
                 errors.get("keyConditionType", new ArrayList<>()).get().add("동일한 key 조건이 존재합니다");
+            } else{
+                column.addKeyCondition(new KeyCondition(conditionSaveForm.getKeyConditionType()));
             }
         } else {
             ValueCondition target = column.getValConditions().stream()
@@ -409,20 +413,21 @@ public class EntityController {
                             .match(conditionSaveForm.getValueConditionType())).findAny().orElse(null);
             if (target != null) {
                 errors.get("valueConditionType", new ArrayList<>()).get().add("동일한 value 조건이 존재합니다");
+            } else{
+                column.addValueCondition(new ValueCondition(conditionSaveForm.getValueConditionType(), conditionSaveForm.getValueConditionTerm()));
             }
         }
 
         entityValidator.validate(templateForm, errors);
 
         if (!errors.isEmpty()) {
+            if (conditionSaveForm.isValidKeyCondition()) {
+                column.deleteKeyCondition(new KeyCondition(conditionSaveForm.getKeyConditionType()));
+            } else {
+                column.deleteValueCondition(new ValueCondition(conditionSaveForm.getValueConditionType(), conditionSaveForm.getValueConditionTerm()));
+            }
             model.addAttribute("errors", errors);
             return "/fragment/form::#edit-column";
-        }
-
-        if (conditionSaveForm.isValidKeyCondition()) {
-            column.addKeyCondition(new KeyCondition(conditionSaveForm.getKeyConditionType()));
-        } else {
-            column.addValueCondition(new ValueCondition(conditionSaveForm.getValueConditionType(), conditionSaveForm.getValueConditionTerm()));
         }
 
         saveEntityPostModelAttributes(model, templateForm);

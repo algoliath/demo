@@ -8,12 +8,12 @@ import com.example.demo.util.datasource.CredentialUtils;
 import com.example.demo.util.datasource.connection.SheetsConnection;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.ClearValuesRequest;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -30,14 +30,18 @@ public class SpreadSheetSource implements DataSource {
         this.credentials = CredentialUtils.getCredentialPath(fileName);
     }
 
-    public void writeSpreadSheetTable(Source<String> paramSource, List<List<Object>> values){
+    public void write(Source<String> paramSource, List<List<Object>> values){
         String range = paramSource.get(DataSource.FILE_RANGE).orElse(null);
         DataSourceId dataSourceId = getDataSourceId(paramSource);
         try {
             Sheets service = SheetsConnection.getConnection(credentials);
             ValueRange valueRange = new ValueRange();
+            valueRange.setRange(range).setValues(values);
             valueRange.setValues(values);
-            service.spreadsheets().values().update(dataSourceId.getOriginalFileId(), range, valueRange);
+            log.info("values = {}", values);
+            log.info("valueRange = {}", valueRange);
+            log.info("dataSourceId = {}", dataSourceId.getOriginalFileId());
+            service.spreadsheets().values().update(dataSourceId.getOriginalFileId(), valueRange.getRange(), valueRange).setValueInputOption("RAW").execute();
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -143,7 +147,7 @@ public class SpreadSheetSource implements DataSource {
                 .build().updateRevision(dataSourceIds.get(0).getOriginalFileId(), revision);
     }
 
-    public DataSourceId publish(Source<String> paramSource, BindingResult bindingResult) {
+    public DataSourceId publish(Source<String> paramSource) {
         List<DataSourceId> dataSourceIds = getDataSourceIds(paramSource); // 파일 id 소스
         if(dataSourceIds.isEmpty()){
             throw new IllegalArgumentException("파일을 찾을 수 없습니다");
@@ -154,20 +158,21 @@ public class SpreadSheetSource implements DataSource {
         log.info("lastRevision={}", lastRevision);
 
         Revision revision = new Revision();
-        revision.setId(revisions.get(revisions.size()-1).getId());
-        revision.setPublishedOutsideDomain(true);
-        revision.setPublished(true);
-        revision.setPublishAuto(true);
-        updateRevision(paramSource, revision);
-
-        Permission permission = new Permission();
-        permission.setType("anyone");
-        permission.setRole("writer");
-        updatePermission(paramSource, permission);
+        if(revision.getPublished() == null || revision.getPublished() == null && !revision.getPublished().booleanValue()){
+            revision.setId(revisions.get(revisions.size()-1).getId());
+            revision.setPublishedOutsideDomain(true);
+            revision.setPublished(true);
+            revision.setPublishAuto(true);
+            updateRevision(paramSource, revision);
+            Permission permission = new Permission();
+            permission.setType("anyone");
+            permission.setRole("writer");
+            updatePermission(paramSource, permission);
+        }
         return dataSourceIds.get(0);
     }
 
-    public Sheet getSpreadSheet(File file){
+    public Sheet get(File file){
         Sheet sheet;
         try{
             Sheets sheets = SheetsConnection.getConnection(credentials);
@@ -198,4 +203,18 @@ public class SpreadSheetSource implements DataSource {
     }
 
 
+    public void clear(Source<String> paramSource, String spreadSheetRange) {
+        String range = paramSource.get(DataSource.FILE_RANGE).orElse(null);
+        DataSourceId dataSourceId = getDataSourceId(paramSource);
+        Sheets service = null;
+        try {
+            service = SheetsConnection.getConnection(credentials);
+            ClearValuesRequest requestBody = new ClearValuesRequest();
+            service.spreadsheets().values().clear(dataSourceId.getOriginalFileId(), spreadSheetRange, requestBody);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

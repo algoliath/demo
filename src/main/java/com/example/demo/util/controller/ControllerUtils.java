@@ -57,22 +57,22 @@ public class ControllerUtils {
         model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
         model.addAttribute("conditionSaveForm", new ConditionSaveForm());
         model.addAttribute("sqlForm", SQLForm.getEmptyInstance());
-        model.addAttribute("sqlBlockTypes", Arrays.stream(SQLBlockType.values()).toList());
+        model.addAttribute("SQLBlockTypes", Arrays.stream(SQLBlockType.values()).toList());
         model.addAttribute("operators", Arrays.stream(SQLOperator.mainQueryOperator()).toList());
         model.addAttribute("subQueryOperators", Arrays.stream(SQLOperator.subQueryOperator()).toList());
         model.addAttribute("sqlBlock", new SQLBlock());
         model.addAttribute("sqlBlockData", new SQLBlockData());
         // sources
         model.addAttribute("sourceId", queryTemplateForm.getSourceId());
-    }
+     }
 
     public static void sendQueryPostModelAttributes(Model model, QueryTemplateForm queryTemplateForm) {
         model.addAttribute("template", queryTemplateForm);
         model.addAttribute("sourceId", queryTemplateForm.getSourceId());
         model.addAttribute("joinTemplates", queryTemplateForm.getJoinTemplates());
         SQLForm sqlForm = queryTemplateForm.getSQLForm();
-        sqlForm.setSqlQuery(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));
         sqlForm.getSqlBlockList().stream().iterator().forEachRemaining(sqlBlock -> sqlBlock.setSqlQuery(QueryUtils.convertSQLBlock(sqlBlock)));
+        sqlForm.setSqlQuery(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));
         log.info("queryTemplateForm={}", queryTemplateForm);
     }
 

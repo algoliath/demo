@@ -84,7 +84,7 @@ public class QueryUtils {
         StringBuilder queryBuilder = new StringBuilder();
         int n_select = 0;
         for(SQLBlock sqlBlock: targetSQLBlockList){
-            if(sqlBlock.getSqlBlockType() == SQLBlockType.SELECT){
+            if(sqlBlock.getSQLBlockType() == SQLBlockType.SELECT){
                 n_select++;
             }
             for(int i=1; i<n_select; i++){
@@ -98,13 +98,13 @@ public class QueryUtils {
 
     public static String convertSQLBlock(SQLBlock targetSQLBlock){
 
-        if(targetSQLBlock.getSqlBlockType() == null){
+        if(targetSQLBlock.getSQLBlockType() == null){
             return "";
         }
 
         String partialQuery = "";
 
-        switch (targetSQLBlock.getSqlBlockType()){
+        switch (targetSQLBlock.getSQLBlockType()){
             case JOIN -> {
                 List<String> joins = new ArrayList<>();
                 for(int i=0; i+1<targetSQLBlock.getDataHolder().size(); i++){
@@ -118,33 +118,30 @@ public class QueryUtils {
             }
             case SELECT -> {
                 partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
-                                .map(sqlBlockData -> (sqlBlockData.getTemplateAlias() != null)?
-                                        (sqlBlockData + " FROM (" + sqlBlockData.getTemplateName() + ") " + sqlBlockData.getTemplateAlias())
-                                        :(sqlBlockData + " FROM " +  sqlBlockData.getTemplateName()))
+                                .map(blockData -> (blockData.getTemplateAlias() != null)?
+                                        (blockData + " FROM (" + blockData.getTemplateName() + ") " + blockData.getTemplateAlias())
+                                        :(blockData + " FROM " +  blockData.getTemplateName()))
                                 .collect(Collectors.joining());
             }
             case GROUP_BY -> {
                 partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
-                        .map(sqlBlockData ->  sqlBlockData.getTemplateName()).collect(Collectors.joining(", "));
+                        .map(blockData ->  blockData.getTemplateName()).collect(Collectors.joining(", "));
             }
             case WHERE, HAVING -> {
                 partialQuery = targetSQLBlock.getDataHolder().stream().filter(sqlBlockData -> sqlBlockData.getTemplateName()!=null)
                         .map(blockData -> blockData.toString()).collect(Collectors.joining(" AND "));
             }
-            case SUBQUERY -> {
-                partialQuery = targetSQLBlock.getSqlQuery();
-            }
         }
 
-        switch (targetSQLBlock.getSqlBlockType()){
+        switch (targetSQLBlock.getSQLBlockType()){
             case SELECT, WHERE, HAVING -> {
                 if(StringUtils.hasText(partialQuery)){
-                   partialQuery = targetSQLBlock.getSqlBlockType() + " " + partialQuery;
+                   partialQuery = targetSQLBlock.getSQLBlockType() + " " + partialQuery;
                 }
             }
             case GROUP_BY -> {
                 if(StringUtils.hasText(partialQuery)){
-                    partialQuery = targetSQLBlock.getSqlBlockType() + " (" + partialQuery + ")";
+                    partialQuery = targetSQLBlock.getSQLBlockType() + " (" + partialQuery + ")";
                 }
             }
         }

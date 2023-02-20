@@ -90,7 +90,7 @@ public class EntityValidator {
                 switch(conditionType){
                     case PRIMARY_KEY, UNIQUE -> {
                         if(spreadSheetTable.hasDuplicateColumn(columnName)){
-                            String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위  {2}를 확인해 주세요.";
+                            String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
                             message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, spreadSheetTable.getColumnRange(columnName)});
                             bindingResult.get(CONDITION_ERROR_CODE + ".PRIMARY_KEY",new ArrayList<>()).get().add(message);
                         }

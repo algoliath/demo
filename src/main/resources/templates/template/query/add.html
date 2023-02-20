@@ -23,12 +23,10 @@
         }
     </script>
     <style>
-        root{
-            color: black;
-        }
         .accordion-button{
             background-color: beige!important;
-            color: black;
+            color: black!important;
+            font-weight: 300;
         }
     </style>
     <!-- ADD TEMPLATE ATTRIBUTE -->
@@ -41,7 +39,7 @@
             <div class="col container" style="background-color: lightyellow">
                 <textarea rows="15" cols="90" style="border: solid 5px floralwhite" th:placeholder="${template.SQLForm.sqlQuery}"></textarea>
             </div>
-            <div class="col-3 container">
+            <div class="col-4 container">
                 <div th:insert="~{/fragment/form::query(${form_url})}" th:with="form_url=|/template/query/execute_query/${memberId}|"></div>
                 <form id="result_query" th:action="|/template/query/execute_query/${memberId}|" method="post"
                       th:object="${template.SQLForm}">
@@ -49,16 +47,29 @@
                     <br>
                     <br>
                     <button type="submit" class="w-50 btn-dark btn">SQL 쿼리 실행</button>
+                    <div class="field-error" th:text="${template.SQLForm.sqlError}"></div>
                     <br>
                </form>
                <br>
             </div>
         </div>
         <div th:replace="~{/fragment/form::query-column}"></div>
+        <div>
+            <div class="template-form pop-up row" th:if="${sourceId}">
+                <p>Query Result</p>
+                <div class="col" th:if="${sourceId}" th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
+                <div class="col-5">
+                    <form id="file-export-form" th:action="|/template/query/export_file/${memberId}|" th:object="${searchForm}">
+                        <input class="form-control" th:field="*{name}">
+                        <button>파일 저장</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- ADD TEMPLATE FILE FORM -->
     <div class="template-form border-white add pop-hide">
-        <div class="container border-white" style="width:500px">
+        <div class="container" style="width:500px">
             <div class="text-center" th:insert="~{/fragment/form::file-search-form(action=|/template/query/search_entity/${memberId}|, table_id='join-section', form_id='file-search-form', anchor_class='template-form')}"></div>
             <hr>
             <div id="join-section" class="text-center" th:insert="~{/fragment/form::template-display-form(templates=${templates}, action=|/template/query/add_entity/${memberId}|, table_id='add_template', form_id='template-view-form')}"></div>
@@ -67,21 +78,12 @@
 </section>
 
 <!-- EDIT COLUMN FORM -->
-<section id="update_columns">
-
-</section>
+<section id="update_columns"></section>
 
 <section id="add_columns">
 </section>
 
 <section id="save_template">
-    <div class="template-form pop-up row">
-        <p>Query Result</p>
-        <div th:insert="~{/fragment/frame::view_template(${@spreadSheetUtils.getEmbeddableSpreadSheetURL(sourceId)})}"></div>
-    </div>
-    <form id="file-export-form">
-        <button>파일 저장</button>
-    </form>
 </section>
 
 </body>

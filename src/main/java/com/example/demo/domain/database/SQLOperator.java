@@ -3,6 +3,7 @@ package com.example.demo.domain.database;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 public enum SQLOperator {
 
@@ -12,6 +13,10 @@ public enum SQLOperator {
 
     SQLOperator(String sign){
         this.sign = sign;
+    }
+
+    public static boolean hasOperator(String operator) {
+        return Arrays.stream(values()).anyMatch(value -> value.name().equals(operator));
     }
 
     public String getSign(){

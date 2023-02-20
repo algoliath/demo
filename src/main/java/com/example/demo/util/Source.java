@@ -45,8 +45,7 @@ public class Source<T> {
         if(paramMap.get(key) == null){
             return Optional.empty();
         }
-        return Optional.of(paramMap.get(key)
-        );
+        return Optional.of(paramMap.get(key));
     }
 
     public void clearMember(){

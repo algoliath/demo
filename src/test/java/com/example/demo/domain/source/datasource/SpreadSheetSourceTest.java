@@ -8,6 +8,7 @@ import com.example.demo.util.Source;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.sheets.v4.model.Sheet;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static com.example.demo.domain.source.datasource.DataSource.*;
 import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
@@ -32,7 +36,7 @@ class SpreadSheetSourceTest {
     private ColumnTypeConverter columnTypeConverter;
 
     private SpreadSheetSource spreadSheetSource;
-    private Source paramSource;
+    private Source<String> paramSource;
     private Member member;
     private List<List<Object>> tableElements;
 
@@ -47,9 +51,9 @@ class SpreadSheetSourceTest {
         member = memberRepository.findByLoginId("test").get();
         spreadSheetSource = new SpreadSheetSource(member.getFileId());
         paramSource = new Source();
-        paramSource.add("spreadSheetTitle", "Consul");
-        paramSource.add("matchPattern", "contains");
-        paramSource.add("spreadSheetRange", "Sheet1!A1:B3");
+        paramSource.add(FILE_NAME, "QUERY_7d9543c7-917b-4dbd-9");
+        paramSource.add(FILE_RANGE, "시트1!A1:D4");
+        paramSource.add(PATTERN_MATCHER, "contains");
     }
 
     @Test
@@ -79,15 +83,41 @@ class SpreadSheetSourceTest {
 
     @Test
     void getSource() {
-        try {
+        assertThatThrownBy(() -> {try {
             tableElements = (List<List<Object>>) spreadSheetSource
                     .getSpreadSheetTable(paramSource)
-                    .get("spreadTableElements").orElse(new ArrayList<>());
+                    .get("spreadTableElements").orElse(new SpreadSheetTable());
         } catch (GoogleJsonResponseException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }}).isInstanceOf(RuntimeException.class);
+    }
+
+
+    @Test
+    void updateSource(){
+        List<List<Object>> values = new ArrayList<>();
+        values.add(Arrays.asList("1","2","3","4"));
+        values.add(Arrays.asList("2","3","4","5"));
+        values.add(Arrays.asList("3","4","5","6"));
+        values.add(Arrays.asList("4","5","6","7"));
+
+        List<File> files = spreadSheetSource.getFiles(paramSource);
+        Sheet sheet = spreadSheetSource.get(files.get(0));
+        String sheetRange = sheet.getProperties().getTitle() + "!A1:D4";
+        paramSource.add(FILE_RANGE, sheetRange);
+        spreadSheetSource.write(paramSource, values);
+
+        SpreadSheetTable spreadSheetTable;
+        try {
+            Optional<SpreadSheetTable> optional = spreadSheetSource.getSpreadSheetTable(paramSource).get(SpreadSheetSource.SPREAD_SHEET_VALUES);
+            spreadSheetTable = optional.get();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+        assertThat(values).isEqualTo(spreadSheetTable.getValues());
     }
 
 }

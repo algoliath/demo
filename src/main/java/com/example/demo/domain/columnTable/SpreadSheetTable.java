@@ -113,7 +113,7 @@ public class SpreadSheetTable {
         }
         result.add(new ArrayList<>());
         for(Object value: values.get(0)){
-            ColumnName columnName = new ColumnName((String) value);
+            ColumnName columnName = new ColumnName(String.valueOf(value));
             result.get(0).add(columnName.getValidName());
         }
         for(int i=1; i<values.size(); i++){

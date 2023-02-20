@@ -2,6 +2,7 @@ package com.example.demo.web.controller;
 
 import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.name.ColumnName;
+import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.database.form.*;
 import com.example.demo.domain.database.model.SQLBlock;
@@ -31,12 +32,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.example.demo.domain.source.datasource.SpreadSheetSource.*;
@@ -130,6 +133,7 @@ public class QueryController {
         // 서브 쿼리 타입
         if(templates.isEmpty()){
             target.setTemplateAlias("SUB_QUERY" + "_" + target.getSqlBlockOrder() + "_" + target.getSqlDataOrder());
+            target.setOperator(sqlBlockData.getOperator());
         }
 
         List<String> parsedColumns = entity.getColumns().stream().map(column -> column.getColumnName().getValidName()).collect(Collectors.toList());
@@ -150,7 +154,7 @@ public class QueryController {
         target.setTargetColumns(sqlBlockData.getTargetColumns());
         target.setTemplateName(sqlBlockData.getTemplateName());
 
-        switch (sqlBlock.getSqlBlockType()){
+        switch (sqlBlock.getSQLBlockType()){
             case WHERE, HAVING -> {
                 target.setOperator(sqlBlockData.getOperator());
                 target.setOperand(sqlBlockData.getOperand());
@@ -174,7 +178,7 @@ public class QueryController {
         }
 
         SQLBlock sqlBlock = queryTemplateForm.getSQLForm().getSqlBlockList().get(sqlBlockOrder);
-        SQLBlockData addSQLBlockData = new SQLBlockData(sqlBlock.getSqlBlockType(), sqlBlockData.getSqlBlockOrder(), sqlBlockData.getSqlDataOrder()+1);
+        SQLBlockData addSQLBlockData = new SQLBlockData(sqlBlock.getSQLBlockType(), sqlBlockData.getSqlBlockOrder(), sqlBlockData.getSqlDataOrder()+1);
         List<SQLBlockData> dataHolder = sqlBlock.getDataHolder();
         dataHolder.add(addSQLBlockData);
         sendQueryPostModelAttributes(model, queryTemplateForm);
@@ -238,12 +242,12 @@ public class QueryController {
         log.info("entity={}", entity.getName());
 
         for(SQLBlock sqlBlock: targetSQLBlockList){
-            if(sqlBlock.getSqlBlockType() == SQLBlockType.SELECT){
+            if(sqlBlock.getSQLBlockType() == SQLBlockType.SELECT){
                 for(SQLBlockData sqlBlockData: sqlBlock.getDataHolder()){
                     List<Column> columns = new ArrayList<>();
                     for(String columnName: sqlBlockData.getColumns()){
                         Column column = new Column();
-                        column.setColumnName(new ColumnName(sqlBlockData.getTemplateName() + "." + columnName));
+                        column.setColumnName(new ColumnName(columnName));
                         columns.add(column);
                     }
                     entity.setColumns(columns);
@@ -251,8 +255,8 @@ public class QueryController {
             }
         }
 
-        queryTemplateForm.getJoinTemplates().add(entity);
         log.info("sqlForm={}", sqlForm);
+        queryTemplateForm.getJoinTemplates().add(entity);
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return ASYNC_VIEW_URL;
     }
@@ -285,9 +289,9 @@ public class QueryController {
 
         List<SQLBlock> sqlBlockList = queryTemplateForm.getSQLForm().getSqlBlockList();
         SQLBlock targetSQLBlock = sqlBlockList.get(sqlBlock.getOrder());
-        targetSQLBlock.setSqlBlockType(sqlBlock.getSqlBlockType());
+        targetSQLBlock.setSQLBlockType(sqlBlock.getSQLBlockType());
         for (SQLBlockData sqlBlockData: targetSQLBlock.getDataHolder()) {
-             sqlBlockData.setSqlBlockType(sqlBlock.getSqlBlockType());
+             sqlBlockData.setSQLBlockType(sqlBlock.getSQLBlockType());
         }
         sendQueryPostModelAttributes(model, queryTemplateForm);
         return ASYNC_VIEW_URL;
@@ -303,7 +307,7 @@ public class QueryController {
         Connection connection;
 
         sendQueryForwardModelAttributes(model, queryTemplateForm);
-        List<SQLBlock> sqlBlockList = sqlForm.getSqlBlockList();
+        List<SQLBlock> sqlBlockList = queryTemplateForm.getSQLForm().getSqlBlockList();
 
         try{
 
@@ -319,16 +323,18 @@ public class QueryController {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<List<Object>> resultList = new ArrayList<>();
 
-            int rowCount = resultSet.getFetchSize();
+            int rowCount = 0;
             int columnCount = resultSet.getMetaData().getColumnCount();
 
             while(resultSet.next()){
-                log.info("result={}", resultSet);
+
+                sqlForm.getSqlBlockList().stream().iterator().forEachRemaining(sqlBlock -> sqlBlock.setSqlQuery(QueryUtils.convertSQLBlock(sqlBlock)));                log.info("result={}", resultSet);
                 List<Object> row = new ArrayList<>();
                 resultList.add(row);
                 for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
                      row.add(resultSet.getObject(columnIndex));
                 }
+                rowCount++;
             }
 
             log.info("result={}", resultList);
@@ -337,15 +343,18 @@ public class QueryController {
 
             Source<String> paramSource = new Source<>();
             paramSource.add(FILE_NAME, "QUERY_"+loginMember.getRandomUUID());
-            File targetFile = null;
             List<File> files = spreadSheetSource.getFiles(paramSource);
-            targetFile = (files.isEmpty())? files.get(0): spreadSheetSource.createFile(paramSource);
+            File targetFile = (!files.isEmpty())? files.get(0): spreadSheetSource.createFile(paramSource);
 
-            Sheet sheet = spreadSheetSource.getSpreadSheet(targetFile);
-            String sheetRange = sheet.getProperties().getTitle() + "!A0:" + (char)('A'+columnCount) + "" + (char)('0'+rowCount);
+            Sheet sheet = spreadSheetSource.get(targetFile);
+            String sheetRange = sheet.getProperties().getTitle() + "!A1:" + (char)('A'+columnCount) + "" + rowCount;
             paramSource.add(FILE_RANGE, sheetRange);
-            spreadSheetSource.writeSpreadSheetTable(paramSource, resultList);
-            model.addAttribute("sourceId", targetFile.getId());
+            spreadSheetSource.publish(paramSource);
+
+            spreadSheetSource.clear(paramSource, sheetRange);
+            spreadSheetSource.write(paramSource, resultList);
+            queryTemplateForm.setSourceId(targetFile.getId());
+            queryTemplateForm.getSQLForm().setSpreadSheetTable(new SpreadSheetTable(sheetRange, resultList));
 
         } catch (SQLException e) {
             sqlForm.setSqlError(e.getSQLState());

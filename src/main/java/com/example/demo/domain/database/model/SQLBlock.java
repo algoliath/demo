@@ -10,10 +10,10 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"sqlQuery", "dataHolder"})
 public class SQLBlock {
 
-    private SQLBlockType sqlBlockType;
+    private SQLBlockType SQLBlockType;
+    private String sqlQuery = "";
     private List<SQLBlockData> dataHolder = new ArrayList<>();
     private Integer order;
-    private String sqlQuery = "";
 
     public SQLBlock(){
         this.dataHolder.add(new SQLBlockData(order, 0));
@@ -24,15 +24,15 @@ public class SQLBlock {
         this.order = sqlBlockOrder;
     }
 
-    public SQLBlock(SQLBlockType sqlBlockType, Integer sqlBlockOrder) {
+    public SQLBlock(SQLBlockType SQLBlockType, Integer sqlBlockOrder) {
         this.order = sqlBlockOrder;
-        this.sqlBlockType = sqlBlockType;
-        this.dataHolder.add(new SQLBlockData(sqlBlockType, order, sqlBlockOrder));
+        this.SQLBlockType = SQLBlockType;
+        this.dataHolder.add(new SQLBlockData(SQLBlockType, order, sqlBlockOrder));
     }
 
     public void clear() {
         this.getDataHolder().clear();
-        this.sqlBlockType = null;
+        this.SQLBlockType = null;
         this.dataHolder.add(new SQLBlockData(order, 0));
     }
 

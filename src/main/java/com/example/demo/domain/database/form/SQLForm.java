@@ -1,5 +1,6 @@
 package com.example.demo.domain.database.form;
 
+import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.example.demo.domain.database.model.SQLBlock;
 import com.example.demo.domain.database.model.SQLBlockType;
 import lombok.Data;
@@ -11,7 +12,6 @@ import java.util.List;
 public class SQLForm {
 
     private static final SQLForm empty = new SQLForm();
-
     static {
         empty.clear();
     }
@@ -22,6 +22,7 @@ public class SQLForm {
 
     private List<SQLBlock> sqlBlockList = new ArrayList<>();
     private List<Integer> indices = new ArrayList();
+    private SpreadSheetTable spreadSheetTable;
     private String sqlError;
     private String sqlQuery;
 
