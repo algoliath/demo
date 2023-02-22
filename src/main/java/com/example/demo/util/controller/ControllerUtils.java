@@ -7,6 +7,7 @@ import com.example.demo.domain.column.property.type.ColumnType;
 import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.column.form.ConditionSaveForm;
 import com.example.demo.domain.column.form.JoinConditionSaveForm;
+import com.example.demo.domain.data.vo.SQLBlockForm;
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.database.SQLOperator;
 import com.example.demo.domain.database.form.*;
@@ -15,6 +16,7 @@ import com.example.demo.domain.database.model.SQLBlockData;
 import com.example.demo.domain.database.model.SQLBlockType;
 import com.example.demo.domain.template.form.EntityTemplateForm;
 import com.example.demo.domain.template.form.QueryTemplateForm;
+import com.example.demo.domain.template.form.TemplateForm;
 import com.example.demo.util.validation.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
@@ -27,7 +29,6 @@ public class ControllerUtils {
     public static void saveEntityForwardModelAttributes(Model model, EntityTemplateForm entityTemplateForm) {
         // forms
         model.addAttribute("template", entityTemplateForm);
-        model.addAttribute("templateForm", entityTemplateForm);
         model.addAttribute("joinTemplates", entityTemplateForm.getJoinTemplates());
         model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
         model.addAttribute("conditionSaveForm", new ConditionSaveForm());
@@ -56,12 +57,10 @@ public class ControllerUtils {
         model.addAttribute("searchForm", new SearchForm());
         model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
         model.addAttribute("conditionSaveForm", new ConditionSaveForm());
-        model.addAttribute("sqlForm", SQLForm.getEmptyInstance());
         model.addAttribute("SQLBlockTypes", Arrays.stream(SQLBlockType.values()).toList());
         model.addAttribute("operators", Arrays.stream(SQLOperator.mainQueryOperator()).toList());
         model.addAttribute("subQueryOperators", Arrays.stream(SQLOperator.subQueryOperator()).toList());
-        model.addAttribute("sqlBlock", new SQLBlock());
-        model.addAttribute("sqlBlockData", new SQLBlockData());
+        model.addAttribute("sqlBlockForm", new SQLBlockForm());
         // sources
         model.addAttribute("sourceId", queryTemplateForm.getSourceId());
      }
@@ -69,7 +68,6 @@ public class ControllerUtils {
     public static void sendQueryPostModelAttributes(Model model, QueryTemplateForm queryTemplateForm) {
         model.addAttribute("template", queryTemplateForm);
         model.addAttribute("sourceId", queryTemplateForm.getSourceId());
-        model.addAttribute("joinTemplates", queryTemplateForm.getJoinTemplates());
         SQLForm sqlForm = queryTemplateForm.getSQLForm();
         sqlForm.getSqlBlockList().stream().iterator().forEachRemaining(sqlBlock -> sqlBlock.setSqlQuery(QueryUtils.convertSQLBlock(sqlBlock)));
         sqlForm.setSqlQuery(QueryUtils.convertSQLBlocks(sqlForm.getSqlBlockList()));

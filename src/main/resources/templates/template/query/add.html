@@ -22,11 +22,43 @@
             submit_form(form_id);
         }
     </script>
+    <script>
+        function dragstart_handler(event) {
+            // Add the target element's id to the data transfer object
+            event.dataTransfer.setData("text/plain", event.target.id);
+            const data = event.dataTransfer.getData("text/plain");
+            console.log('data:'+data);
+            event.dataTransfer.effectAllowed = "move";
+        }
+        function dragover_handler(event) {
+            event.preventDefault();
+            console.log('target:' + event.target.id);
+            event.dataTransfer.dropEffect = "move";
+        }
+        function dragend_handler(event) {
+            event.preventDefault();
+            console.log('target:' + event.target.id);
+        }
+        function drop_handler(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData("text/plain");
+            console.log('data:' + data, 'target:' + event.target.id);
+            submit_value_form('template-name', data, event.target.id);
+        }
+    </script>
     <style>
         .accordion-button{
             background-color: beige!important;
             color: black!important;
             font-weight: 300;
+        }
+        .accordion-body {
+            background-color: beige!important;
+            color: black!important;
+        }
+        .accordion-item{
+            background-color: beige!important;
+            padding: 10px;
         }
     </style>
     <!-- ADD TEMPLATE ATTRIBUTE -->
@@ -67,24 +99,14 @@
             </div>
         </div>
     </div>
-    <!-- ADD TEMPLATE FILE FORM -->
-    <div class="template-form border-white add pop-hide">
-        <div class="container" style="width:500px">
-            <div class="text-center" th:insert="~{/fragment/form::file-search-form(action=|/template/query/search_entity/${memberId}|, table_id='join-section', form_id='file-search-form', anchor_class='template-form')}"></div>
-            <hr>
-            <div id="join-section" class="text-center" th:insert="~{/fragment/form::template-display-form(templates=${templates}, action=|/template/query/add_entity/${memberId}|, table_id='add_template', form_id='template-view-form')}"></div>
-        </div>
-    </div>
 </section>
 
 <!-- EDIT COLUMN FORM -->
 <section id="update_columns"></section>
 
-<section id="add_columns">
-</section>
+<section id="add_columns"></section>
 
-<section id="save_template">
-</section>
+<section id="save_template"></section>
 
 </body>
 </html>

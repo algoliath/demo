@@ -13,7 +13,7 @@ import com.example.demo.domain.source.datasource.DriveSource;
 import com.example.demo.domain.source.datasource.SpreadSheetSource;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
 import com.example.demo.domain.source.datasource.wrapper.MimeTypes;
-import com.example.demo.domain.data.vo.EntityVO;
+import com.example.demo.domain.data.vo.EntityForm;
 import com.example.demo.domain.template.form.QueryTemplateForm;
 import com.example.demo.domain.template.service.TemplateService;
 import com.example.demo.domain.template.form.EntityTemplateForm;
@@ -24,6 +24,7 @@ import com.example.demo.domain.template.type.TemplateType;
 import com.example.demo.util.Source;
 import com.example.demo.util.template.TemplateFormProvider;
 import com.example.demo.web.session.SessionConst;
+import com.github.pagehelper.PageHelper;
 import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,12 +69,52 @@ public class TemplateController {
             DriveSource drive = new DriveSource.Builder(MimeTypes.SHEETS).setCredentials(getCredentialPath(fileId))
                     .setFields("id, name").setPattern("contains").setTitle(fileName).build();
             List<File> files = drive.getSource();
-            List<EntityVO> entityVOList = new ArrayList<>();
+            // 잘못된 객체 사용
+            List<EntityForm> entityFormList = new ArrayList<>();
             for(File file: files){
-                  entityVOList.add(new EntityVO(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
+                  entityFormList.add(new EntityForm(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
             }
-            model.addAttribute("files", entityVOList);
+            model.addAttribute("files", entityFormList);
             return "/fragment/sidebar::#" + fragment;
+      }
+
+      @GetMapping(value="/search_templates/sidebar/{memberId}", consumes="application/x-www-form-urlencoded;charset=UTF-8;")
+      public String searchSideBarTemplates(@ModelAttribute SearchForm searchForm, @PathVariable String memberId,
+                                           @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,Model model) {
+            TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
+            String templateName = searchForm.getName();
+            String fragment = searchForm.getFragment();
+            templateForm.setName(templateName);
+            templateForm.setType(TemplateType.ENTITY.name());
+            PageHelper.startPage(1, 1, false);
+
+            List<Template> templates = templateService.findTemplatesByNameAndMemberId(templateName, member.getId());
+            templates.remove(new Template(templateForm));
+            model.addAttribute("templates", templates);
+            model.addAttribute("searchForm", searchForm);
+            log.info("templates={}", templates);
+            log.info("fragment={}", fragment);
+            return "fragment/sidebar::#" + fragment;
+      }
+
+
+      @GetMapping(value = "/search_templates/mainframe/{memberId}", consumes = "application/x-www-form-urlencoded;charset=UTF-8;")
+      public String searchMainFrameTemplates(@ModelAttribute SearchForm searchForm, @PathVariable String memberId,
+                                             @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,Model model) {
+            TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
+            String templateName = searchForm.getName();
+            String fragment = searchForm.getFragment();
+            templateForm.setName(templateName);
+            templateForm.setType(TemplateType.ENTITY.name());
+
+            PageHelper.startPage(1, 1, false);
+            List<Template> templates = templateService.findTemplatesByNameAndMemberId(templateName, member.getId());
+            templates.remove(new Template(templateForm));
+            model.addAttribute("templates", templates);
+            model.addAttribute("searchForm", searchForm);
+            log.info("templates={}", templates);
+            log.info("fragment={}", fragment);
+            return "template/entity/add::#" + fragment;
       }
 
       @GetMapping("/add_template/{memberId}")
@@ -95,22 +136,20 @@ public class TemplateController {
             String templateName = templateForm.getName();
             String templateType = templateForm.getType();
             model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
+            model.addAttribute("searchForm", new SearchForm());
             log.info("-----------[POST START]-------------");
             log.info("memberId={}", memberId);
             log.info("templateForm={}", templateForm);
 
             List<TemplateDTO> identicalNames = templateMapper.findByName(templateName);
-
             // 이름 중복 방지 로직
             if(!identicalNames.isEmpty()){
                  bindingResult.rejectValue("name", "duplicate", new Object[]{templateName}, null);
             }
-
             if(bindingResult.hasErrors()){
                log.info("bindingResult={}", bindingResult);
                return "/template/layout/templateLayoutMain";
             }
-
             templateForm.setName(templateName);
             templateForm.setType(templateType);
 
@@ -220,6 +259,5 @@ public class TemplateController {
             model.addAttribute("templates", templates);
             return "login/loginHome";
       }
-
 
 }

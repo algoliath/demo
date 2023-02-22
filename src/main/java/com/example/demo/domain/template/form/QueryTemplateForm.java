@@ -16,17 +16,16 @@ import java.util.List;
 public class QueryTemplateForm extends TemplateForm{
 
     @NotBlank
+    private String templateName;
     private String spreadSheetTitle;
-    private SQLForm SQLForm = new SQLForm();
+    private String spreadSheetRange;
     private SpreadSheetTable spreadSheetTable;
     private String sourceId;
-    private List<Entity> joinTemplates = new ArrayList<>();
-    private List<SQLBlock> subQueryBlocks = new ArrayList<>();
+    private SQLForm SQLForm = new SQLForm();
 
     public QueryTemplateForm(){
 
     }
-
     public QueryTemplateForm(TemplateForm templateForm){
         super(templateForm.getName(), templateForm.getType());
     }

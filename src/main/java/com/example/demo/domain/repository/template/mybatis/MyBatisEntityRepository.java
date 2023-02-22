@@ -46,14 +46,22 @@ public class MyBatisEntityRepository implements EntityRepository {
 
     @Override
     public List<EntityDTO> findByMemberId(Long memberId){
-        log.info("[List<Template>]:{}", entityMapper.findByMemberId(memberId));
-        return entityMapper.findByMemberId(memberId);
+        List<EntityDTO> entities = entityMapper.findByMemberId(memberId);
+        log.info("[List<Template>]:{}", entities);
+        return entities;
     }
 
     @Override
     public List<EntityDTO> findByName(String name) {
-        log.info("[List<Template>]:{}", entityMapper.findByName(name));
-        return entityMapper.findByName(name);
+        List<EntityDTO> entities = entityMapper.findByName(name);
+        log.info("[List<Template>]:{}", entities);
+        return entities;
+    }
+
+    @Override
+    public List<EntityDTO> findByNameAndMemberId(String name, Long memberId) {
+        log.info("[List<Template>]:{}", entityMapper.findByNameAndMemberId(name, memberId));
+        return entityMapper.findByNameAndMemberId(name, memberId);
     }
 
     @Override
@@ -63,8 +71,9 @@ public class MyBatisEntityRepository implements EntityRepository {
 
     @Override
     public Optional<EntityDTO> findById(Long id){
-        log.info("[Template]:{}", entityMapper.findById(id));
-        return entityMapper.findById(id);
+        Optional<EntityDTO> optionalEntity = entityMapper.findById(id);
+        log.info("[Template]:{}", optionalEntity);
+        return optionalEntity;
     }
 
 }

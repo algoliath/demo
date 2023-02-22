@@ -7,22 +7,26 @@ import com.example.demo.domain.data.dto.EntityDTO;
 import com.example.demo.domain.template.form.EntityTemplateForm;
 import com.example.demo.domain.template.type.TemplateType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Data
+
 @Getter
+@Setter
+@EqualsAndHashCode(exclude = {"sourceId"})
 public class Entity extends Template {
 
-    private List<Column> columns = new ArrayList<>();
     private String sheetTitle;
     private String sheetRange;
-    private String sourceId;
     private SpreadSheetTable sheetTable;
+    private List<Column> columns = new ArrayList<>();
+    private String sourceId;
 
 
     public Entity(EntityTemplateForm templateForm){
@@ -49,20 +53,10 @@ public class Entity extends Template {
         columns.add(column);
     }
 
-    public List<Column> getColumns() {
-        return columns;
-    }
 
     public Optional<Column> getPrimaryKeyColumn(){
         return columns.stream().filter(column -> column.getKeyConditions().contains(KeyCondition.PRIMARY_KEY_CONDITION)).findAny();
     }
 
-    public String getSheetTitle() {
-        return sheetTitle;
-    }
-
-    public String getSheetRange() {
-        return sheetRange;
-    }
 
 }

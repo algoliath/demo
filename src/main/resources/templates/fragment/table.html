@@ -15,7 +15,7 @@
                 <td th:if="${item}!=null" >
                     <div class="row justify-content-center align-items-center">
                         <div class="col">
-                            <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 10px;"
+                            <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 5px;"
                                  th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
                                  onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
                         </div>
@@ -61,28 +61,40 @@
         </div>
     </table>
 
-    <table th:fragment="sideBarFileTable(files, input_id, form_id)">
+    <table th:fragment="sideBarFileTable(files)">
+        <tbody>
+        <tr th:each="file, stat: ${files}">
+            <td>
+                <div class="row justify-content-center align-items-center">
+                    <div class="col">
+                        <img src="/images/excel.png" style="width:50px; height:50px; border:1px solid mediumspringgreen; padding:4px;" class="box-hover"
+                             th:id="${file.name}" draggable="true" ondragstart="dragstart_handler(event)">
+                    </div>
+                    <div class="col">
+                        <a th:text="${file.name}" th:href="|@{${@spreadSheetUtils.getSpreadSheetURL(fileId)}(fileId=${file.id})}|"></a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table th:fragment="sideBarTemplateTable(files)">
         <thead>
-            <tr>
-                <th><img src="/images/template.png" style="width:30px; height:30px;">파일 목록</th>
-            </tr>
+        <tr>
+            <th><img src="/images/template.png" style="width:30px; height:30px;">템플릿 목록</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="file, stat: ${files}">
             <td>
                 <div class="row justify-content-center align-items-center">
                     <div class="col">
-                        <img src="/images/excel.png" style="width:50px; height:50px; border:1px solid mediumspringgreen; padding:10px;" class="img-hover"
-                             th:id="${file.name}"
-                             draggable="true" ondragstart="dragstart_handler(event)"
-                             th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-file-name="${file.name}"
-                             onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-file-name'), this.getAttribute('data-form-id'))">
+                        <img src="/images/excel.png" style="width:50px; height:50px; border:1px solid mediumspringgreen; padding:10px;" class="box-hover"
+                             th:id="${file.name}" draggable="true" ondragstart="dragstart_handler(event)">
                     </div>
                     <div class="col">
-                        <p th:text="${file.name}"></p>
-                    </div>
-                    <div class="col">
-                        <img src="/images/thumbnail.png" style="width:30px; height: 30px; border: 1px solid" th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))"></button>
+                        <a th:text="${file.name}" th:href="|@{${@spreadSheetUtils.getSpreadSheetURL(fileId)}(fileId=${file.id})}|">></a>
                     </div>
                 </div>
             </td>
@@ -101,7 +113,7 @@
                 <td>
                     <div class="row justify-content-center align-items-center">
                         <div class="col">
-                            <img src="/images/excel.png" style="width:100px; height:100px; border:1px solid mediumspringgreen; padding:10px;" class="img-hover"
+                            <img src="/images/excel.png" style="width:100px; height:100px; border:1px solid mediumspringgreen; padding:10px;" class="box-hover"
                                  th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-file-name="${file.name}"
                                  onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-file-name'), this.getAttribute('data-form-id'))">
                         </div>

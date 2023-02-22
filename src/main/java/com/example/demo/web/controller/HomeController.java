@@ -45,8 +45,7 @@ public class HomeController {
         model.addAttribute("memberId", member.getRandomUUID());
         try{
             List<EntityDTO> entityDTOList = entityRepository.findByMemberId(member.getId());
-            List<Entity> entityList = entityDTOList.stream()
-                    .map(entityDto -> new Entity(entityDto)).collect(Collectors.toList());
+            List<Entity> entityList = entityDTOList.stream().map(entityDto -> new Entity(entityDto)).collect(Collectors.toList());
             model.addAttribute("templates", entityList);
         } catch(Exception e){
             log.info("Exception occurred during transaction. Caused by={}", e);

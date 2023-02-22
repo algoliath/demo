@@ -1,12 +1,17 @@
 package com.example.demo.domain.database.model;
 
+import com.example.demo.domain.column.Column;
 import com.example.demo.domain.database.SQLOperator;
+import com.example.demo.domain.template.model.Entity;
+import com.example.demo.domain.template.model.Query;
+import com.example.demo.util.validation.QueryUtils;
 import lombok.Data;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -14,15 +19,11 @@ public class SQLBlockData {
 
     private Integer sqlBlockOrder;
     private Integer sqlDataOrder;
-    private String templateName;
-    private String templateAlias;
-    private List<String> targetColumns = new ArrayList<>();
-    private List<String> columns = new ArrayList<>();
-    private String operator;
-    private String operand;
+    private List<Query> queries = Arrays.asList();
     private SQLBlockType SQLBlockType;
 
     public SQLBlockData() {
+
 
     }
 
@@ -36,40 +37,34 @@ public class SQLBlockData {
         this.SQLBlockType = SQLBlockType;
     }
 
-
-    @Override
-    public String toString() {
-
-        if (SQLBlockType == null) {
-            return "MISSING";
+    public Query getQuery(int order){
+        if(order < 0 || order >= queries.size()){
+            throw new IllegalArgumentException(String.format("인덱스 범위는 %d과 %d 사이에 있어야 합니다", 0, queries.size()));
         }
+        return queries.get(order);
+    }
 
-        switch (SQLBlockType) {
-            case SELECT -> {
-                if (templateAlias != null) {
-                    return targetColumns.stream().map(column -> getTemplateAlias() + "." + column).collect(Collectors.joining(", "));
-                }
-                return targetColumns.stream().map(column -> templateName + "." + column).collect(Collectors.joining(", "));
-            }
-            case GROUP_BY -> {
-                return targetColumns.stream().collect(Collectors.joining(","));
-            }
-            case WHERE, HAVING -> {
-                if (templateAlias != null){
-                    return targetColumns.stream().map(column -> operator + "(" + templateName + ")").collect(Collectors.joining(" AND "));
-                }
-                return targetColumns.stream().filter(column -> SQLOperator.hasOperator(getOperator())).map(column -> getTemplateName() + "." + column + " " + SQLOperator.valueOf(operator).getSign() + " " + getOperand()).collect(Collectors.joining(" AND "));
-            }
-            case JOIN -> {
-                return targetColumns.stream().map(column -> templateName + "." + column).collect(Collectors.joining(""));
-            }
-            default -> {
-                return null;
-            }
+    public Optional<Query> getQuery(String templateName){
+        return queries.stream().filter(query -> query.getName().equals(templateName)).findAny();
+    }
+
+    public void addQuery(Query query){
+        queries.add(query);
+    }
+
+
+    public void deleteQuery(String queryName){
+        Optional<Query> targetOptional = queries.stream().filter(query -> query.getName().equals(queryName)).findAny();
+        if(!targetOptional.isEmpty()){
+            queries.remove(targetOptional.get());
         }
     }
 
-    public String getTargetColumn(int i) {
-        return targetColumns.get(i);
+    @Override
+    public String toString() {
+        if (SQLBlockType == null) {
+            return "MISSING";
+        }
+        return QueryUtils.convertSQLBlockData(queries, SQLBlockType);
     }
 }

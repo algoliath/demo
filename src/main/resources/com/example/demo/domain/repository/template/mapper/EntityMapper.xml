@@ -42,7 +42,25 @@
         select template.id, template.name, file_name, file_domain, template.member_id
         from entity
         join template on entity.id = template.id
-        where member_id = #{memberId}
+        <where>
+            <if test="memberId != null">
+                and member_id = #{memberId}
+            </if>
+        </where>
+    </select>
+
+    <select id="findByNameAndMemberId" parameterType="Long" resultType="EntityDTO">
+        select template.id, template.name, file_name, file_domain, template.member_id
+        from entity
+        join template on entity.id = template.id
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+            <if test="memberId != null">
+                and member_id = #{memberId}
+            </if>
+        </where>
     </select>
 
     <select id="findById" parameterType="Long" resultType="EntityDTO">

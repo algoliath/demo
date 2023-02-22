@@ -3,6 +3,7 @@ package com.example.demo.domain.repository.template.mapper;
 import com.example.demo.domain.data.dto.EntityDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,4 +28,10 @@ public interface EntityMapper {
     Optional<EntityDTO> findById(@Param("id") Long id);
 
     List<EntityDTO> findAll();
+
+//    @Select("select template.id, template.name, file_name, file_domain, template.member_id from entity" +
+//            " join template on entity.id = template.id" +
+//            " where name like concat('%', #{name}, '%') and member_id = #{memberId}")
+    List<EntityDTO> findByNameAndMemberId(String name, Long
+            memberId);
 }

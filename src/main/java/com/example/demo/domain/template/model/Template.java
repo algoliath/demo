@@ -17,6 +17,7 @@ public class Template {
     private Long id;
     private String uuid;
     private String name;
+    private String alias;
     private TemplateType templateType;
 
     public Template(){

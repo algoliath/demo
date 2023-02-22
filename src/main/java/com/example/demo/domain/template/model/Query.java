@@ -12,16 +12,13 @@ import java.util.List;
 public class Query extends Template{
 
     private String sheetTitle;
-    private SpreadSheetTable sheetTable;
+    private String operator;
+    private String operand;
     private String sourceId;
 
-    private List<Column> verticalColumns = new ArrayList<>();
-    private List<Column> horizontalColumns = new ArrayList<>();
-
-    public Query(QueryTemplateForm queryTemplateForm){
-        super(queryTemplateForm);
-        this.sheetTitle = queryTemplateForm.getSpreadSheetTitle();
-        this.sourceId = queryTemplateForm.getSourceId();
-    }
+    private List<Column> columns = new ArrayList<>();
+    private List<Column> targetColumns = new ArrayList<>();
+    private SpreadSheetTable sheetTable;
+    private Boolean isSubQuery;
 
 }

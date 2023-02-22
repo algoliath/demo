@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html th:replace="~{template/layout/templateLayout::layout(~{::section#add_template}, ~{::section#add_columns}, ~{::section#update_columns}, ~{::section#save_template})}"
       xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <body>
 <!-- ADD TEMPLATE FORM -->
+
 <section id="add_template">
     <!-- ADD TEMPLATE ATTRIBUTE -->
     <div class="template-form base pop-up">
@@ -32,7 +32,7 @@
     <!-- JOIN TEMPLATE FILE FORM -->
     <div class="template-form container border-white join pop-hide">
         <div class="container border-white" style="width:500px">
-            <div th:replace="~{/fragment/form::file-search-form(action=|/template/entity/search_entity/memberId|, table_id='join-section', form_id='join-file-search-form', anchor_class='template-form')}"></div>
+            <div th:replace="~{/fragment/form::file-search-form(action=|/template/search_templates/mainframe/memberId|, table_id='join-section', form_id='join-file-search-form', anchor_class='template-form')}"></div>
             <hr>
             <div id="join-section" th:insert="~{/fragment/frame::join_template(action=|/template/entity/join_template/memberId|, table_id='join-section', form_id='join-file-view-form')}"></div>
         </div>

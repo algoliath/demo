@@ -3,14 +3,13 @@ package com.example.demo.web.controller;
 import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.condition.options.OptionType;
 import com.example.demo.domain.column.property.condition.value.ForeignKey;
-import com.example.demo.domain.column.property.condition.value.ValueConditionType;
 import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.data.vo.SearchForm;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
 import com.example.demo.domain.data.dto.EntityDTO;
-import com.example.demo.domain.data.vo.EntityVO;
+import com.example.demo.domain.data.vo.EntityForm;
 import com.example.demo.domain.template.form.TemplateForm;
 import com.example.demo.domain.template.model.Template;
 import com.example.demo.domain.template.type.TemplateType;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,7 +45,6 @@ import java.util.*;
 import static com.example.demo.domain.source.datasource.DataSource.*;
 import static com.example.demo.util.controller.ControllerUtils.*;
 import static com.example.demo.util.datasource.SpreadSheetUtils.getEmbeddableSpreadSheetURL;
-import static com.example.demo.domain.validation.ErrorConst.*;
 
 @Slf4j
 @Controller
@@ -83,12 +80,12 @@ public class EntityController {
         paramSource.add(PATTERN_MATCHER, "contains");
 
         List<File> files = spreadSheetSource.getFiles(paramSource);
-        List<EntityVO> entityVOList = new ArrayList<>();
+        List<EntityForm> entityFormList = new ArrayList<>();
         for (File file : files) {
-            entityVOList.add(new EntityVO(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
+            entityFormList.add(new EntityForm(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
         }
 
-        model.addAttribute("files", entityVOList);
+        model.addAttribute("files", entityFormList);
         saveEntityPostModelAttributes(model, templateFormProvider.getEntityTemplateForm(memberId));
         return "/template/entity/add::#" + fragment;
     }
@@ -136,7 +133,6 @@ public class EntityController {
 
         List<Template> templateResultSet = templateService.findTemplatesByName(templateName);
         Entity entity = (Entity) templateResultSet.get(0);
-        entity.setColumns(templateService.findColumnsByTemplateId(entity.getId()));
 
         SpreadSheetSource spreadSheetSource = new SpreadSheetSource(fileId);
         spreadSheetSource = new SpreadSheetSource(loginMember.getFileId());
@@ -388,6 +384,7 @@ public class EntityController {
         model.addAttribute("joinConditionSaveForm", conditionSaveForm);
         return "fragment/form::#edit-column";
     }
+
 
     @PostMapping("/add_condition/{memberId}")
     public String addCondition(@ModelAttribute("conditionSaveForm") ConditionSaveForm conditionSaveForm, BindingResult bindingResult,

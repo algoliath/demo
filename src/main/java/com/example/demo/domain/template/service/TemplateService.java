@@ -26,4 +26,5 @@ public interface TemplateService {
 
     List<Template> findTemplatesByName(String templateName);
 
+    List<Template> findTemplatesByNameAndMemberId(String templateName, Long memberId);
 }

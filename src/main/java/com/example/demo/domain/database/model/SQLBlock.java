@@ -52,5 +52,12 @@ public class SQLBlock {
         dataHolder.set(dataOrder, sqlBlockData);
     }
 
+    public void removeData(int sqlDataOrder) {
+        dataHolder.remove(sqlDataOrder);
+    }
+
+    public SQLBlockData getSQLBlockData(int sqlBlockDataOrder){
+        return dataHolder.get(sqlBlockDataOrder);
+    }
 
 }

@@ -5,17 +5,17 @@
     <title>Title</title>
 </head>
 <body>
-      <div th:fragment="sidebar" class="d-flex d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="position: fixed; width: 300px; height: 100vh;">
+      <div th:fragment="sidebar" class="d-flex d-flex flex-column flex-shrink-0 p-3 text-white bg-dark overflow-auto" style="position: fixed; width: 300px; height: 100vh;">
         <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
           <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
           <span class="fs-4">EasyToDataBase</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto accordion">
-          <li class="nav-item accordion-item" style="border: none">
-            <h2 class="accordion-header bg-dark" id="panelsStayOpen-headingOne">
+          <li class="nav-item accordion-item bg-dark" style="border: none">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
               <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                 Google Driver
+                <img src="/images/drive.png" width="30" height="30" class="d-inline-block">Google Driver
               </button>
               <!--<a th:href="|/template/add_template/${memberId}|" class="nav-link active" aria-current="page">-->
               <!--<svg class="bi me-2" width="16" height="16"></svg>-->
@@ -24,11 +24,30 @@
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
               <div class="accordion-body bg-dark">
                 <div class="sidebar">
-                  <img src="/images/drive.png" width="40" height="40" class="d-inline-block"><a>Google Drive</a>
                   <hr>
-                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_file/${memberId}|, table_id='sidebar-join-section', form_id='drive-search-form', anchor_class='sidebar')}"></div>
+                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_file/${memberId}|, table_id='sidebar-google-drive-section', form_id='drive-search-form', anchor_class='sidebar')}"></div>
                   <br>
-                  <div id="sidebar-join-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${files}, action=|/template/search_file/${memberId}|, table_id='sidebar-join-section', form_id='drive-file-form')}"></div>
+                  <div id="sidebar-google-drive-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${files})}"></div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item accordion-item bg-dark" style="border: none">
+            <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+              <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                <img src="/images/sheet.png" width="30" height="30" class="d-inline-block">Template Repository
+              </button>
+              <!--<a th:href="|/template/add_template/${memberId}|" class="nav-link active" aria-current="page">-->
+              <!--<svg class="bi me-2" width="16" height="16"></svg>-->
+              <!--</a>-->
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
+              <div class="accordion-body bg-dark">
+                <div class="sidebar">
+                  <hr>
+                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_templates/sidebar/${memberId}|, table_id='sidebar-entity-view-section', form_id='sidebar-entity-repo-search-form')}"></div>
+                  <br>
+                  <div id="sidebar-entity-view-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${templates})}"></div>
                 </div>
               </div>
             </div>

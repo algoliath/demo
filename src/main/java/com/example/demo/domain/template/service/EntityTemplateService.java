@@ -67,9 +67,28 @@ public class EntityTemplateService implements TemplateService {
     public List<Template> findTemplatesByName(String templateName) {
         List<Template> templates = new ArrayList<>();
         if(StringUtils.hasText(templateName)){
-            List<EntityDTO> entities = entityRepository.findByName("%" + templateName + "%");
+            List<EntityDTO> entities = entityRepository.findByName(templateName);
             for(EntityDTO entityDTO : entities){
                 Entity entity = new Entity(entityDTO);
+                for (Column column : findColumnsByTemplateId(entity.getId())) {
+                     entity.addColumn(column);
+                }
+                templates.add(entity);
+            }
+        }
+        return templates;
+    }
+
+    @Transactional
+    public List<Template> findTemplatesByNameAndMemberId(String templateName, Long memberId) {
+        List<Template> templates = new ArrayList<>();
+        if(StringUtils.hasText(templateName)){
+            List<EntityDTO> entities = entityRepository.findByNameAndMemberId(templateName, memberId);
+            for(EntityDTO entityDTO : entities){
+                Entity entity = new Entity(entityDTO);
+                for (Column column : findColumnsByTemplateId(entity.getId())) {
+                    entity.addColumn(column);
+                }
                 templates.add(entity);
             }
         }

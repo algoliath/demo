@@ -8,7 +8,9 @@
     <link th:href="@{/css/sidebars.css}" rel="stylesheet">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sidebars/">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet"><script src="https://code.jquery.com/jquery-3.6.1.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
@@ -55,7 +57,6 @@
         }
         function ajax_form(form_id, form_url, method = "post", table_id = "", content_type='application/x-www-form-urlencoded;charset=UTF-8', message="success") {
             console.log(form_id, form_url, method, table_id, content_type);
-
             $.ajax({
                 type: method,
                 url: form_url,
@@ -117,7 +118,7 @@
             console.log('target:' + event.target);
             const data = event.dataTransfer.getData("text/plain");
             console.log('data:'+data);
-            submit_value_form('file-name', data, 'drag-template-form');
+            submit_value_form('file-name', data, 'drag-file-form');
         }
     </script>
     <style>
@@ -164,19 +165,19 @@
             </div>
             <div class="d-flex justify-content-evenly" style="flex-flow: row-reverse" ondragover="dragover_handler(event)" ondragend="dragend_handler(event)" ondrop="drop_handler(event)">
                 <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}">
-                    <img src="/images/plus.png" id="drop-box" class="img-hover" width="30" height="30" th:text="#{add.template}">
+                    <img src="/images/plus.png" id="drop-box" class="box-hover" width="30" height="30" th:text="#{add.template}">
                 </a>
-                <a>
-                    <img src="/images/logout.png" class="img-hover" width="30" height="30" th:text="#{logout}" onclick="location.href='home.html'" th:onclick="|location.href='@{/logout}'|"></img>
+                <a th:href="@{/logout}">
+                    <img src="/images/logout.png" class="box-hover" width="30" height="30" th:text="#{logout}" onclick="location.href='home.html'">
                 </a>
             </div>
-            <form id="drag-template-form" th:action="|template/entity/add_entity/${memberId}|" method="post" th:object="${searchForm}">
+            <form id="drag-file-form" th:action="|template/entity/add_entity/${memberId}|" method="post" th:object="${searchForm}">
                 <input type="hidden" id="file-name" name="name">
             </form>
             <hr>
             <br>
             <br>
-            <form id="search-form" th:action="|template/entity/search_entity/${memberId}|" th:object="${searchForm}"
+            <form id="search-form" th:action="|template/search_templates/mainframe/${memberId}|" th:object="${searchForm}"
                   onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method='get', table_id='join-section');">
                 <div class="flex-box-center">
                     <!-- search form -->
