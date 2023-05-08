@@ -6,7 +6,7 @@
     <title>Title<</title>
     <meta name="description">
     <meta charset="utf-8">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@600;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;300&display=swap" rel="stylesheet">
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
@@ -58,7 +58,7 @@
         .header-collapse{
             border-bottom: 2px groove var(--border-line-color);
             border-radius: 20px;
-            background-color: lightsteelblue;
+            background-color: mediumspringgreen;
             padding: 5px;
             color: white;
             transition: 1s;
@@ -67,18 +67,17 @@
             font-weight: bold;
             color: red;
         }
-
     </style>
 </head>
 
 <body>
 <div class="container" style="background-color: white; width: 600px; border-radius: 20px;">
     <div class="py-5 text-center" style="margin-top: 150px; display:flex; justify-content: center; align-items: center">
-        <img src="/images/sheet.png" alt="missing">
+        <img src="/images/sheet.png" alt="missing" style="width: 100px; height: 80px">
         <h3 style="color:black; font-weight: lighter;;font-size: 40px;">FileBase</h3>
 <!--        <div th:replace="~{/fragment/table::bootstrap}"></div>-->
     </div>
-    <div class="container border border-3 border-dark" style="border-radius: 20px;">
+    <div class="container border border-3 border-dark shadow-lg" style="border-radius: 20px;">
         <div class="row" style="border-radius: 20px; background-color: var(--border-line-color); padding:unset;">
             <div class="col p-0">
                 <div class="login header header-show" style="border: none;" role="button" onclick="toggle_classes('login.header','registry.header','login.container','registry.container')">로그인</div>

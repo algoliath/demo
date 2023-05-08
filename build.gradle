@@ -41,6 +41,7 @@ dependencies{
     // https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper
 	implementation group: 'com.github.pagehelper', name: 'pagehelper', version: '5.0.1'
 	implementation group: 'org.bgee.log4jdbc-log4j2', name:'log4jdbc-log4j2-jdbc4.1', version: '1.16'
+	implementation 'com.github.jsqlparser:jsqlparser:4.1'
 
 	runtimeOnly 'com.h2database:h2'
 	compileOnly 'org.projectlombok:lombok'
