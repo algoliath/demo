@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <div class="w container" th:each="column, columnStat:${columns}">
+    <div class="container" th:each="column, columnStat:${columns}">
         <div class="row">
             <div class="col">
                 <div>
@@ -306,16 +306,16 @@
                 </div>
                 <br>
                 <div>
-                    <h6 th:if="${!#lists.isEmpty(column.valConditions)}">등록된 키-값 조건</h6>
-                    <hr th:if="${!#lists.isEmpty(column.valConditions)}">
-                    <div th:each="valueCondition, substat: ${column.valConditions}">
+                    <h6 th:if="${!#lists.isEmpty(column.getValueConditions)}">등록된 키-값 조건</h6>
+                    <hr th:if="${!#lists.isEmpty(column.getValueConditions)}">
+                    <div th:each="valueCondition, substat: ${column.getValueConditions}">
                         <div class="row">
                             <div class="col">
                                 <label for="val_condition_type" th:text="#{column.valueConditionType}"></label>
-                                <input id="val_condition_type" th:name="valueConditionType" th:value="${column.valConditions[__${substat.index}__].conditionType}" class="form-control-sm">
+                                <input id="val_condition_type" th:name="valueConditionType" th:value="${column.getValueConditions[__${substat.index}__].conditionType}" class="form-control-sm">
                                 <br>
                                 <label for="val_condition_term" th:text="#{column.valueConditionTerm}"></label>
-                                <input id="val_condition_term" th:name="conditionTerm" th:value="${column.valConditions[__${substat.index}__].conditionTerm.argument}" class="form-control-sm">
+                                <input id="val_condition_term" th:name="conditionTerm" th:value="${column.getValueConditions[__${substat.index}__].conditionTerm.argument}" class="form-control-sm">
                             </div>
                         </div>
                     </div>

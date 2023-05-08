@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,17 +33,10 @@ class SpreadSheetSourceTest {
     private MemberRepository memberRepository;
     @Autowired
     private ColumnTypeConverter columnTypeConverter;
-
     private SpreadSheetSource spreadSheetSource;
     private Source<String> paramSource;
-    private Member member;
     private List<List<Object>> tableElements;
-
-    @TestConfiguration
-    static class config{
-
-
-    }
+    private Member member;
 
     @BeforeEach
     void setup(){
@@ -75,8 +67,8 @@ class SpreadSheetSourceTest {
         SpreadSheetTable table = new SpreadSheetTable((String) paramSource.get("spreadSheetRange").get(), tableElements);
         String key1 = String.valueOf(tableElements.get(0).get(0));
         String key2 = String.valueOf(tableElements.get(0).get(1));
-        ColumnType columnType1 = columnTypeConverter.getType(table.getColumn(key1, false));
-        ColumnType columnType2 = columnTypeConverter.getType(table.getColumn(key2, false));
+        ColumnType columnType1 = columnTypeConverter.getType(table.getColumnValues(key1, false));
+        ColumnType columnType2 = columnTypeConverter.getType(table.getColumnValues(key2, false));
         assertThat(columnType1).isEqualTo(ColumnType.CHARACTER);
         assertThat(columnType2).isEqualTo(ColumnType.CHARACTER);
     }
@@ -96,7 +88,7 @@ class SpreadSheetSourceTest {
 
 
     @Test
-    void updateSource(){
+    void updateFile(){
         List<List<Object>> values = new ArrayList<>();
         values.add(Arrays.asList("1","2","3","4"));
         values.add(Arrays.asList("2","3","4","5"));

@@ -4,200 +4,116 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;600&display=swap" rel="stylesheet">
+
     <!-- Custom styles for this template -->
-    <link th:href="@{/css/sidebars.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/table.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebars.css}">
+    <link rel="stylesheet" th:href="@{/css/templateLayout.css}">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sidebars/">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet"><script src="https://code.jquery.com/jquery-3.6.1.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
     <script th:src="@{/js/sidebars.js}"></script>
-    <!-- sync form -->
-    <script>
-        function submit_value_form(input_id, value, form_id){
-            insert_by_id(input_id, value);
-            submit_form(form_id);
-        }
-        function submit_form(form_id) {
-            console.log(form_id);
-            $('#' + form_id).submit();
-        }
-        function insert_by_id(input_id, value){
-            $('#' + input_id).val(value);
-        }
-    </script>
-    <script>
-
-    function toggle_popup(anchorClass, targetClass){
-        let containers = $('.' + anchorClass);
-        if(containers.length == 0){
-            console.log("invalid input: input size of 0");
-            return;
-        }
-        containers.each(function(index, element){
-            if($(element).hasClass(targetClass) && $(element).css('display')=='none'){
-                $(element).toggle('slow');
-                $(element).removeClass('pop-hide');
-                $(element).addClass('pop-up');
-            }
-            else if(!$(element).hasClass(targetClass) && $(element).css('display')!='none') {
-                $(element).toggle('slow');
-                $(element).removeClass('pop-up');
-                $(element).addClass('pop-hide');
-            }
-        });
-    }
-</script>
-    <script th:inline="javascript">
-        function submit_by_form_id(form_id) {
-            $('#' + form_id).submit();
-        }
-        function ajax_form(form_id, form_url, method = "post", table_id = "", content_type='application/x-www-form-urlencoded;charset=UTF-8', message="success") {
-            console.log(form_id, form_url, method, table_id, content_type);
-            $.ajax({
-                type: method,
-                url: form_url,
-                data: $('#'+form_id).serialize(),
-                contentType: content_type,
-                success: function () {
-                    console.log(message);
-                }
-            }).done(function(fragment) {
-                console.log('fragment=' + fragment);
-                if (!table_id) {
-                    table_id = form_id;
-                }
-                console.log('table_id=' + table_id);
-                $('#'+table_id).replaceWith(fragment);
-            });
-            return false;
-        }
-        <!-- async form -->
-        function json_ajax_form(form_id){
-            const memberId = [[${memberId}]];
-            const data = $('#' + form_id).serializeArray();
-            const form_data = data.reduce(function(json, {name, value}){json[name] = value; return json;}, {})
-            console.log(data);
-            console.log(JSON.stringify(data));
-            $.ajax({
-                type: "post",
-                url: "/template/search_entity/" + memberId,
-                data: JSON.stringify(form_data),
-                contentType: "application/json",
-                success: function(){
-                    console.log('ajax form post success');
-                }
-            }).done(function(fragment) {
-                console.log(fragment);
-                $('#templateTable').replaceWith(fragment);
-            });
-            return false;
-        }
-    </script>
-    <script>
-        function dragstart_handler(event) {
-            // Add the target element's id to the data transfer object
-            event.dataTransfer.setData("text/plain", event.target.id);
-            const data = event.dataTransfer.getData("text/plain");
-            console.log('data:'+data);
-            event.dataTransfer.effectAllowed = "move";
-        }
-        function dragover_handler(event) {
-            event.preventDefault();
-            console.log('target:' + event.target);
-            event.dataTransfer.dropEffect = "move";
-        }
-        function dragend_handler(event) {
-            event.preventDefault();
-        }
-        function drop_handler(event) {
-            event.preventDefault();
-            console.log('target:' + event.target);
-            const data = event.dataTransfer.getData("text/plain");
-            console.log('data:'+data);
-            submit_value_form('file-name', data, 'drag-file-form');
-        }
-    </script>
+    <script th:src="@{/js/form.js}"></script>
+    <script th:src="@{/js/tools.js}"></script>
     <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
+
+        textarea {
+            border: 3px solid;
         }
+
+        #sidebar .accordion-button {
+            background-color: aquamarine !important;
+            color: black !important;
+            font-weight: 300;
+        }
+
+        #sidebar .accordion-body {
+            background-color: aquamarine !important;
+            color: black !important;
+        }
+
+        #sidebar .accordion-item {
+            background-color: aquamarine !important;
+            padding: 10px;
+        }
+
         @media (min-width: 768px) {
             .bd-placeholder-img-lg {
                 font-size: 3.5rem;
             }
         }
+
     </style>
     <style>
-        .container{
-            width: 300px;
-        }
-        .flex-box-center{
+        .flex-box-center {
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        .pop-up{
-            display:block;
-        }
-        .pop-hide{
-            display:none;
         }
     </style>
 </head>
 <body>
 <div class="row">
-   <div class="col-3 container">
-       <div th:insert="~{fragment/sidebar::sidebar}"></div>
-   </div>
-   <div class="col container" style="height: 800px; border-radius: 20px;">
-        <div class="container border-white" style="width: 1200px">
-            <div class="d-flex py-5 text-center outline" style="margin-top:70px; justify-content: center; align-items: center;">
-                <h3 style="color: black; font-weight: lighter; font-size: 40px;">EasyToDataBase</h3>
-                <img src="/images/template.png" width="70px" height="70px">
+    <div class="col-1 container p-0 w-25">
+        <div th:insert="~{fragment/sidebar::sidebar}"></div>
+    </div>
+    <div class="col container border-white">
+        <div class="container border-white" style="width: 1000px;">
+            <div class="d-flex justify-content-lg-center align-items-lg-center py-3 text-center outline">
+                <img src="/images/sheet.png" width="70px" height="70px">
+                <h3 style="color: black; font-weight: lighter; font-size: 40px;">FileBase</h3>
             </div>
-            <div class="d-flex justify-content-evenly" style="flex-flow: row-reverse" ondragover="dragover_handler(event)" ondragend="dragend_handler(event)" ondrop="drop_handler(event)">
-                <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}">
-                    <img src="/images/plus.png" id="drop-box" class="box-hover" width="30" height="30" th:text="#{add.template}">
-                </a>
-                <a th:href="@{/logout}">
-                    <img src="/images/logout.png" class="box-hover" width="30" height="30" th:text="#{logout}" onclick="location.href='home.html'">
-                </a>
+            <div class="d-flex justify-content-md-evenly align-items-lg-center py-3 text-center outline"
+                 form-id='drop-file-form' input-id="template-name"
+                 ondragover="dragover_handler(event)" ondragend="dragend_handler(event)"
+                 ondrop="drop_handler(event)">
+                <div class="drop-box form-control">
+                    <a th:href="@{/template/add_template/${memberId}(memberId=${memberId})}"></a>
+                    <img src="/images/plus.png" id="drop-box-icon" class="box-hover" th:text="#{add.template}"
+                         width="35" height="35">
+                </div>
+                <div class="drop-box form-control" style="margin-left: 550px;">
+                    <img src="/images/logout.png" class="box-hover" width="30" height="30"
+                         th:onclick="|location.href=@{/logout}|">
+                    <a class="mt-3" th:href="@{/logout}" th:text="#{logout}"></a>
+                </div>
+                <form id="drop-file-form" th:action="|template/entity/load_file/${memberId}|" method="post"
+                      th:object="${entitySearchForm}">
+                    <input type="hidden" id="template-name" name="name">
+                </form>
             </div>
-            <form id="drag-file-form" th:action="|template/entity/add_entity/${memberId}|" method="post" th:object="${searchForm}">
-                <input type="hidden" id="file-name" name="name">
-            </form>
             <hr>
-            <br>
-            <br>
-            <form id="search-form" th:action="|template/search_templates/mainframe/${memberId}|" th:object="${searchForm}"
+            <form id="search-form" class="mt-5" th:action="|template/search_templates/mainframe/${memberId}|"
+                  th:object="${entitySearchForm}"
                   onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method='get', table_id='join-section');">
                 <div class="flex-box-center">
                     <!-- search form -->
-                    <input class="search_input" name="name" oninput="submit_by_form_id('search-form')" th:placeholder="#{required.template.name}" style="width:350px; height:40px; border-radius:5px;">
+                    <input class="search_input" name="name" oninput="submit_form('search-form')"
+                           th:placeholder="#{required.template.name}"
+                           style="width:350px; height:40px; border-radius:5px;">
                     <input type="hidden" name="fragment" value="join-section">
-                    <button type="submit" style="background-color:white;"><img src="/images/search.gif" style="width:25px;" alt="missing"></button>
+                    <button type="submit" style="background-color:white;"><img src="/images/search.gif"
+                                                                               style="width:25px;"
+                                                                               alt="missing">
+                    </button>
                 </div>
             </form>
-            <br>
-            <br>
             <!-- search result table -->
-            <div class="container" style="width: 400px;">
-                <div class="flex-box-center">
+            <div class="container border-white" style="width: 400px;">
+                <div class="m-auto bg-gradient">
                     <div id="join-section"></div>
                 </div>
             </div>
         </div>
-        <br>
-        <br>
-        <br>
     </div>
 </div>
 </body>

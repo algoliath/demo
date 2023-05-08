@@ -1,8 +1,8 @@
 package com.example.demo.util.template;
 
-import com.example.demo.domain.template.form.EntityTemplateForm;
-import com.example.demo.domain.template.form.QueryTemplateForm;
-import com.example.demo.domain.template.form.TemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.query.QueryTemplateForm;
+import com.example.demo.domain.data.vo.template.TemplateForm;
 import com.example.demo.domain.template.type.TemplateType;
 import org.springframework.stereotype.Component;
 

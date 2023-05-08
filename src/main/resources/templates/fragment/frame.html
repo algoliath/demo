@@ -1,13 +1,32 @@
 <div th:fragment="search_template(action, form_id, table_id)">
-    <div class="container" style="width: 500px;">
+    <div class="container">
         <form th:replace="~{/fragment/form::file-view-form(files=${files}, action=${action}, form_id=${form_id}, table_id=${table_id})}"></form>
     </div>
 </div>
 
-<div th:fragment="join_template(action, form_id, table_id)">
-    <div class="container" style="width: 400px">
-        <div th:replace="~{/fragment/form::template-view-form(templates=${templates}, action=${action}, form_id=${form_id}, table_id=${table_id})}"></div>
+<div th:fragment="join_template(action, form_id, table_id, index)">
+    <div class="d-flex justify-content-start" style="flex-flow: row-reverse">
+        <div contenteditable="true" class="form-control"
+             style="width: 300px; height: 100px; border: 2px solid"
+             ondragover="dragover_handler(event)" ondragend="dragend_handler(event)"
+             ondrop="drop_handler(event)"
+             th:form-id="${form_id}"
+             th:input-id="|template-name${index}|">
+            <img src="/images/template.png" width="50" height="50" alt="template icon">
+            <span><img src="/images/img.png" width="30" height="30" th:text="#{add.template}"></span>
+        </div>
     </div>
+    <form th:id="${form_id}"
+          th:action="${action}" method="post"
+          th:object="${joinConditionSaveForm}"
+          th:data-table="${table_id}"
+          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+        <input type="hidden" th:id="|template-name${index}|" name="templateName">
+        <input type="hidden" name="columnName" th:value="${column.name}">
+    </form>
+<!--    <div class="container" style="width: 400px">-->
+<!--        <div th:replace="~{/fragment/form::template-view-form(templates=${templates}, action=${action}, form_id=${form_id}, table_id=${table_id})}"></div>-->
+<!--    </div>-->
 </div>
 
 <div th:fragment="view_template(sourceId)">
@@ -18,3 +37,5 @@
     </div>
 </div>
 
+<div th:fragment="view_query(templates, action, form_id, table_id)">
+</div>

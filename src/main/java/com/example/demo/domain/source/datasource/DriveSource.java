@@ -2,7 +2,7 @@ package com.example.demo.domain.source.datasource;
 import com.example.demo.util.Source;
 import com.example.demo.domain.source.datasource.wrapper.MimeTypes;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
-import com.example.demo.util.datasource.connection.DriveConnection;
+import com.example.demo.domain.source.datasource.connection.DriveConnection;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.*;
 import lombok.extern.slf4j.Slf4j;

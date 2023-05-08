@@ -9,12 +9,14 @@ import lombok.Setter;
 @Setter
 public class ForeignKey extends ValueCondition {
 
-    private final OptionType updateType;
-    private final OptionType deleteType;
+    private final String referenceColumn;
+    private final OptionType updateMode;
+    private final OptionType deleteMode;
 
-    public ForeignKey(String referenceTarget, OptionType updateType, OptionType deleteType){
+    public ForeignKey(String referenceTarget, String referenceColumn, OptionType updateMode, OptionType deleteMode){
         super(ValueConditionType.FOREIGN_KEY, new ValueConditionTerm(referenceTarget));
-        this.updateType = updateType;
-        this.deleteType = deleteType;
+        this.referenceColumn = referenceColumn;
+        this.updateMode = updateMode;
+        this.deleteMode = deleteMode;
     }
 }

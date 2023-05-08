@@ -1,13 +1,10 @@
 package com.example.demo.domain.template.model;
 
-import com.example.demo.domain.column.Column;
-import com.example.demo.domain.template.form.TemplateForm;
+import com.example.demo.domain.data.vo.template.TemplateForm;
 import com.example.demo.domain.template.type.TemplateType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Data

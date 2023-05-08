@@ -59,9 +59,9 @@ public class MyBatisEntityRepository implements EntityRepository {
     }
 
     @Override
-    public List<EntityDTO> findByNameAndMemberId(String name, Long memberId) {
-        log.info("[List<Template>]:{}", entityMapper.findByNameAndMemberId(name, memberId));
-        return entityMapper.findByNameAndMemberId(name, memberId);
+    public List<EntityDTO> searchByCond(String name, Long memberId) {
+        log.info("[List<Template>]:{}", entityMapper.searchByCond(name, memberId));
+        return entityMapper.searchByCond(name, memberId);
     }
 
     @Override

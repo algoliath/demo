@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="query-column">
+    <div class="row">
+        <div class="col container border-2 border-dark">
+            <div style="height: 100px;">
+                <form id="add-sub-query-form" th:action="|/template/query/add_sub_query/${memberId}|" method="post"
+                      th:object="${queryBlockForm}" th:data-table-id="query-column"
+                      onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table-id'))">
+                      <span class="invisible" th:each="block, stat: ${template.queryBuilderForm.queryBlockList}">
+                           <input type="checkbox" class="form-check-input" th:field="*{indices}"
+                                  th:value="${stat.index}">
+                           <label th:for="${#ids.prev('indices')}" class="form-check-label"
+                                  th:text="${stat.index}"></label>
+                      </span>
+                </form>
+                <form id="block-add-form-default" th:action="|/template/query/add_block/${memberId}|"
+                      th:object="${queryBlockForm}" th:data-table="query-column" method="get"
+                      onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                    <input type="hidden" name="order" value="0">
+                </form>
+            </div>
+            <br>
+            <br>
+            <img style="width:40px; height: 40px;" src="/images/plus.png" data-form-id="block-add-form0"
+                 onclick="submit_form('block-add-form-default')"
+                 th:if="${#lists.isEmpty(template.queryBuilderForm.queryBlockList)}">
+            <div th:id="|toggle-block${stat.index}|" th:each="block, stat: ${template.queryBuilderForm.queryBlockList}">
+                <div class="d-inline-flex">
+                    <div class="form-group">
+                        <input type="checkbox" class="form-check-input" th:data-check-form-id="|indices${stat.index+1}|"
+                               onclick="toggle_checkbox(this.getAttribute('data-check-form-id'))" th:value="${stat}">
+                        <label th:for="${#ids.next('columns')}" class="form-check-label">서브쿼리 포함</label>
+                    </div>
+                    <div class="img-fluid">
+                        <img style="width:40px; height: 40px;" src="/images/plus.png"
+                             th:data-form-id="|block-add-form${stat.index}|"
+                             onclick="submit_form(this.getAttribute('data-form-id'))">
+                        <img style="width:40px; height: 40px;" src="/images/minus.png"
+                             th:data-form-id="|block-delete-form${stat.index}|"
+                             th:data-toggle-id="|toggle-block${stat.index}|"
+                             onclick="onHandleToggle(this.getAttribute('data-toggle-id'), this.getAttribute('data-form-id'))">
+                    </div>
+                </div>
+                <div class="row">
+                    <form th:id="|block-add-form${stat.index}|"
+                          th:action="|/template/query/add_block/${memberId}|" th:object="${queryBlockForm}"
+                          th:data-table="query-column" method="get"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                    </form>
+                    <form th:id="|block-delete-form${stat.index}|"
+                          th:action="|/template/query/delete_block/${memberId}|" th:object="${queryBlockForm}"
+                          th:data-table="query-column" method="get"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                    </form>
+                    <form th:id="|block-edit-form${stat.index}|"
+                          th:action="|/template/query/edit_block/${memberId}|" th:object="${queryBlockForm}"
+                          th:data-table="query-column" method="post"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                        <input type="hidden" th:id="|sql-block-type${stat.index}|" name="sqlBlockType">
+                    </form>
+                    <form th:id="|block-convert-form${stat.index}|"
+                          th:action="|/template/query/convert_block/${memberId}|" th:object="${queryBlockForm}"
+                          th:data-table="query-column" method="post"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                        <input type="hidden" th:id="|convert-sql-block-type${stat.index}|" name="sqlBlockType"
+                               th:value="${block.sqlBlockType}">
+                    </form>
+                    <form id="data-add-form-default" th:action="|/template/query/add_data/${memberId}|"
+                          th:object="${queryBlockForm}" th:data-table="query-column" method="get"
+                          onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                        <input type="hidden" name="sqlBlockOrder" th:value="${block.order}">
+                        <input type="hidden" name="sqlDataOrder" value="0">
+                    </form>
+                    <div class="col container border-0">
+                        <div th:if="${#lists.isEmpty(block.dataHolder)}">
+                            <img style="width:40px; height: 40px;" src="/images/plus.png"
+                                 th:data-form-id="|data-add-form${stat.index}-0|"
+                                 onclick="submit_form(this.getAttribute('data-form-id'))">
+                        </div>
+                        <div class="col container border border-dark rounded-3 ui-widget-shadow">
+                            <div th:each="data, substat: ${block.dataHolder}">
+                                <div class="d-flex justify-content-start" style="flex-flow: row-reverse">
+                                    <div contenteditable="true" class="form-control"
+                                         style="width: 300px; height: 100px; border: 2px solid"
+                                         ondragover="dragover_handler(event)" ondragend="dragend_handler(event)"
+                                         ondrop="drop_handler(event)"
+                                         th:form-id="|drop-file-form${stat.index}-${substat.index}|"
+                                         th:input-id="|template-name${stat.index}-${substat.index}|">
+                                        <img src="/images/template.png" width="50" height="50" alt="template icon">
+                                        <span><img src="/images/img.png" width="30" height="30"
+                                                   th:text="#{add.template}"></span>
+                                    </div>
+                                </div>
+                                <form th:id="|drop-file-form${stat.index}-${substat.index}|"
+                                      th:action="|/template/query/add_template/${memberId}|" method="post"
+                                      th:object="${queryBlockForm}"
+                                      data-table="query-column"
+                                      onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                                    <input type="hidden" th:id="|template-name${stat.index}-${substat.index}|"
+                                           name="templateName">
+                                    <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                                    <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+                                </form>
+                                <form th:id="|data-add-form${stat.index}-${substat.index}|"
+                                      th:action="|/template/query/add_query_data/${memberId}|" method="get"
+                                      th:object="${queryBlockForm}" th:data-table="query-column"
+                                      onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                                    <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                                    <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+                                </form>
+                                <form th:id="|data-delete-form${stat.index}-${substat.index}|"
+                                      th:action="|/template/query/delete_query_data/${memberId}|"
+                                      th:object="${queryBlockForm}" th:data-table="query-column" method="get"
+                                      onsubmit="return ajax_form(this.getAttribute('id'), this.getAttribute('action'), this.getAttribute('method'), this.getAttribute('data-table'))">
+                                    <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                                    <input type="hidden" name="sqlDataOrder" th:value="${substat.index}">
+                                </form>
+                                <div class="img-group">
+                                    <img style="width:40px; height: 40px;" src="/images/plus.png"
+                                         th:data-form-id="|data-add-form${stat.index}-${substat.index}|"
+                                         onclick="submit_form(this.getAttribute('data-form-id'))">
+                                    <img style="width:40px; height: 40px;" src="/images/minus.png"
+                                         th:data-form-id="|data-delete-form${stat.index}-${substat.index}|"
+                                         onclick="submit_form(this.getAttribute('data-form-id'))">
+                                </div>
+                                <div class="form-group mt-2"
+                                     th:with="form_id=|query-column-form-${stat.index}-${substat.index}|">
+                                    <div th:each="query, querystat:${data.queries}">
+                                        <div th:if="${query}!=null">
+                                            <div class="border rounded-2 border-3 border-dark shadow-lg">
+                                                <img src="/images/template.png"
+                                                     style="width:50px; height:50px; border: 3px solid;"
+                                                     th:onclick="|location.href=@{/template/{memberId}/{templateId}(memberId=${memberId})}|">
+                                                <img src="/images/remove.gif" width="60" height="50"
+                                                     th:onclick="|location.href=@{/template/query/delete_template/{memberId}(memberId=${memberId})}|">
+                                                <form th:id="query-add-column-form" method="post"
+                                                      th:action="|/template/query/add_column_form/${memberId}|"
+                                                      th:object="${queryBlockForm}"
+                                                      th:data-table="query-column"
+                                                      onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+                                                    <input type="hidden" name="templateName" th:value="${query.name}">
+                                                    <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                                                    <input type="hidden" name="sqlDataOrder"
+                                                           th:value="${substat.index}">
+                                                    <input type="hidden" name="queryOrder"
+                                                           th:value="${querystat.index}">
+                                                    <button class="btn btn-primary">칼럼추가</button>
+                                                </form>
+                                                <form th:id="${form_id}" method="post"
+                                                      th:action="|/template/query/update_columns/${memberId}|"
+                                                      th:object="${queryBlockForm}"
+                                                      th:data-table="query-column"
+                                                      onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id=this.getAttribute('data-table'));">
+                                                    <input type="hidden" name="templateName" th:value="${query.name}">
+                                                    <input type="hidden" name="sqlBlockOrder" th:value="${stat.index}">
+                                                    <input type="hidden" name="sqlDataOrder"
+                                                           th:value="${substat.index}">
+                                                    <input type="hidden" name="queryOrder"
+                                                           th:value="${querystat.index}">
+                                                    <table th:replace="~{/fragment/table::checkFormTable(name='선택 칼럼', query=${query}, form_id=${form_id})}"></table>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col container border border-dark">
+                                <div>
+                                    <h3>QUERY</h3>
+                                    <textarea id="sql-block" rows="10" cols="50" th:placeholder="${block.sqlQuery}"
+                                              style="font-size: large; border: 4px solid; border-radius: 10px;"></textarea>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 th:text="${block.sqlBlockType}"></h3>
+                                    <div style="width:200px;"
+                                         th:insert="~{/fragment/table:: formTable('블록 타입', ${sqlBlockTypes}, |sql-block-type${stat.index}|, |block-edit-form${stat.index}|)}"></div>
+                                </div>
+                            </div>
+                            <div class="col-2 container border border-dark"
+                                 style="background-color: lightyellow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

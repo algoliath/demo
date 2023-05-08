@@ -4,7 +4,7 @@ import com.example.demo.domain.member.Member;
 import com.example.demo.util.Source;
 import com.example.demo.domain.source.datasource.wrapper.MimeTypes;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
-import com.example.demo.util.datasource.connection.DocsConnection;
+import com.example.demo.domain.source.datasource.connection.DocsConnection;
 import com.google.api.services.docs.v1.Docs;
 import com.google.api.services.docs.v1.model.*;
 import lombok.RequiredArgsConstructor;

@@ -1,16 +1,13 @@
 package com.example.demo.web.controller;
 
-import com.example.demo.domain.data.vo.SearchForm;
+import com.example.demo.domain.data.vo.template.entity.EntitySearchForm;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.data.dto.EntityDTO;
 import com.example.demo.domain.login.LoginForm;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.member.form.MemberForm;
 import com.example.demo.domain.repository.template.model.EntityRepository;
-import com.example.demo.domain.template.form.TemplateForm;
-import com.example.demo.domain.template.service.TemplateService;
 import com.example.demo.domain.template.model.Entity;
-import com.example.demo.util.template.TemplateFormProvider;
 import com.example.demo.web.session.SessionConst;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +47,7 @@ public class HomeController {
         } catch(Exception e){
             log.info("Exception occurred during transaction. Caused by={}", e);
         }
-        model.addAttribute("searchForm", new SearchForm());
+        model.addAttribute("entitySearchForm", new EntitySearchForm());
         return "login/loginHome";
     }
 }

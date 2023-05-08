@@ -2,7 +2,7 @@ package com.example.demo.domain.repository.template.mybatis;
 
 import com.example.demo.domain.data.dto.EntityDTO;
 import com.example.demo.domain.repository.template.model.EntityRepository;
-import com.example.demo.domain.template.form.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
 import com.example.demo.domain.template.model.Entity;
 import com.example.demo.domain.template.type.TemplateType;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,9 @@
 package com.example.demo.domain.template.model;
 
-import com.example.demo.domain.column.Column;
+import com.example.demo.domain.data.vo.template.QueryColumnUpdateForm;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
-import com.example.demo.domain.template.form.QueryTemplateForm;
+import com.example.demo.domain.data.dto.EntityDTO;
+import com.example.demo.domain.template.type.TemplateType;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -12,13 +13,31 @@ import java.util.List;
 public class Query extends Template{
 
     private String sheetTitle;
-    private String operator;
-    private String operand;
     private String sourceId;
 
-    private List<Column> columns = new ArrayList<>();
-    private List<Column> targetColumns = new ArrayList<>();
+    private List<QueryColumnUpdateForm> columns = new ArrayList<>();
+    private List<QueryColumnUpdateForm> targetColumns = new ArrayList<>();
     private SpreadSheetTable sheetTable;
-    private Boolean isSubQuery;
+    private Boolean subQueryMark;
 
+    public Query(){
+
+    }
+
+    public Query(EntityDTO entityDTO){
+        super(entityDTO.getId(), entityDTO.getName(), TemplateType.ENTITY);
+    }
+
+    public Query(Template template, List<QueryColumnUpdateForm> columns){
+        super(template.getId(), template.getName(), TemplateType.ENTITY);
+        this.columns = columns;
+    }
+
+    public void addColumn(QueryColumnUpdateForm column) {
+        columns.add(column);
+    }
+
+    public boolean hasColumn(String name){
+        return columns.stream().anyMatch(queryColumnUpdateForm -> queryColumnUpdateForm.getName().equals(name));
+    }
 }

@@ -14,7 +14,7 @@ public interface EntityRepository {
     EntityDTO save(EntityDTO template);
     List<EntityDTO> findByMemberId(Long memberId);
     List<EntityDTO> findByName(String name);
-    List<EntityDTO> findByNameAndMemberId(String name, Long memberId);
+    List<EntityDTO> searchByCond(String name, Long memberId);
     List<EntityDTO> findAll();
     Optional<EntityDTO> findById(Long id);
 }

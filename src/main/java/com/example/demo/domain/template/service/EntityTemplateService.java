@@ -1,12 +1,14 @@
 package com.example.demo.domain.template.service;
 
 import com.example.demo.domain.column.Column;
+import com.example.demo.domain.data.vo.template.QueryColumnUpdateForm;
 import com.example.demo.domain.column.property.condition.key.KeyCondition;
 import com.example.demo.domain.column.property.condition.value.ValueCondition;
 import com.example.demo.domain.data.dto.ColumnDTO;
 import com.example.demo.domain.data.dto.ConditionDTO;
 import com.example.demo.domain.data.dto.TemplateDTO;
-import com.example.demo.domain.database.querybuilder.EntityDynamicSQLBuilder;
+import com.example.demo.domain.sql.query.EntityDynamicSQLBuilder;
+import com.example.demo.domain.exception.ForeignKeyException;
 import com.example.demo.domain.repository.condition.mapper.KeyConditionMapper;
 import com.example.demo.domain.repository.condition.mapper.ValueConditionMapper;
 import com.example.demo.domain.data.dto.EntityDTO;
@@ -14,6 +16,7 @@ import com.example.demo.domain.repository.column.model.ColumnRepository;
 import com.example.demo.domain.repository.template.mapper.TemplateMapper;
 import com.example.demo.domain.repository.template.model.EntityRepository;
 import com.example.demo.domain.template.model.Entity;
+import com.example.demo.domain.template.model.Query;
 import com.example.demo.domain.template.model.Template;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +67,8 @@ public class EntityTemplateService implements TemplateService {
     }
 
     @Transactional
-    public List<Template> findTemplatesByName(String templateName) {
-        List<Template> templates = new ArrayList<>();
+    public List<Entity> findEntitiesByName(String templateName) {
+        List<Entity> templates = new ArrayList<>();
         if(StringUtils.hasText(templateName)){
             List<EntityDTO> entities = entityRepository.findByName(templateName);
             for(EntityDTO entityDTO : entities){
@@ -80,10 +83,37 @@ public class EntityTemplateService implements TemplateService {
     }
 
     @Transactional
+    public Entity findEntityById(Long templateId) {
+        Entity entity = new Entity(entityRepository.findById(templateId).orElseThrow(() -> new IllegalArgumentException()));
+        for (Column column : findColumnsByTemplateId(entity.getId())) {
+            entity.addColumn(column);
+        }
+        return entity;
+    }
+
+
+    @Transactional
+    public List<Query> findQueriesByName(String templateName) {
+        List<Query> templates = new ArrayList<>();
+        if(StringUtils.hasText(templateName)){
+            List<EntityDTO> entities = entityRepository.findByName(templateName);
+            for(EntityDTO entityDTO : entities){
+                Query query = new Query(entityDTO);
+                List<Column> columns = findColumnsByTemplateId(query.getId());
+                columns.stream().map(column -> new QueryColumnUpdateForm(column.getColumnName().getValidName()))
+                        .iterator()
+                        .forEachRemaining((column) -> query.addColumn(column));
+                templates.add(query);
+            }
+        }
+        return templates;
+    }
+
+    @Transactional
     public List<Template> findTemplatesByNameAndMemberId(String templateName, Long memberId) {
         List<Template> templates = new ArrayList<>();
         if(StringUtils.hasText(templateName)){
-            List<EntityDTO> entities = entityRepository.findByNameAndMemberId(templateName, memberId);
+            List<EntityDTO> entities = entityRepository.searchByCond(templateName, memberId);
             for(EntityDTO entityDTO : entities){
                 Entity entity = new Entity(entityDTO);
                 for (Column column : findColumnsByTemplateId(entity.getId())) {
@@ -125,12 +155,18 @@ public class EntityTemplateService implements TemplateService {
     }
 
     @Transactional
-    public EntityDTO saveTemplate(Entity entity, Long memberId){
+    public EntityDTO saveEntity(Entity entity, Long memberId){
+        // CREATE NEW ENTITY TABLE (DDL)
+        createTable(sqlMapper.createTableQuery(entity));
+
         EntityDTO entitySaveDTO = new EntityDTO(entity, memberId);
-        registerTemplate(entitySaveDTO);
+
+        // INSERT INTO TEMPLATE/ENTITY/COLUMN TABLE(DML)
+        saveTemplate(entitySaveDTO);
         EntityDTO entityDTO = registerEntity(entitySaveDTO);
         saveColumns(entity.getColumns(), entityDTO.getId());
-        createTable(sqlMapper.createTableQuery(entity));
+
+        // INSERT ROWS INTO CREATED ENTITY TABLE(DML)
         insertColumns(entity);
         return entityDTO;
     }
@@ -141,12 +177,7 @@ public class EntityTemplateService implements TemplateService {
     }
 
     @Transactional
-    public EntityDTO registerEntity(EntityDTO entityDTO){
-        return entityRepository.save(entityDTO);
-    }
-
-    @Transactional
-    public void registerTemplate(TemplateDTO templateDTO) {
+    public void saveTemplate(TemplateDTO templateDTO) {
         templateMapper.save(templateDTO);
     }
     @Transactional
@@ -155,16 +186,18 @@ public class EntityTemplateService implements TemplateService {
     }
 
     @Transactional
-    public void deleteTemplate(Long templateId) {
-        Optional<EntityDTO> entityDAO = entityRepository.findById(templateId);
+    public EntityDTO registerEntity(EntityDTO entityDTO){
+        return entityRepository.save(entityDTO);
+    }
+
+    @Transactional
+    public void deleteTemplate(Long templateId) throws ForeignKeyException {
         if(templateId == null){
             log.error("templateId={}", templateId);
             throw new IllegalArgumentException("잘못된 템플릿 아이디가 들어왔습니다");
         }
-        if(entityDAO.isEmpty()){
-            throw new IllegalStateException("존재하지 않는 템플릿입니다");
-        }
-        Entity entity = new Entity(entityDAO.get());
+        EntityDTO entityDAO = entityRepository.findById(templateId).orElseThrow(IllegalStateException::new);
+        Entity entity = new Entity(entityDAO);
         columnRepository.delete(templateId);
         templateMapper.delete(templateId);
         entityRepository.dropEntity(sqlMapper.deleteTableQuery(entity));

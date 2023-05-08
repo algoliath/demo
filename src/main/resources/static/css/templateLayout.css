@@ -1,0 +1,162 @@
+
+:root {
+    --border-line-color: aliceblue;
+}
+
+p {
+    margin-top: 10px;
+    font-size: medium;
+    font-weight: bold;
+}
+
+table {
+    width: 100%; /* Fallback for non-WebKit browsers */
+    width: -webkit-fill-available;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 1px 1px 1px 1px black;
+}
+
+td, th {
+    border-width: 1px!important;
+    padding: 7px;
+}
+
+.drop-box {
+    width: 300px!important;
+    height: 70px!important;
+    border: 2px dashed!important;
+    border-radius: 15px!important;
+
+}
+
+.form-control {
+    text-align: left;
+}
+
+.field-error {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    color: red;
+    font-size: medium;
+    font-weight: bold;
+}
+
+.accordion-button {
+    background-color: transparent;
+}
+
+.pop-up {
+    display: block;
+}
+
+.pop-hide {
+    display: none;
+}
+
+.header {
+    height: 25px;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: large;
+}
+
+.flex-box-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-show {
+    border-top: 2px groove var(--border-line-color);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 5px;
+    padding: 20px;
+    background-color: #0d6efd;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.header-collapse {
+    border-bottom: 2px groove var(--border-line-color);
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+    transition: 0.3s;
+}
+
+.topless {
+    border-left: 2px groove var(--border-line-color);
+    border-right: 2px groove var(--border-line-color);
+    border-bottom: 2px groove var(--border-line-color);
+}
+
+.outline {
+    border-radius: 5px;
+}
+
+.box-hover:hover {
+    opacity: 0.5;
+    transition: 0.5s linear;
+}
+
+.img-box:hover {
+    opacity: 0.5;
+    transition: 0.5s ease;
+    transform: translateX(5px);
+    border: 3px solid white;
+    background-image: url('src/main/resources/static/images/loading.gif') !important;
+}
+
+.img-button {
+    font-size: small;
+    width: 50px;
+    height: 30px;
+}
+
+.no-padding {
+    padding: unset;
+}
+
+.col.container {
+    padding: 15px;
+    border: 2px solid;
+    transition: 0.8s;
+    transition-property: width;
+}
+
+.container {
+    margin: 20px;
+    border: 2px solid;
+    border-radius: 10px;
+    padding: 30px;
+    /*background-color: #b3d4f5;*/
+    font-weight: bold;
+}
+
+.accordion-body {
+    margin: auto;
+}
+
+.accordion-button {
+    background-color: springgreen;
+    color: white;
+}
+
+.form-group {
+    margin: auto 10px;
+}
+
+.card-img:active {
+    background-color: mediumspringgreen;
+}
+
+.car-img.validation-error {
+    background: red;
+}
+

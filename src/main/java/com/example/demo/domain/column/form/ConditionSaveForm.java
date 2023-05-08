@@ -5,6 +5,7 @@ import com.example.demo.domain.column.property.condition.value.ValueConditionTyp
 import com.example.demo.domain.column.property.type.ColumnType;
 import lombok.Data;
 
+// separate into keyConditionSaveForm and valueConditionSaveForm
 @Data
 public class ConditionSaveForm {
 

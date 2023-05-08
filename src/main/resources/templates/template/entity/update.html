@@ -1,82 +1,75 @@
 <!DOCTYPE html>
-<html th:replace="~{template/layout/templateLayout :: layout(~{::section#add_template}, ~{::section#add_columns}, ~{::section#update_columns}, ~{::section#save_template})}"
+<html th:replace="~{template/layout/templateLayout::layout(~{::style#style}, ~{::section#header}, ~{::section#body}, ~{::section#footer}, ~{::section#sidebar})}"
       xmlns:th="http://www.thymeleaf.org" lang="en">
 <body>
+<style id="style">
+    root {
+        color: black;
+    }
 
+    #sidebar .accordion-button {
+        background-color: mediumspringgreen !important;
+    }
+
+    #sidebar .accordion-body {
+        background-color: mediumspringgreen !important;
+    }
+</style>
+
+<section id="sidebar">
+    <div th:insert="~{fragment/sidebar::sidebar}"></div>
+</section>
+
+<section id="header"></section>
 <!-- ADD TEMPLATE FORM -->
-<section id="add_template">
-    <!-- ADD TEMPLATE PROPERTY -->
+<section id="body">
+    <!-- ADD TEMPLATE ATTRIBUTE -->
     <div class="template-form base pop-up">
-        <div class="row" width="1300px">
+        <div class="row" style="width: 1200px;">
+            <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
+                <h2 style="color: black; font-weight: lighter; font-size: 35px;">BUILD ENTITY</h2>
+                <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
+            </div>
             <div class="col container">
                 <div th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
             </div>
-            <div class="col-4 container" style="background-color: mediumspringgreen;">
-                <div th:insert="~{/fragment/form::entity(${form_url})}" th:with="form_url=${template} and ${template.spreadSheetTitle}? '/template/entity/sync_entity/' + ${memberId} + '': '/template/entity/add_entity/' + ${memberId} + ''"></div>
+            <div class="col-3 container" style="background-color: mediumspringgreen;"
+                 th:with="form_action=${sourceId}? '/template/entity/sync_entity/' + ${memberId} + '':'/template/entity/add_entity/' + ${memberId} + ''">
+                <div th:insert="~{/fragment/form::entity(${form_action})}"></div>
             </div>
+        </div>
+        <div class="row mt-5">
+            <div id="edit-column" th:insert="~{components/columnForm::column(${template.columnUpdateForms.columnUpdateFormList})}"></div>
         </div>
     </div>
     <!-- ADD TEMPLATE FILE FORM -->
-    <div class="template-form container border-white add pop-hide">
-        <div class="container border-white justify-content-center align-items-center" style="width:500px">
-            <div th:replace="~{/fragment/form::file-search-form(action=|/template/entity/add_entity/${memberId}|, table_id='add-section', form_id='file-search-form', anchor_class='template-form')}"></div>
+    <div class="container border-dark pop-hide add m-auto text-center">
+        <div class="container border-white" style="width:500px">
+            <div class="flex-box-center"
+                 th:insert="~{/fragment/form::file-search-form(action=|/template/entity/add_entity/${memberId}|, table_id='add-section', form_id='file-search-form', anchor_class='template-form')}"></div>
             <hr>
-            <div id="add-section" th:insert="~{/fragment/frame::search_template(action=|/template/entity/add_entity/${memberId}|, table_id='add-template', form_id='file-view-form')}"></div>
+            <div id="join-section" class="mt-3"
+                 th:insert="~{/fragment/form::template-view-form(templates=${templates}, action=|/template/entity/add_entity/${memberId}|, form_id='file-view-form', table_id='edit-column')}"></div>
         </div>
     </div>
-    <!-- JOIN TEMPLATE FILE FORM -->
-    <div class="template-form container border-white join pop-hide">
-        <div class="container border-white justify-content-center align-items-center" style="width:500px">
-            <div th:replace="~{/fragment/form::file-search-form(action=|/template/entity/search_entity/${memberId}|, table_id='join-section', form_id='join-file-search-form', anchor_class='template-form')}"></div>
-            <hr>
-            <div id="join-section" th:insert="~{/fragment/frame::join_template(action=|/template/entity/join_template/${memberId}|, table_id='join-section', form_id='join-file-view-form')}"></div>
-        </div>
-    </div>
+    <!-- JOIN TEMPLATE FILE FORM-->
+    <!--    <div class="template-form container border-white join pop-hide">-->
+    <!--        <div class="container border-white" style="width:500px">-->
+    <!--            <div th:replace="~{/fragment/form::file-search-form(action=|/template/search_templates/mainframe/${memberId}|, table_id='join-section', form_id='join-file-search-form', anchor_class='template-form')}"></div>-->
+    <!--            <hr>-->
+    <!--            <div id="join-section"-->
+    <!--                 th:insert="~{/fragment/frame::join_template(action=|/template/entity/join_template/${memberId}|, table_id='join-section', form_id='join-file-view-form')}"></div>-->
+    <!--        </div>-->
+    <!--    </div>-->
 </section>
-<!-- EDIT COLUMN FORM -->
-<section id="update_columns">
-    <div th:insert="~{/fragment/form:: column}" class="template-form base pop-up"></div>
-</section>
-<section id="add_columns">
-<!--    <div class="container fixed-container" th:if="${template.spreadSheetTable!=null}">-->
-<!--        <form id="column__update__form" th:action="|/template/entity/add_column/${memberId}|" method="POST" th:object="${columnSaveForm}">-->
-<!--            <div th:if="${#fields.hasGlobalErrors()}">-->
-<!--                <p class="field-error" th:each="error : ${#fields.globalErrors()}" th:text="${error}">글로벌 오류 메시지</p>-->
-<!--            </div>-->
-<!--            <div class="row">-->
-<!--                <div class="col">-->
-<!--                    <label for="name" th:text="#{column.name}"></label>-->
-<!--                    <input type="text" id="name" th:field="*{name}" class="form-control"-->
-<!--                           th:errorclass="field-error" th:placeholder="#{required.columnSaveForm.name}">-->
-<!--                    <div th:replace="/template/tables::columnEntry('name','column-save')"></div>-->
-<!--                    <div class="field-error" th:errors="*{name}">칼럼이름 오류</div>-->
-<!--                    <br>-->
-<!--                    <label for="type" th:text="#{column.type}"></label>-->
-<!--                    <input type="text" id="type" th:field="*{type}" class="form-control"-->
-<!--                           th:errorclass="field-error" th:placeholder="#{required.columnSaveForm.type}">-->
-<!--                    <div class="field-error" th:errors="*{type}">칼럼타입 오류</div>-->
-<!--                </div>-->
-<!--                <div class="col-sm">-->
-<!--                    <button type="button" style="margin-top: 265px;" class="accordion-button">-->
-<!--                    </button>-->
-<!--                </div>-->
-<!--                <div class="col-sm">-->
-<!--                    <div>-->
-<!--                        <button class="w-100 btn btn-dark" style="margin-top: 265px" type="submit" name="submit" value="add" th:text="#{add.column}">-->
-<!--                        </button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--    </div>-->
-</section>
-<section id="save_template">
+
+<section id="footer">
     <div class="template-form pop-up">
         <div class="container" style="position:sticky; border:none; width:700px;" th:if="${template} and ${template.spreadSheetTable != null}">
             <div class="row">
                 <div class="col">
                     <form th:action="|/template/entity/update_template/${memberId}|" method="GET">
-                        <button class="w-100 btn btn-dark" value="save" th:text="#{save}"></button>
+                        <button class="w-100 btn btn-dark" value="save" th:text="#{update}"></button>
                     </form>
                 </div>
                 <div class="col">

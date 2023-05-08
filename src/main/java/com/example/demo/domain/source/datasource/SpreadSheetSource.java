@@ -5,7 +5,7 @@ import com.example.demo.util.Source;
 import com.example.demo.domain.source.datasource.wrapper.MimeTypes;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
 import com.example.demo.util.datasource.CredentialUtils;
-import com.example.demo.util.datasource.connection.SheetsConnection;
+import com.example.demo.domain.source.datasource.connection.SheetsConnection;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ClearValuesRequest;
@@ -22,10 +22,8 @@ import java.util.List;
 @Slf4j
 @Data
 public class SpreadSheetSource implements DataSource {
-
     public static String SPREAD_SHEET_VALUES = "values";
     private final String credentials;
-
     public SpreadSheetSource(String fileName) {
         this.credentials = CredentialUtils.getCredentialPath(fileName);
     }
@@ -158,7 +156,7 @@ public class SpreadSheetSource implements DataSource {
         log.info("lastRevision={}", lastRevision);
 
         Revision revision = new Revision();
-        if(revision.getPublished() == null || revision.getPublished() == null && !revision.getPublished().booleanValue()){
+        if(revision.getPublished() == null || (revision.getPublished() == null && !revision.getPublished().booleanValue())){
             revision.setId(revisions.get(revisions.size()-1).getId());
             revision.setPublishedOutsideDomain(true);
             revision.setPublished(true);

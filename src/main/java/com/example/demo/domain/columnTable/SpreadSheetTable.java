@@ -30,7 +30,7 @@ public class SpreadSheetTable {
         this.spreadSheetRange = spreadSheetRange;
     }
 
-    public List<Object> getRow(int index){
+    public List<Object> getRowValues(int index){
         return values.get(index);
     }
 
@@ -38,7 +38,7 @@ public class SpreadSheetTable {
         return this.values;
     }
 
-    public List<Object> getColumn(Column column){
+    public List<Object> getColumnValues(Column column){
         int index = values.get(0).indexOf(column.getColumnName().getValidName());
         if(index == -1){
             log.info("column not found");
@@ -49,7 +49,7 @@ public class SpreadSheetTable {
                 .collect(Collectors.toList());
     }
 
-    public List<Object> getColumn(String name, boolean inclusive){
+    public List<Object> getColumnValues(String name, boolean inclusive){
         log.info("name={}", name);
         int column_index = values.get(0).indexOf(name);
         int start_index = inclusive? 0:1;
@@ -61,21 +61,21 @@ public class SpreadSheetTable {
                 .collect(Collectors.toList());
     }
 
-    public List<List<Object>> getColumns(boolean inclusive){
-        List<Object> columns = getRow(0);
-        return columns.stream().map(column -> getColumn(column.toString(), inclusive)).collect(Collectors.toList());
+    public List<List<Object>> getColumnValues(boolean inclusive){
+        List<Object> columns = getRowValues(0);
+        return columns.stream().map(column -> getColumnValues(column.toString(), inclusive)).collect(Collectors.toList());
     }
 
     public String getColumnRange(String columnName){
-        char columnOrder = (char)('A' + getRow(0).indexOf(columnName));
+        char columnOrder = (char)('A' + getRowValues(0).indexOf(columnName));
         String rangeStart = columnOrder + "" + spreadSheetRange.charAt(spreadSheetRange.indexOf(':')-1);
         String rangeEnd = columnOrder + "" + spreadSheetRange.charAt(spreadSheetRange.length()-1);
-        log.info("columnOrder of {}={}", columnName, getRow(0).indexOf(columnName));
+        log.info("columnOrder of {}={}", columnName, getRowValues(0).indexOf(columnName));
         return rangeStart + ":" + rangeEnd;
     }
 
     public String getCellRange(String columnName, Object columnValue){
-        int rowOrder = getColumn(columnName, false).indexOf(columnValue);
+        int rowOrder = getColumnValues(columnName, false).indexOf(columnValue);
         char columnOrder = (char)('A' + values.get(0).indexOf(columnName));
         return columnOrder + "" + rowOrder;
     }
@@ -90,7 +90,7 @@ public class SpreadSheetTable {
 
     public boolean hasDuplicateRow(int row){
         Set<Object> set = new HashSet<>();
-        for(Object value: getRow(row)){
+        for(Object value: getRowValues(row)){
             if(!set.add(value)){
                 return true;
             }
@@ -99,7 +99,7 @@ public class SpreadSheetTable {
     }
     public boolean hasDuplicateColumn(String column){
         Set<Object> set = new HashSet<>();
-        for(Object value: getColumn(column, false)){
+        for(Object value: getColumnValues(column, false)){
             if(!set.add(value)){
                 return true;
             }
@@ -116,10 +116,12 @@ public class SpreadSheetTable {
             ColumnName columnName = new ColumnName(String.valueOf(value));
             result.get(0).add(columnName.getValidName());
         }
+
+        String defaultValue = "";
         for(int i=1; i<values.size(); i++){
             result.add(new ArrayList<>());
             for(Object value: values.get(i)){
-                result.get(i).add(value);
+                result.get(i).add(value == null? defaultValue: value);
             }
         }
         return result;

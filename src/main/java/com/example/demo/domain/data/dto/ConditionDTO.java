@@ -1,6 +1,5 @@
 package com.example.demo.domain.data.dto;
 import lombok.Data;
-import java.util.UUID;
 
 @Data
 public class ConditionDTO {

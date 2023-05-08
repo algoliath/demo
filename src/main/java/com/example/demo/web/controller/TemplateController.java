@@ -1,11 +1,12 @@
 package com.example.demo.web.controller;
-
 import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.column.form.ColumnSaveForm;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.example.demo.domain.data.dto.TemplateDTO;
-import com.example.demo.domain.data.vo.SearchForm;
-import com.example.demo.domain.database.form.SQLForm;
+import com.example.demo.domain.data.vo.template.entity.EntitySearchForm;
+import com.example.demo.domain.data.vo.file.FileReadForm;
+import com.example.demo.domain.data.vo.template.query.QueryBuilderForm;
+import com.example.demo.domain.exception.ForeignKeyException;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.repository.template.mapper.TemplateMapper;
@@ -13,11 +14,11 @@ import com.example.demo.domain.source.datasource.DriveSource;
 import com.example.demo.domain.source.datasource.SpreadSheetSource;
 import com.example.demo.domain.source.datasource.wrapper.DataSourceId;
 import com.example.demo.domain.source.datasource.wrapper.MimeTypes;
-import com.example.demo.domain.data.vo.EntityForm;
-import com.example.demo.domain.template.form.QueryTemplateForm;
+import com.example.demo.domain.data.vo.template.query.QueryTemplateForm;
+import com.example.demo.domain.template.service.EntityTemplateService;
 import com.example.demo.domain.template.service.TemplateService;
-import com.example.demo.domain.template.form.EntityTemplateForm;
-import com.example.demo.domain.template.form.TemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.TemplateForm;
 import com.example.demo.domain.template.model.Entity;
 import com.example.demo.domain.template.model.Template;
 import com.example.demo.domain.template.type.TemplateType;
@@ -42,9 +43,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.example.demo.domain.source.datasource.SpreadSheetSource.*;
-import static com.example.demo.util.controller.ControllerUtils.*;
-import static com.example.demo.util.controller.ControllerUtils.saveEntityForwardModelAttributes;
-import static com.example.demo.util.controller.ControllerUtils.saveEntityPostModelAttributes;
+import static com.example.demo.util.model.ModelUtils.sendForwardModelAttributes;
+import static com.example.demo.util.model.ModelUtils.sendPostModelAttributes;
 import static com.example.demo.util.datasource.CredentialUtils.*;
 import static com.example.demo.util.datasource.SpreadSheetUtils.getEmbeddableSpreadSheetURL;
 
@@ -56,34 +56,37 @@ public class TemplateController {
 
       private final MemberRepository memberRepository;
       private final TemplateService templateService;
+
+      private final EntityTemplateService entityTemplateService;
       private final TemplateFormProvider templateFormProvider;
       private final TemplateMapper templateMapper;
 
       @GetMapping("/search_file/{memberId}")
-      public String searchFile(@ModelAttribute("searchForm") SearchForm searchForm,
-                               @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
-                               @PathVariable String memberId, Model model){
-            String fileName = searchForm.getName();
-            String fragment = searchForm.getFragment();
+      public String searchSideBarFiles(@ModelAttribute("searchForm") EntitySearchForm entitySearchForm,
+                                       @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,
+                                       @PathVariable String memberId, Model model){
+            String fileName = entitySearchForm.getName();
             String fileId = memberRepository.findById(member.getId()).get().getFileId();
-            DriveSource drive = new DriveSource.Builder(MimeTypes.SHEETS).setCredentials(getCredentialPath(fileId))
-                    .setFields("id, name").setPattern("contains").setTitle(fileName).build();
+            DriveSource drive = new DriveSource.Builder(MimeTypes.SHEETS)
+                    .setCredentials(getCredentialPath(fileId))
+                    .setFields("id, name")
+                    .setPattern("contains")
+                    .setTitle(fileName).build();
             List<File> files = drive.getSource();
             // 잘못된 객체 사용
-            List<EntityForm> entityFormList = new ArrayList<>();
+            List<FileReadForm> fileReadForms = new ArrayList<>();
             for(File file: files){
-                  entityFormList.add(new EntityForm(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
+                  fileReadForms.add(new FileReadForm(file.getId(), file.getName(), getEmbeddableSpreadSheetURL(file.getId())));
             }
-            model.addAttribute("files", entityFormList);
-            return "/fragment/sidebar::#" + fragment;
+            model.addAttribute("files", fileReadForms);
+            return "/fragment/sidebar::#sidebar-file-section";
       }
 
       @GetMapping(value="/search_templates/sidebar/{memberId}", consumes="application/x-www-form-urlencoded;charset=UTF-8;")
-      public String searchSideBarTemplates(@ModelAttribute SearchForm searchForm, @PathVariable String memberId,
-                                           @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,Model model) {
+      public String searchSideBarTemplates(@ModelAttribute EntitySearchForm entitySearchForm, @PathVariable String memberId,
+                                           @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member, Model model) {
             TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
-            String templateName = searchForm.getName();
-            String fragment = searchForm.getFragment();
+            String templateName = entitySearchForm.getName();
             templateForm.setName(templateName);
             templateForm.setType(TemplateType.ENTITY.name());
             PageHelper.startPage(1, 1, false);
@@ -91,30 +94,27 @@ public class TemplateController {
             List<Template> templates = templateService.findTemplatesByNameAndMemberId(templateName, member.getId());
             templates.remove(new Template(templateForm));
             model.addAttribute("templates", templates);
-            model.addAttribute("searchForm", searchForm);
+            model.addAttribute("entitySearchForm", entitySearchForm);
             log.info("templates={}", templates);
-            log.info("fragment={}", fragment);
-            return "fragment/sidebar::#" + fragment;
+            return "fragment/sidebar::#sidebar-template-section";
       }
 
 
       @GetMapping(value = "/search_templates/mainframe/{memberId}", consumes = "application/x-www-form-urlencoded;charset=UTF-8;")
-      public String searchMainFrameTemplates(@ModelAttribute SearchForm searchForm, @PathVariable String memberId,
-                                             @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member,Model model) {
+      public String searchMainFrameTemplates(@ModelAttribute EntitySearchForm entitySearchForm, @PathVariable String memberId,
+                                             @SessionAttribute(name= SessionConst.LOGIN_MEMBER, required = false) Member member, Model model) {
             TemplateForm templateForm = templateFormProvider.getTemplateForm(memberId);
-            String templateName = searchForm.getName();
-            String fragment = searchForm.getFragment();
+            String templateName = entitySearchForm.getName();
             templateForm.setName(templateName);
             templateForm.setType(TemplateType.ENTITY.name());
 
-            PageHelper.startPage(1, 1, false);
+            PageHelper.startPage(1, 5, false);
             List<Template> templates = templateService.findTemplatesByNameAndMemberId(templateName, member.getId());
             templates.remove(new Template(templateForm));
             model.addAttribute("templates", templates);
-            model.addAttribute("searchForm", searchForm);
+            model.addAttribute("entitySearchForm", entitySearchForm);
             log.info("templates={}", templates);
-            log.info("fragment={}", fragment);
-            return "template/entity/add::#" + fragment;
+            return "template/entity/add::#mainframe";
       }
 
       @GetMapping("/add_template/{memberId}")
@@ -123,7 +123,7 @@ public class TemplateController {
             model.addAttribute("memberId", memberId);
             model.addAttribute("columnSaveForm", new ColumnSaveForm());
             model.addAttribute("columnUpdateForm", new ColumnUpdateForm());
-            model.addAttribute("searchForm", new SearchForm());
+            model.addAttribute("entitySearchForm", new EntitySearchForm());
             model.addAttribute("template", new TemplateForm());
             model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
             return "/template/layout/templateLayoutMain";
@@ -136,7 +136,7 @@ public class TemplateController {
             String templateName = templateForm.getName();
             String templateType = templateForm.getType();
             model.addAttribute("templateTypes", Arrays.stream(TemplateType.values()).toList());
-            model.addAttribute("searchForm", new SearchForm());
+            model.addAttribute("entitySearchForm", new EntitySearchForm());
             log.info("-----------[POST START]-------------");
             log.info("memberId={}", memberId);
             log.info("templateForm={}", templateForm);
@@ -147,8 +147,8 @@ public class TemplateController {
                  bindingResult.rejectValue("name", "duplicate", new Object[]{templateName}, null);
             }
             if(bindingResult.hasErrors()){
-               log.info("bindingResult={}", bindingResult);
-               return "/template/layout/templateLayoutMain";
+                 log.info("bindingResult={}", bindingResult);
+                 return "/template/layout/templateLayoutMain";
             }
             templateForm.setName(templateName);
             templateForm.setType(templateType);
@@ -157,15 +157,15 @@ public class TemplateController {
                   case ENTITY -> {
                         EntityTemplateForm entityTemplateForm = new EntityTemplateForm(templateForm);
                         templateFormProvider.setEntityTemplateForm(memberId, entityTemplateForm);
-                        saveEntityForwardModelAttributes(model, entityTemplateForm);
+                        sendForwardModelAttributes(model, entityTemplateForm);
                         return "/template/entity/add";
                   }
                   case QUERY -> {
                         QueryTemplateForm queryTemplateForm = new QueryTemplateForm(templateForm);
-                        queryTemplateForm.setSQLForm(new SQLForm());
+                        queryTemplateForm.setQueryBuilderForm(new QueryBuilderForm());
                         log.info("queryTemplateForm={}", queryTemplateForm);
                         templateFormProvider.setQueryTemplateForm(memberId, queryTemplateForm);
-                        sendQueryForwardModelAttributes(model, queryTemplateForm);
+                        sendForwardModelAttributes(model, queryTemplateForm);
                         return "/template/query/add";
                   }
             }
@@ -181,19 +181,17 @@ public class TemplateController {
             session.setAttribute(SessionConst.TEMPLATE_ID, templateId);
 
             Member loginMember = memberRepository.findById(member.getId()).orElse(null);
-            Template template = templateService.findTemplateById(templateId).get(); // use BasicTemplateService
-            TemplateType templateType = template.getTemplateType();
+            Entity entity = entityTemplateService.findEntityById(templateId);
 
-            if(loginMember == null || template == null){
-                  throw new IllegalStateException(String.format("member=[%s], template=[%s]", loginMember, template));
+            if(loginMember == null || entity == null){
+                  throw new IllegalStateException(String.format("member=[%s], template=[%s]", loginMember, entity));
             }
 
             SpreadSheetSource spreadSheetSource = new SpreadSheetSource(loginMember.getFileId());
-            Entity entity = (Entity) template;
-            Source<String> paramSource = new Source<>(Arrays.asList(FILE_NAME), Arrays.asList(entity.getSheetTitle()));
-            DataSourceId dataSourceId = spreadSheetSource.getDataSourceId(paramSource);
-            paramSource.add(FILE_RANGE, entity.getSheetRange());
 
+            Source<String> paramSource = new Source<>(Arrays.asList(FILE_NAME), Arrays.asList(entity.getSheetTitle()));
+            paramSource.add(FILE_RANGE, entity.getSheetRange());
+            DataSourceId dataSourceId = spreadSheetSource.getDataSourceId(paramSource);
             try {
                   SpreadSheetTable spreadSheetTable = spreadSheetSource.getSpreadSheetTable(paramSource).get(SPREAD_SHEET_VALUES).orElse(null);
                   entity.setSheetTable(spreadSheetTable);
@@ -201,19 +199,22 @@ public class TemplateController {
                   throw new IllegalStateException("스프레드시트 범위 정보 에러" ,e);
             }
 
-            entity.setColumns(templateService.findColumnsByTemplateId(templateId));
             entity.setSourceId(dataSourceId.getOriginalFileId());
             EntityTemplateForm templateForm = new EntityTemplateForm(entity);
-            saveEntityForwardModelAttributes(model, templateForm);
-            saveEntityPostModelAttributes(model, templateForm);
+            sendForwardModelAttributes(model, templateForm);
+            sendPostModelAttributes(model, templateForm);
             templateFormProvider.setTemplateForm(memberId, templateForm);
             return "/template/entity/update";
       }
 
-      @GetMapping("/delete/{memberId}/{templateId}")
+      @DeleteMapping("/delete/{memberId}/{templateId}")
       public String deleteTemplate(@PathVariable String memberId, @PathVariable Long templateId, Model model){
-            templateService.deleteTemplate(templateId);
-            return "redirect:" + "/";
+            try{
+                  templateService.deleteTemplate(templateId);
+            } catch(ForeignKeyException e){
+
+            }
+            return "redirect:/";
       }
 
       @GetMapping("/{memberId}/{templateId}")
@@ -239,7 +240,7 @@ public class TemplateController {
 
                         EntityTemplateForm templateForm = new EntityTemplateForm(entity);
                         templateFormProvider.setTemplateForm(memberId, templateForm);
-                        model.addAttribute("searchForm", new SearchForm());
+                        model.addAttribute("entitySearchForm", new EntitySearchForm());
                         model.addAttribute("template", templateForm);
                         model.addAttribute("columns", templateForm.getColumnUpdateForms().getColumnUpdateFormList());
                   }
@@ -251,13 +252,6 @@ public class TemplateController {
 
             }
             return "template/template";
-      }
-
-      @GetMapping("/template/{memberId}")
-      public String templates(@SessionAttribute(value = SessionConst.LOGIN_MEMBER) Member member, Model model){
-            List<Template> templates = templateService.getTemplates(member.getId());
-            model.addAttribute("templates", templates);
-            return "login/loginHome";
       }
 
 }

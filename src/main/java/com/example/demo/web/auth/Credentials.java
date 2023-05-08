@@ -1,6 +1,6 @@
 package com.example.demo.web.auth;
 
-import com.example.demo.util.datasource.connection.DocsConnection;
+import com.example.demo.domain.source.datasource.connection.DocsConnection;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;

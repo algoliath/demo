@@ -2,17 +2,19 @@ package com.example.demo.domain.column;
 
 import com.example.demo.domain.column.property.condition.key.KeyCondition;
 import com.example.demo.domain.column.property.condition.value.ValueCondition;
-import com.example.demo.domain.column.property.condition.value.ValueConditionTerm;
 import com.example.demo.domain.column.property.condition.value.ValueConditionType;
 import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.data.dto.ColumnDTO;
 import com.example.demo.domain.data.dto.ConditionDTO;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Column {
 
     private Long id;
@@ -21,8 +23,10 @@ public class Column {
     private List<KeyCondition> keyConditions = new ArrayList<>();
     private List<ValueCondition> valueConditions = new ArrayList<>();
 
-    public Column(){
-
+    public Column(Long id, String type, ColumnName columnName){
+        this.id = id;
+        this.type = type;
+        this.columnName = columnName;
     }
 
     public Column(ColumnUpdateForm columnUpdateForm) {
@@ -30,7 +34,7 @@ public class Column {
         this.columnName = new ColumnName(columnUpdateForm.getName());
         this.type = columnUpdateForm.getType();
         this.keyConditions = columnUpdateForm.getKeyConditions();
-        this.valueConditions = columnUpdateForm.getValConditions();
+        this.valueConditions = columnUpdateForm.getValueConditions();
     }
 
     public Column(ColumnDTO columnDto, List<ConditionDTO> keyConditions, List<ConditionDTO> valueConditions){
@@ -45,14 +49,8 @@ public class Column {
         }
     }
 
-    public Optional<ValueConditionTerm> getConditionParam(ValueConditionType valueConditionType){
-        return valueConditions.stream()
-                .filter(valueCondition -> valueCondition.getConditionType() == valueConditionType)
-                .map(valueCondition -> valueCondition.getConditionTerm()).findAny();
-    }
-
     public boolean hasKeyCondition(KeyCondition keyCondition) {
-        return this.getKeyConditions().contains(keyCondition);
+        return keyConditions.contains(keyCondition);
     }
 
     public boolean hasValueCondition(ValueCondition valueCondition) {
@@ -65,6 +63,11 @@ public class Column {
 
     public Optional<ValueCondition> getValueCondition(ValueConditionType valueConditionType) {
         return valueConditions.stream().filter(valueCondition -> valueCondition.getConditionType() == valueConditionType).findAny();
+    }
+
+    @Override
+    public String toString(){
+        return columnName.getValidName();
     }
 
 }

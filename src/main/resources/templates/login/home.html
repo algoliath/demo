@@ -1,13 +1,13 @@
 <!DOCTYPE HTML>
 <html lang='en' xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="login/home">
+
 <head>
     <title>Title<</title>
     <meta name="description">
     <meta charset="utf-8">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet"><link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@600;600&display=swap" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
@@ -58,7 +58,7 @@
         .header-collapse{
             border-bottom: 2px groove var(--border-line-color);
             border-radius: 20px;
-            background-color: floralwhite;
+            background-color: lightsteelblue;
             padding: 5px;
             color: white;
             transition: 1s;
@@ -71,13 +71,14 @@
     </style>
 </head>
 
-<body style="background-color: #82ffd5;">
-<div class="container" style="background-color: aquamarine;width: 600px;border-radius: 20px;">
+<body>
+<div class="container" style="background-color: white; width: 600px;border-radius: 20px;">
     <div class="py-5 text-center" style="margin-top: 150px; display:flex; justify-content: center; align-items: center">
-        <h3 style="color:black; font-weight: lighter;;font-size: 40px;">EasyToDataBase</h3>
+        <img src="/images/sheet.png" alt="missing">
+        <h3 style="color:black; font-weight: lighter;;font-size: 40px;">FileBase</h3>
 <!--        <div th:replace="~{/fragment/table::bootstrap}"></div>-->
     </div>
-    <div class="container topless" style="border-radius: 20px;background-color: white;">
+    <div class="container border border-3 border-dark" style="border-radius: 20px;">
         <div class="row" style="border-radius: 20px; background-color: var(--border-line-color); padding:unset;">
             <div class="col p-0">
                 <div class="login header header-show" style="border: none;" role="button" onclick="toggle_classes('login.header','registry.header','login.container','registry.container')">로그인</div>

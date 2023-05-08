@@ -13,7 +13,7 @@ import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.example.demo.domain.member.Member;
 import com.example.demo.domain.repository.member.MemberRepository;
 import com.example.demo.domain.source.datasource.SpreadSheetSource;
-import com.example.demo.domain.template.form.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
 import com.example.demo.domain.template.type.TemplateType;
 import com.example.demo.util.Source;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ class EntityValidationTest {
     }
 
     @Test
-    void validate_error(){
+    void no_error(){
 
         EntityTemplateForm templateForm = new EntityTemplateForm();
         ColumnUpdateForms columnUpdateForms = new ColumnUpdateForms();
@@ -68,7 +68,7 @@ class EntityValidationTest {
 
         ColumnUpdateForm columnUpdateForm1 = new ColumnUpdateForm("consultant_id", "NUMBER");
         columnUpdateForm1.addKeyCondition(new KeyCondition(KeyConditionType.PRIMARY_KEY));
-        columnUpdateForm1.addValueCondition(new ForeignKey("template5", OptionType.CASCADE, OptionType.CASCADE));
+        columnUpdateForm1.addValueCondition(new ForeignKey("template5", "id", OptionType.CASCADE, OptionType.CASCADE));
 
         ColumnUpdateForm columnUpdateForm2 = new ColumnUpdateForm("email", "CHARACTER");
         columnUpdateForm2.addKeyCondition(new KeyCondition(KeyConditionType.NOT_NULL));

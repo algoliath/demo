@@ -10,11 +10,11 @@ import com.example.demo.domain.column.form.ColumnUpdateForm;
 import com.example.demo.domain.column.ColumnTypeConverter;
 import com.example.demo.domain.column.form.ColumnUpdateForms;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
-import com.example.demo.domain.template.form.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
 import com.example.demo.util.Source;
-import com.example.demo.util.message.MessageConverter;
+import com.example.demo.util.message.MessageConverterUtils;
 import com.example.demo.util.validation.NamingUtils;
-import com.example.demo.util.validation.QueryUtils;
+import com.example.demo.util.database.sql.QueryBuilderUtils;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +65,7 @@ public class EntityValidator {
             for (String column: duplicateColumns) {
                 columnUpdateForms.deleteForm(new ColumnUpdateForm(column, null));
                 String message = "엔터티의 칼럼 {0}에서 {1} 조건이 위배되었습니다.";
-                message = MessageConverter.convertMessage(message, new Object[]{column, "uniqueness"});
+                message = MessageConverterUtils.convertMessage(message, new Object[]{column, "uniqueness"});
                 bindingResult.get(ENTITY_ERROR_CODE+".template.spreadSheetTable",new ArrayList<>()).get().add(message);
             }
         }
@@ -73,11 +73,11 @@ public class EntityValidator {
         for(ColumnUpdateForm columnUpdateForm: columnUpdateFormList){
             columnName = columnUpdateForm.getName();
             expectedType = columnUpdateForm.getType();
-            List<Object> columnValues = spreadSheetTable.getColumn(columnName, false);
+            List<Object> columnValues = spreadSheetTable.getColumnValues(columnName, false);
 
             if(converter.getType(columnValues) != ColumnType.valueOf(expectedType)){
                 String message = "칼럼 {0}의 타입을 {1}으로 설정할 수 없습니다. 스프레드시트의 셀 수정 범위  {2}를 확인해 주세요.";
-                message = MessageConverter.convertMessage(message, new Object[]{columnName, expectedType, spreadSheetTable.getColumnRange(columnName)});
+                message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, expectedType, spreadSheetTable.getColumnRange(columnName)});
                 bindingResult.get( TYPE_ERROR_CODE+".template.column",new ArrayList<>()).get().add(message);
             }
 
@@ -91,7 +91,7 @@ public class EntityValidator {
                     case PRIMARY_KEY, UNIQUE -> {
                         if(spreadSheetTable.hasDuplicateColumn(columnName)){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, spreadSheetTable.getColumnRange(columnName)});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, spreadSheetTable.getColumnRange(columnName)});
                             bindingResult.get(CONDITION_ERROR_CODE + ".PRIMARY_KEY",new ArrayList<>()).get().add(message);
                         }
                     }
@@ -102,14 +102,14 @@ public class EntityValidator {
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, spreadSheetTable.getColumnRange(columnName)});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, spreadSheetTable.getColumnRange(columnName)});
                             bindingResult.get(CONDITION_ERROR_CODE + ".PRIMARY_KEY",new ArrayList<>()).get().add(message);
                         }
                     }
                 }
             }
 
-            List<ValueCondition> valueConditions = columnUpdateForm.getValConditions();
+            List<ValueCondition> valueConditions = columnUpdateForm.getValueConditions();
 
             for(ValueCondition valueCondition: valueConditions){
                 ValueConditionType conditionType = valueCondition.getConditionType();
@@ -124,7 +124,7 @@ public class EntityValidator {
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, indices});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, indices});
                             bindingResult.get(CONDITION_ERROR_CODE + "." + conditionType,new ArrayList<>()).get().add(message);
 
                         }
@@ -136,7 +136,7 @@ public class EntityValidator {
                                 .collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, indices});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, indices});
                             bindingResult.get(CONDITION_ERROR_CODE + "." + conditionType,new ArrayList<>()).get().add(message);
                         }
                     }
@@ -147,18 +147,18 @@ public class EntityValidator {
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, indices});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, indices});
                             bindingResult.get(CONDITION_ERROR_CODE + "." + conditionType,new ArrayList<>()).get().add(message);
                         }
                     }
                     case LIKE -> {
                         indices = columnValues.stream().map(val -> (String)val)
-                                .filter(value -> !QueryUtils.sqlPatternMatch(value, NamingUtils.parseString(argument)))
+                                .filter(value -> !QueryBuilderUtils.sqlPatternMatch(value, NamingUtils.parseString(argument)))
                                 .map(val -> spreadSheetTable.getCellRange(finalColumnName, val))
                                 .distinct().collect(Collectors.toList());
                         if(!indices.isEmpty()){
                             String message = "칼럼 {0}의 조건 {1}을 설정할 수 없습니다. 스프레드시트의 셀 범위 {2}를 확인해 주세요.";
-                            message = MessageConverter.convertMessage(message, new Object[]{columnName, conditionType, indices});
+                            message = MessageConverterUtils.convertMessage(message, new Object[]{columnName, conditionType, indices});
                             bindingResult.get(CONDITION_ERROR_CODE + "." + conditionType,new ArrayList<>()).get().add(message);
                         }
                     }

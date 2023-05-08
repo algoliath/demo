@@ -5,10 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-      <div th:fragment="sidebar" class="d-flex d-flex flex-column flex-shrink-0 p-3 text-white bg-dark overflow-auto" style="position: fixed; width: 300px; height: 100vh;">
+      <div th:fragment="sidebar" id="sidebar" class="d-flex w-25 flex-column flex-shrink-0 p-3 text-white bg-dark overflow-auto" style="position: fixed; height: 100vh;">
         <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-          <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
-          <span class="fs-4">EasyToDataBase</span>
+          <img src="/images/sheet.png" width="50" height="50">
+          <h3 class>FileBase</h3>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto accordion">
@@ -22,12 +22,12 @@
               <!--</a>-->
             </h2>
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
-              <div class="accordion-body bg-dark">
+              <div class="accordion-body">
                 <div class="sidebar">
                   <hr>
-                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_file/${memberId}|, table_id='sidebar-google-drive-section', form_id='drive-search-form', anchor_class='sidebar')}"></div>
+                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_file/${memberId}|, table_id='sidebar-file-section', form_id='drive-search-form', anchor_class='sidebar')}"></div>
                   <br>
-                  <div id="sidebar-google-drive-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${files})}"></div>
+                  <div id="sidebar-file-section" style="border: none;" th:insert="~{/fragment/table::sideBarFileTable(files=${files})}"></div>
                 </div>
               </div>
             </div>
@@ -42,12 +42,12 @@
               <!--</a>-->
             </h2>
             <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
-              <div class="accordion-body bg-dark">
+              <div class="accordion-body">
                 <div class="sidebar">
                   <hr>
-                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_templates/sidebar/${memberId}|, table_id='sidebar-entity-view-section', form_id='sidebar-entity-repo-search-form')}"></div>
+                  <div th:insert="~{/fragment/form::sidebar-file-search-form(action=|/template/search_templates/sidebar/${memberId}|, table_id='sidebar-template-section', form_id='sidebar-entity-repo-search-form')}"></div>
                   <br>
-                  <div id="sidebar-entity-view-section" style="border: none; width: 500px;" th:insert="~{/fragment/form::sidebar-file-view-form(files=${templates})}"></div>
+                  <div id="sidebar-template-section" style="border: none;" th:insert="~{/fragment/table::sideBarTemplateTable(templates=${templates})}"></div>
                 </div>
               </div>
             </div>

@@ -1,20 +1,34 @@
 package com.example.demo.util.validation;
 
+import org.springframework.util.StringUtils;
+
 public class NamingUtils {
 
     public static String removeCamelCase(String name){
+        if(!StringUtils.hasText(name)){
+            return null;
+        }
         return name.trim().replaceAll("_", " ");
     }
 
     public static String addCamelCase(String name){
+        if(!StringUtils.hasText(name)){
+            return null;
+        }
         return name.trim().replaceAll(" ", "_");
     }
 
     public static boolean isValid(String name){
+        if(!StringUtils.hasText(name)){
+            return false;
+        }
         return isCamelCase(name) || isSingleton(name);
     }
 
     private static boolean isCamelCase(String name){
+        if(!StringUtils.hasText(name)){
+            return false;
+        }
         boolean isUnderScore = false;
         for(char c: name.toCharArray()){
             if(!Character.isAlphabetic(c) && !Character.isDigit(c)){

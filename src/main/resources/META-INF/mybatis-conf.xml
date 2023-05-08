@@ -17,8 +17,6 @@
         <package name="com.github.pagehelper.model"/>
     </typeAliases>
 
-
-
     <plugins>
         <plugin interceptor="com.github.pagehelper.PageInterceptor">
             <property name="dialect" value="com.github.pagehelper.dialect.rowbounds.HsqldbRowBoundsDialect"/>

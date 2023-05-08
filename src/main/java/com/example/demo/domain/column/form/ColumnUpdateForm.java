@@ -2,6 +2,7 @@ package com.example.demo.domain.column.form;
 
 import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.condition.key.KeyCondition;
+import com.example.demo.domain.column.property.condition.value.ForeignKey;
 import com.example.demo.domain.column.property.condition.value.ValueCondition;
 import com.example.demo.domain.column.property.name.ColumnName;
 import com.example.demo.domain.column.property.type.ColumnType;
@@ -24,7 +25,8 @@ public class ColumnUpdateForm {
     @NotNull
     private String type;
     private List<KeyCondition> keyConditions = new ArrayList<>();
-    private List<ValueCondition> valConditions = new ArrayList<>();
+    private List<ValueCondition> valueConditions = new ArrayList<>();
+    private ForeignKey foreignKey;
 
     public ColumnUpdateForm(){
     }
@@ -43,17 +45,17 @@ public class ColumnUpdateForm {
         this.name = column.getColumnName().getValidName();
         this.type = column.getType();
         this.keyConditions = column.getKeyConditions();
-        this.valConditions = column.getValueConditions();
+        this.valueConditions = column.getValueConditions();
     }
 
-    public ColumnUpdateForm(ColumnDTO columnDto, List<ConditionDTO> keyConditions, List<ConditionDTO> valConditions){
+    public ColumnUpdateForm(ColumnDTO columnDto, List<ConditionDTO> keyConditions, List<ConditionDTO> valueConditions){
         this.name = columnDto.getName();
         this.type = columnDto.getType();
         for(ConditionDTO keyCondition: keyConditions){
             this.keyConditions.add(new KeyCondition(keyCondition.getType()));
         }
-        for(ConditionDTO valueCondition: valConditions){
-            this.valConditions.add(new ValueCondition(valueCondition.getType(), valueCondition.getTerm()));
+        for(ConditionDTO valueCondition: valueConditions){
+            this.valueConditions.add(new ValueCondition(valueCondition.getType(), valueCondition.getTerm()));
         }
     }
 
@@ -62,7 +64,7 @@ public class ColumnUpdateForm {
     }
 
     public void addValueCondition(ValueCondition valueCondition){
-        valConditions.add(valueCondition);
+        valueConditions.add(valueCondition);
     }
 
     public void deleteKeyCondition(KeyCondition keyCondition) {
@@ -70,21 +72,13 @@ public class ColumnUpdateForm {
     }
 
     public void deleteValueCondition(ValueCondition valueCondition) {
-        valConditions.remove(valueCondition);
+        valueConditions.remove(valueCondition);
     }
 
     @Override
     public boolean equals(Object o){
         ColumnUpdateForm columnUpdateForm = (ColumnUpdateForm) o;
         return this.name == columnUpdateForm.getName();
-    }
-
-    public boolean hasKeyCondition(KeyCondition keyCondition) {
-        return this.getKeyConditions().contains(keyCondition);
-    }
-
-    public boolean hasValueCondition(ValueCondition valueCondition) {
-        return this.getValConditions().contains(valueCondition);
     }
 
     @Override

@@ -6,195 +6,228 @@
 </head>
 
 <body>
-    <table th:fragment="templateTable(templates, input_id, form_id)">
-        <span><img src="/images/sheet.png" style="width:30px; height:30px;">템플릿 목록</span>
-        <thead>
-        </thead>
-        <tbody>
-            <tr th:each="item:${templates}">
-                <td th:if="${item}!=null" >
-                    <div class="row justify-content-center align-items-center">
-                        <div class="col">
-                            <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 5px;"
-                                 th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
-                                 onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
-                        </div>
-                        <div class="col">
-                            <a href="template.html" class='view-template' th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}" th:text="${item.name}"></a>
-                        </div>
-                        <div class="col">
-                            <a href="template.html" class='delete-template' th:href="@{/template/delete/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}">삭제</a>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table th:fragment="queryTemplateTable(name, templates, input_id, form_id)">
-        <div class="accordion-item">
-            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-                <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" th:text="${name}" data-bs-target="#accordion-panel-template-form" aria-controls="accordion-panel-ft" aria-expanded="false" style="background-color: black; border-radius: 5px; color: white;"></button>
-            </h3>
-            <div id="accordion-panel-template-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
-                <div class="accordion-body">
-                    <div th:each="item:${templates}">
-                        <div th:if="${item}!=null" >
-                            <div class="row justify-content-center align-items-center">
-                                <div class="col">
-                                    <img src="/images/template.png" style="width:100px; height:100px; border: 3px solid; padding: 10px;"
-                                         th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
-                                         onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
-                                </div>
-                                <div class="col">
-                                    <a href="template.html" class='view-template' th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}" th:text="${item.name}"></a>
-                                </div>
-                                <div class="col">
-                                    <a href="template.html" class='delete-template' th:href="@{/template/query/delete_template/{memberId}/{templateName}(memberId=${memberId}, templateName=${item.name})}">삭제</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<table th:fragment="templateTable(templates, input_id, form_id)" style="background-color: #212529">
+    <thead></thead>
+    <tbody>
+    <tr th:each="item:${templates}">
+        <td th:if="${item}!=null">
+            <div class="row justify-content-center align-items-center">
+                <div class="col">
+                    <img src="/images/sheet.png" style="width:85px; height:85px; border: 3px solid; padding: 5px;"
+                         th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-template="${item.name}"
+                         onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
                 </div>
-                <br>
+                <div class="col">
+                    <a href="template.html" class='view-template'
+                       th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}"
+                       th:text="${item.name}"></a>
+                </div>
+                <div class="col">
+                    <a href="template.html" class='delete-template'
+                       th:href="@{/template/delete/{memberId}/{templateId}(memberId=${memberId}, templateId=${item.id})}">삭제</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table th:fragment="queryTable(name, templates, action, input_id, form_id, table_id)">
+    <div th:each="query, querystat:${templates}">
+        <div th:if="${query}!=null">
+            <div class="row justify-content-center align-items-center">
+                <div class="col">
+                    <img src="/images/template.png"
+                         style="width:100px; height:100px; border: 3px solid; padding: 10px;"
+                         th:data-form-id="${form_id}"
+                         th:data-input-id="|${input_id}_${querystat.index}|"
+                         th:data-template="${query.name}"
+                         onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-template'), this.getAttribute('data-form-id'))">
+                </div>
+                <div class="col">
+                    <a href="template.html" class='view-template'
+                       th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${query.id})}"
+                       th:text="${query.name}"></a>
+                </div>
+                <div class="col">
+                    <a href="template.html" class='delete-template'
+                       th:href="@{/template/query/delete_template/{memberId}(memberId=${memberId})}">삭제</a>
+                </div>
             </div>
         </div>
-    </table>
+    </div>
+</table>
 
-    <table th:fragment="sideBarFileTable(files)">
-        <tbody>
-        <tr th:each="file, stat: ${files}">
-            <td>
-                <div class="row justify-content-center align-items-center">
-                    <div class="col">
-                        <img src="/images/excel.png" style="width:50px; height:50px; border:1px solid mediumspringgreen; padding:4px;" class="box-hover"
-                             th:id="${file.name}" draggable="true" ondragstart="dragstart_handler(event)">
-                    </div>
-                    <div class="col">
-                        <a th:text="${file.name}" th:href="|@{${@spreadSheetUtils.getSpreadSheetURL(fileId)}(fileId=${file.id})}|"></a>
-                    </div>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<table th:fragment="sideBarFileTable(files)">
+    <thead>
+    <tr>
+        <th>file type</th>
+        <th>file name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="file, stat: ${files}">
+        <td style="border: 2px solid">
+            <img src="/images/excel.png"
+                 style="width:40px; height:40px;"
+                 class="img-box"
+                 th:template-name="${file.fileName}" draggable="true" ondragstart="dragstart_handler(event)">
+        </td>
+        <td style="border: 2px solid">
+            <a th:href="|${file.fileUrl}|" th:text="${file.fileName}"></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
-    <table th:fragment="sideBarTemplateTable(files)">
-        <thead>
+<table th:fragment="sideBarTemplateTable(templates)">
+    <thead>
         <tr>
-            <th><img src="/images/template.png" style="width:30px; height:30px;">템플릿 목록</th>
+            <th>template type</th>
+            <th>template name</th>
         </tr>
-        </thead>
-        <tbody>
-        <tr th:each="file, stat: ${files}">
-            <td>
-                <div class="row justify-content-center align-items-center">
-                    <div class="col">
-                        <img src="/images/excel.png" style="width:50px; height:50px; border:1px solid mediumspringgreen; padding:10px;" class="box-hover"
-                             th:id="${file.name}" draggable="true" ondragstart="dragstart_handler(event)">
-                    </div>
-                    <div class="col">
-                        <a th:text="${file.name}" th:href="|@{${@spreadSheetUtils.getSpreadSheetURL(fileId)}(fileId=${file.id})}|">></a>
-                    </div>
+    </thead>
+    <tbody>
+    <tr th:each="template, stat: ${templates}">
+        <td>
+            <img src="/images/sheet.png" style="width:40px; height:40px;" class="img-box"
+                 th:template-name="${template.name}" draggable="true" ondragstart="dragstart_handler(event)">
+        </td>
+        <td>
+            <a th:text="${template.name}"
+               th:href="@{/template/{memberId}/{templateId}(memberId=${memberId}, templateId=${template.id})}"></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table th:fragment="fileTable(files, input_id, form_id)">
+    <thead>
+    <tr>
+        <th><img src="/images/sheet.png" style="width:40px; height:40px;">파일 목록</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="file, stat: ${files}">
+        <td>
+            <div class="row justify-content-center align-items-center">
+                <div class="col">
+                    <img src="/images/excel.png"
+                         style="width:100px; height:100px; border:1px solid mediumspringgreen; padding:10px;"
+                         class="box-hover"
+                         th:data-form-id="${form_id}" th:data-input-id="${input_id}"
+                         th:data-file-name="${file.fileName}"
+                         onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-file-name'), this.getAttribute('data-form-id'))">
                 </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <table th:fragment="fileTable(files, input_id, form_id)">
-        <thead>
-            <tr>
-                <th><img src="/images/template.png" style="width:30px; height:30px;">파일 목록</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="file, stat: ${files}">
-                <td>
-                    <div class="row justify-content-center align-items-center">
-                        <div class="col">
-                            <img src="/images/excel.png" style="width:100px; height:100px; border:1px solid mediumspringgreen; padding:10px;" class="box-hover"
-                                 th:data-form-id="${form_id}" th:data-input-id="${input_id}" th:data-file-name="${file.name}"
-                                 onclick="submit_value_form(this.getAttribute('data-input-id'), this.getAttribute('data-file-name'), this.getAttribute('data-form-id'))">
-                        </div>
-                        <div class="col">
-                            <p th:text="${file.name}"></p>
-                        </div>
-                        <div class="col">
-                            <img src="/images/thumbnail.png" style="width:40px; height: 40px; border: 1px solid" th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))"></button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-   <div th:fragment="checkFormTable(name, columns, form_id)" class="accordion" id="accordion_check_form_type">
-       <div class="accordion-item">
-           <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-check-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
-           </h3>
-           <div id="accordion-panel-check-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
-                   <div class="accordion-body">
-                       <div th:each="column: ${columns}">
-                           <input type="checkbox" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
-                           <label th:for="${#ids.prev('targetColumns')}" th:text="${column}" class="form-check-label"></label>
-                       </div>
-                   </div>
-                   <br>
-                   <div th:if="${columns}">
-                       <button class="btn btn-dark" th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))" th:text="#{save}"></button>
-                   </div>
-           </div>
-       </div>
-   </div>
-
-    <div th:fragment="radioFormTable(name, columns, form_id)" id="accordion_radio_form_type">
-        <div class="accordion-item">
-            <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-                <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-radio-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
-            </h3>
-            <div id="accordion-panel-radio-form" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
-                <div class="accordion-body">
-                    <div th:each="column: ${columns}">
-                        <input type="radio" class="form-check-input" th:field="*{targetColumns}" th:value="${column}">
-                        <label th:for="${#ids.prev('targetColumns')}" th:text="${column}" class="form-check-label"></label>
-                    </div>
+                <div class="col">
+                    <p th:text="${file.fileName}"></p>
                 </div>
-             </div>
+                <div class="col">
+                    <img src="/images/thumbnail.png" style="width:40px; height: 40px; border: 1px solid"
+                         th:data-form-id="${form_id}" onclick="submit_form(this.getAttribute('data-form-id'))"></button>
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:fragment="checkFormTable(name, query, form_id)" class="accordion" id="accordion_check_form_type">
+    <div th:each="column, columnStat: ${query.columns}">
+        <div class="d-flex justify-content-evenly align-items-center">
+            <div>
+                <select class="form-select-sm">
+                    <option th:each="columnOption: ${query.columns}"
+                            th:text="${columnOption.name}"
+                            th:value="${columnOption.name}"
+                            th:selected="${columnOption.name == column.name}">
+                        Column
+                    </option>
+                </select>
+            </div>
+            <div th:if="${#strings.equals(block.sqlBlockType, 'SELECT')}">
+                <input type="checkbox" class="form-check-input"
+                       th:form-id="${form_id}" th:field="*{columns}" th:value="${column.name}" th:text="${query.hasColumn(column.name)}" th:checked="${query.hasColumn(column.name)}">
+                <label class="form-check-label" th:for="${#ids.prev('columns')}"></label>
+            </div>
+            <div th:if="${#strings.equals(block.sqlBlockType,'WHERE') or #strings.equals(block.sqlBlockType,'HAVING')}">
+                <select class="form-select-sm" name="operator">
+                    <option th:each="operator: ${operators}"
+                            th:text="${operator.sign}"
+                            th:value="${operator.sign}">
+                        Operator
+                    </option>
+                </select>
+                <input type="text" class="form-control" th:field="*{operands}" th:value="${column.operand}">
+            </div>
         </div>
     </div>
+    <button class="btn-lg btn-primary" style="text-align: right" th:form-id="${form_id}" onclick="submit_form(this.getAttribute('form-id'))">등록</button>
+</div>
 
-    <div th:fragment="formTable(name, items, input_id, form_id)" id="accordion_form_type">
-       <div class="accordion-item">
-           <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-form" aria-controls="accordion-panel-ft" aria-expanded="false" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
-           </h3>
-           <div id="accordion-panel-form" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
-               <div th:each="item: ${items}">
-                   <div class="accordion-body">
-                       <input type="button" th:data-input-id="${input_id}" th:data-form-id="${form_id}" class="form-control" th:value="${item}" onclick="submit_value_form(input_id=this.getAttribute('data-input-id'), value=this.getAttribute('value'), form_id=this.getAttribute('data-form-id'))">
-                   </div>
-               </div>
-           </div>
-       </div>
-   </div>
+<div th:fragment="radioFormTable(name, columns, form_id)" id="accordion_radio_form_type">
+    <div class="accordion-item">
+        <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
+            <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#accordion-panel-radio-form" aria-controls="accordion-panel-ft"
+                    aria-expanded="false" th:text="${name}"
+                    style="background-color: black; border-radius: 5px; color: white;"></button>
+        </h3>
+        <div id="accordion-panel-radio-form" class="accordion-collapse collapse" aria-labelledby="headingOne"
+             data-bs-parent="#accordion_template_type">
+            <div class="accordion-body">
+                <div th:each="column: ${columns}">
+                    <input type="radio" class="form-check-input" th:field="*{columns}"
+                           th:value="${column.name}">
+                    <label th:for="${#ids.prev('columns')}" th:text="${column.name}"
+                           class="form-check-label"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-   <div th:fragment="promptTable(name, items, input_id, another_input_id)" id="accordion_prompt_type">
-       <div class="accordion-item">
-           <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
-               <button class="accordion-button p-1 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-panel-prompt" aria-expanded="false" aria-controls="accordion-panel-vt" th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
-           </h3>
-           <div id="accordion-panel-prompt" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_template_type">
-               <div th:each="item: ${items}">
-                   <div class="accordion-body">
-                       <input type="button" class="form-control" th:value="${item}" th:data-input="${input_id}" th:another-data-input="${another_input_id}" onclick="shift_focus(this.getAttribute('data-input'), this.getAttribute('value'), this.getAttribute('another-data-input'))">
-                   </div>
-               </div>
-           </div>
-           <div id="accordion-panel-vt" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordion_val_cond_type"></div>
-       </div>
-   </div>
+<div th:fragment="formTable(name, items, input_id, form_id)" id="accordion_form_type">
+    <div class="accordion-item">
+        <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
+            <button class="accordion-button p-2 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#accordion-panel-form" aria-controls="accordion-panel-ft" aria-expanded="false"
+                    th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+        </h3>
+        <div id="accordion-panel-form" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+             data-bs-parent="#accordion_template_type">
+            <div th:each="item: ${items}">
+                <div class="accordion-body">
+                    <input type="button" th:data-input-id="${input_id}" th:data-form-id="${form_id}"
+                           class="form-control" th:value="${item}"
+                           onclick="submit_value_form(input_id=this.getAttribute('data-input-id'), value=this.getAttribute('value'), form_id=this.getAttribute('data-form-id'))">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="promptTable(name, items, input_id, another_input_id)" id="accordion_prompt_type">
+    <div class="accordion-item">
+        <h3 class="accordion-header" aria-labelledby="panelsStayOpen-headingOne">
+            <button class="accordion-button p-1 ui-icon-arrow-1-e" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#accordion-panel-prompt" aria-expanded="false" aria-controls="accordion-panel-vt"
+                    th:text="${name}" style="background-color: black; border-radius: 5px; color: white;"></button>
+        </h3>
+        <div id="accordion-panel-prompt" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+             data-bs-parent="#accordion_template_type">
+            <div th:each="item: ${items}">
+                <div class="accordion-body">
+                    <input type="button" class="form-control" th:value="${item}" th:data-input="${input_id}"
+                           th:another-data-input="${another_input_id}"
+                           onclick="shift_focus(this.getAttribute('data-input'), this.getAttribute('value'), this.getAttribute('another-data-input'))">
+                </div>
+            </div>
+        </div>
+        <div id="accordion-panel-vt" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+             data-bs-parent="#accordion_val_cond_type"></div>
+    </div>
+</div>
 
 </body>
 </html>

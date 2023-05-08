@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="column(columns)">
+    <div class="column-form-group">
+        <div th:each="column, columnStat: ${columns}" th:if="${template}" class="border-0">
+            <div class="row" style="width:1200px;">
+                <div class="d-flex" style="height: 50px; font-size: x-small;">
+                <span class="me-3">
+                    <img class="img-box" src="/images/img.png" width="30" height="30"><button
+                        class="btn btn__inline btn-dark"
+                        type="button"
+                        th:anchor-class="|column_option_${columnStat.index}|"
+                        onclick="toggle_popup(this.getAttribute('anchor-class'), 'add')">조건 추가</button>
+                </span>
+                    <span class="me-3">
+                    <img class="img-box" src="/images/join.png" width="30" height="30"><button
+                            class="btn btn__inline btn-dark"
+                            type="button"
+                            th:anchor-class="|column_option_${columnStat.index}|"
+                            onclick="toggle_popup(this.getAttribute('anchor-class'), 'join')">칼럼 조인</button>
+                </span>
+                    <span class="me-3">
+                    <img class="img-box" src="/images/edit.png" width="30" height="30"><button
+                            class="btn btn__inline btn-dark"
+                            type="button"
+                            th:classappend="|${errors ne null and @errorsMappingUtils.containsColumn(errors, column.name)}? 'validation-error': 'no-error'|"
+                            th:anchor-class="|column_option_${columnStat.index}|"
+                            onclick="toggle_popup(this.getAttribute('anchor-class'), 'edit')">칼럼 수정</button></span>
+                    </span>
+                </div>
+                <div class="col container">
+                    <div class="row">
+                        <div class="col">
+                            <form th:id="|edit-form${columnStat.index}|"
+                                  th:action="|/template/entity/edit_column/${memberId}|"
+                                  method="post"
+                                  th:object="${columnUpdateForm}"
+                                  onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label th:text="#{column.name}"></label>
+                                            <br>
+                                            <input type="text" name="name" th:value="${column.name}"
+                                                   class="w-50 form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label th:for="|update__type__${columnStat.index}|"
+                                                   th:text="#{column.type}"></label>
+                                            <br>
+                                            <input type="text" th:value="${column.type}"
+                                                   th:id="|update__type__${columnStat.index}|"
+                                                   class="w-50 form-control" name="type">
+                                        </div>
+                                        <br>
+                                        <div style="width: 200px;" th:with="input_id=|update__type__${columnStat.index}|"
+                                             th:insert="/fragment/table::formTable(name='칼럼 타입', items=${columnTypes}, input_id=${input_id}, form_id=|edit-form${columnStat.index}|)"></div>
+                                    </div>
+                                    <br>
+                                </div>
+                                <div class="col">
+                                    <div th:if="${errors ne null and !errors.isEmpty()}">
+                                        <div class="field-error" th:each="error:${errors.getParamMap()}">
+                                            <p th:each="err: ${error.value}" th:text="${err}"
+                                               th:if="${@errorsMappingUtils.matchColumn(err, column.name)}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <br>
+                            <br>
+                        </div>
+                        <div class="col">
+                            <div class="row" th:each="keyCondition, subcolumnStat: ${column.keyConditions}">
+                                <form th:id="|delete-key-form${columnStat.index}_${subcolumnStat.index}|"
+                                      th:action="|/template/entity/delete_condition/${memberId}|" method="post"
+                                      th:object="${conditionSaveForm}"
+                                      onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                    <div class="form-group">
+                                        <input type="hidden" name="columnName" th:value="${column.name}">
+                                        <h6 th:if="${!#lists.isEmpty(column.keyConditions)}">등록된 키 조건</h6>
+                                        <hr th:if="${!#lists.isEmpty(column.keyConditions)}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{column.keyCondition}"></label>
+                                        <br>
+                                        <input class="form-control-sm"
+                                               th:id="|update_key_condition_type${columnStat.index + '-' + subcolumnStat.index}|"
+                                               th:name="keyConditionType"
+                                               th:value="${column.keyConditions[__${subcolumnStat.index}__].conditionType}">
+                                    </div>
+                                    <img src="/images/remove.gif" width="25" height="25" style="margin-top:20px;"
+                                         th:data-form-id="|delete-key-form${columnStat.index}_${subcolumnStat.index}|"
+                                         th:data-value="${column.keyConditions[__${subcolumnStat.index}__].conditionType}"
+                                         th:data-input="|update_key_condition_type${columnStat.index + '-' + subcolumnStat.index}|"
+                                         onclick="submit_value_form(this.getAttribute('data-input'), this.getAttribute('data-value'), form_id=this.getAttribute('data-form-id'))">
+                                </form>
+                            </div>
+                            <div class="row" th:each="valueCondition, subcolumnStat: ${column.valueConditions}">
+                                <form th:id="|delete-value-form${columnStat.index}_${subcolumnStat.index}|"
+                                      th:action="|/template/entity/delete_condition/${memberId}|" method="post"
+                                      th:object="${conditionSaveForm}"
+                                      onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+                                    <input type="hidden" name="columnName" th:value="${column.name}">
+                                    <h6 th:if="${!#lists.isEmpty(column.valueConditions)}">등록된 키-값 조건</h6>
+                                    <hr th:if="${!#lists.isEmpty(column.valueConditions)}">
+                                    <label th:for="|update_val_condition_type${columnStat.index + '-' + subcolumnStat.index}|"
+                                           th:text="#{column.valueConditionType}"></label>
+                                    <br>
+                                    <input th:id="|update_val_condition_type${columnStat.index + '-' + subcolumnStat.index}|"
+                                           th:name="valueConditionType"
+                                           th:value="${column.valueConditions[__${subcolumnStat.index}__].conditionType}"
+                                           class="form-control-sm">
+                                    <br>
+                                    <label for="update_val_condition_term"
+                                           th:text="#{column.valueConditionTerm}"></label>
+                                    <br>
+                                    <input id="update_val_condition_term" th:name="valueConditionTerm"
+                                           th:value="${column.valueConditions[__${subcolumnStat.index}__].conditionTerm.argument}"
+                                           class="form-control-sm">
+                                    <img src="/images/remove.gif" width="25" height="25" style="margin-top:20px;"
+                                         th:data-form-id="|delete-value-form${columnStat.index}_${subcolumnStat.index}|"
+                                         th:data-input="|update_val_condition_type${columnStat.index + '-' + subcolumnStat.index}|"
+                                         th:data-value="${column.valueConditions[__${subcolumnStat.index}__].conditionType}"
+                                         onclick="submit_value_form(this.getAttribute('data-input'), this.getAttribute('data-value'), form_id=this.getAttribute('data-form-id'))">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:insert="~{/fragment/frame::join_template(action=|/template/entity/join_template/${memberId}|, form_id=|drop-file-form${columnStat.index}|, table_id='edit-column', index=${columnStat.index})}"></div>
+                </div>
+                <div th:class="|col-4 container column_option_${columnStat.index} empty-block|"
+                     style="background-color: mediumspringgreen"></div>
+                <div th:class="|col-5 container column_option_${columnStat.index} add pop-hide|"
+                     th:insert="components/conditionForm::condition(${columnStat.index})"></div>
+                <div th:class="|col-9 container column_option_${columnStat.index} edit pop-hide|"
+                     th:insert="fragment/form::validation"></div>
+                <div th:class="|col-6 container column_option_${columnStat.index} join pop-hide|">
+                    <div th:insert="~{fragment/form::join(column=${column}, index=${columnStat.index})}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

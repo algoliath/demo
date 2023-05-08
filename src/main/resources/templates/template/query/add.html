@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html th:replace="~{template/layout/templateLayout::layout(~{::section#add_template}, ~{::section#add_columns}, ~{::section#update_columns}, ~{::section#save_template})}"
+<html th:replace="~{template/layout/templateLayout::layout(~{::style#style}, ~{::section#header}, ~{::section#body}, ~{::section#footer}, ~{::section#sidebar})}"
       xmlns:th="http://www.thymeleaf.org" lang="en">
 <body>
 
+<style id="style">
+    #sidebar .accordion-button {
+        background-color: beige !important;
+        color: black !important;
+    }
+
+    #sidebar .accordion-body {
+        background-color: beige !important;
+    }
+</style>
+
+<section id="sidebar">
+    <div th:insert="~{fragment/sidebar::sidebar}"></div>
+</section>
+
+<section id="header">
+
+</section>
+
 <!-- ADD TEMPLATE FORM -->
-<section id="add_template">
+<section id="body">
     <script>
         function toggle_checkbox(checkbox_id) {
             const checkbox = $('#' + checkbox_id);
@@ -16,51 +35,12 @@
                 checkbox.prop('checked', true);
             }
         }
-        function toggle_form(toggle_id, form_id){
+        function onHandleToggle(toggle_id, form_id) {
             console.log(this);
             $('#' + toggle_id).toggle('slow');
             submit_form(form_id);
         }
     </script>
-    <script>
-        function dragstart_handler(event) {
-            // Add the target element's id to the data transfer object
-            event.dataTransfer.setData("text/plain", event.target.id);
-            const data = event.dataTransfer.getData("text/plain");
-            console.log('data:'+data);
-            event.dataTransfer.effectAllowed = "move";
-        }
-        function dragover_handler(event) {
-            event.preventDefault();
-            console.log('target:' + event.target.id);
-            event.dataTransfer.dropEffect = "move";
-        }
-        function dragend_handler(event) {
-            event.preventDefault();
-            console.log('target:' + event.target.id);
-        }
-        function drop_handler(event) {
-            event.preventDefault();
-            const data = event.dataTransfer.getData("text/plain");
-            console.log('data:' + data, 'target:' + event.target.id);
-            submit_value_form('template-name', data, event.target.id);
-        }
-    </script>
-    <style>
-        .accordion-button{
-            background-color: beige!important;
-            color: black!important;
-            font-weight: 300;
-        }
-        .accordion-body {
-            background-color: beige!important;
-            color: black!important;
-        }
-        .accordion-item{
-            background-color: beige!important;
-            padding: 10px;
-        }
-    </style>
     <!-- ADD TEMPLATE ATTRIBUTE -->
     <div class="template-form base pop-up" style="width: 1200px;">
         <div class="py-5 text-center d-sm-flex justify-content-center align-items-center">
@@ -68,45 +48,39 @@
             <img src="/images/template.png" class="py-4 card-img" style="width:100px; height:150px; border:none;">
         </div>
         <div class="row">
-            <div class="col container" style="background-color: lightyellow">
-                <textarea rows="15" cols="90" style="border: solid 5px floralwhite" th:placeholder="${template.SQLForm.sqlQuery}"></textarea>
+            <div class="col container border-white" style="background-color: lightyellow">
+                <textarea rows="15" cols="90" style="border: solid 5px floralwhite"></textarea>
             </div>
-            <div class="col-4 container">
-                <div th:insert="~{/fragment/form::query(${form_url})}" th:with="form_url=|/template/query/execute_query/${memberId}|"></div>
-                <form id="result_query" th:action="|/template/query/execute_query/${memberId}|" method="post"
-                      th:object="${template.SQLForm}">
-                    <input type="hidden" class="form-check-input form-control" th:name="sqlBlockList">
-                    <br>
-                    <br>
+            <div class="col-4 container border-white">
+                <div th:insert="~{/fragment/form::query(${action})}"
+                     th:with="action=|/template/query/execute_query/${memberId}|"></div>
+                <form id="result_query" th:action="|/template/query/execute_query/${memberId}|" method="post" th:object="${queryBlockForm}">
+                    <input type="hidden" class="form-check-input form-control" th:name="queryBlockList">
+                    <button type="submit" class="w-10 btn-dark btn" onclick="submit_form('add-sub-query-form')">서브 쿼리 빌드</button>
                     <button type="submit" class="w-50 btn-dark btn">SQL 쿼리 실행</button>
-                    <div class="field-error" th:text="${template.SQLForm.sqlError}"></div>
-                    <br>
-               </form>
-               <br>
+                    <div class="field-error" th:text="${template.queryBuilderForm.sqlError}"></div>
+                </form>
             </div>
         </div>
-        <div th:replace="~{/fragment/form::query-column}"></div>
-        <div>
-            <div class="template-form pop-up row" th:if="${sourceId}">
-                <p>Query Result</p>
-                <div class="col" th:if="${sourceId}" th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
-                <div class="col-5">
-                    <form id="file-export-form" th:action="|/template/query/export_file/${memberId}|" th:object="${searchForm}">
-                        <input class="form-control" th:field="*{name}">
-                        <button>파일 저장</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <div id="query-column" th:insert="~{/components/queryColumnForm::query-column}"></div>
     </div>
 </section>
 
 <!-- EDIT COLUMN FORM -->
-<section id="update_columns"></section>
-
-<section id="add_columns"></section>
-
-<section id="save_template"></section>
+<section id="footer">
+    <div>
+        <div class="template-form pop-up row" th:if="${sourceId}">
+            <p>Query Result</p>
+            <div class="col" th:if="${sourceId}" th:insert="~{/fragment/frame::view_template(${sourceId})}"></div>
+            <div class="col-5">
+                <form id="file-export-form" th:action="|/template/query/export_file/${memberId}|" th:object="${entitySearchForm}">
+                    <input class="form-control" th:field="*{name}">
+                    <button>파일 저장</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 
 </body>
 </html>

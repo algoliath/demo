@@ -1,12 +1,13 @@
 package com.example.demo.domain.column.property.name;
 
 import com.example.demo.util.validation.NamingUtils;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import static com.example.demo.util.validation.NamingUtils.*;
 
 
-@EqualsAndHashCode
+@Data
 public class ColumnName {
 
     private String validName;

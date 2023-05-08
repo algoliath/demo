@@ -4,9 +4,8 @@ import com.example.demo.domain.column.Column;
 import com.example.demo.domain.column.property.condition.key.KeyCondition;
 import com.example.demo.domain.columnTable.SpreadSheetTable;
 import com.example.demo.domain.data.dto.EntityDTO;
-import com.example.demo.domain.template.form.EntityTemplateForm;
+import com.example.demo.domain.data.vo.template.entity.EntityTemplateForm;
 import com.example.demo.domain.template.type.TemplateType;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +46,15 @@ public class Entity extends Template {
 
     public Entity() {
 
+    }
+
+    public static Entity createEntity(Template template, List<Column> columns){
+        Entity entity = new Entity();
+        entity.setId(template.getId());
+        entity.setName(template.getName());
+        entity.setTemplateType(template.getTemplateType());
+        entity.setColumns(columns);
+        return entity;
     }
 
     public void addColumn(Column column){

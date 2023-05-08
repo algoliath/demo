@@ -24,6 +24,7 @@ public class LoginController {
     public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
         return "login/home";
     }
+
     @PostMapping("/login")
     public String loginFormV3(@ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult,
                               @RequestParam(defaultValue = "/") String redirectURL, HttpServletRequest request){
@@ -58,7 +59,8 @@ public class LoginController {
 
     @GetMapping("/logout")
     public String logoutV3(HttpServletRequest request){
-        HttpSession session = request.getSession(false); // 세션이 없을 경우 null 반환
+        // 세션이 없을 경우 null 반환
+        HttpSession session = request.getSession(false);
         if(session != null){
             session.invalidate();
         }

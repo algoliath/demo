@@ -1,0 +1,76 @@
+<div th:fragment="condition(columnIndex)" id="edit-condition">
+    <form id="condition-form"
+          th:id="|condition-save-form${columnIndex}|"
+          th:action="|/template/entity/add_condition/${memberId}|" method="post"
+          th:object="${conditionSaveForm}"
+          onsubmit="return ajax_form(form_id=this.getAttribute('id'), form_url=this.getAttribute('action'), method=this.getAttribute('method'), table_id='edit-column')">
+        <div class="condition-from-group">
+            <div class="topless border-white" style="border:none;">
+                <div class="row" style="padding:unset;">
+                    <div class="col p-0">
+                        <div th:class="|header column_${columnIndex} header-show|"
+                             th:data-toggle="|condition_${columnIndex}|"
+                             th:data-header="|header.column_${columnIndex}|"
+                             onclick="toggle_header(this.getAttribute('data-header'), this.getAttribute('data-toggle'))">
+                            key 조건 추가
+                        </div>
+                    </div>
+                    <div class="col p-0">
+                        <div th:class="|header column_${columnIndex} header-collapse|"
+                             th:data-toggle="|condition_${columnIndex}|"
+                             th:data-header="|header.column_${columnIndex}|"
+                             onclick="toggle_header(this.getAttribute('data-header'), this.getAttribute('data-toggle'))">
+                            value 조건 추가
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <input type="hidden" name="columnName" th:value="${column.name}">
+            <div th:class="|condition_${columnIndex} border-white pop-up|">
+                <div class="form-group">
+                    <!-- ADD KEY CONDITION FORM -->
+                    <label th:for="|key_condition_type${columnIndex}|" th:text="#{column.keyCondition}"
+                           class="form-check-label"></label>
+                    <br>
+                    <input th:id="|key_condition_type${columnIndex}|" th:field="*{keyConditionType}"
+                           th:error-class="field-error"
+                           th:placeholder="#{required.conditionSaveForm.keyConditionTypes}" style="width:170px;"
+                           class="form-control-sm">
+                    <button class="w-25 btn btn-primary">등록</button>
+                    <div class="field-error" th:errors="*{keyConditionType}"></div>
+                    <hr>
+                    <div style="width:200px;"
+                         th:insert="/fragment/table::promptTable (name='key 조건 타입', items=${keyConditionTypes}, input_id=|key_condition_type${columnIndex}|, another_input_id=|key_condition_type${columnIndex}|)"></div>
+
+                </div>
+            </div>
+            <div th:class="|condition_${columnIndex} border-white pop-hide|">
+                <div class="form-group">
+                    <!-- ADD VALUE CONDITION FORM -->
+                    <label th:for="|val_condition_type${columnIndex}|" th:text="#{column.valueConditionType}"
+                           class="form-check-label"></label>
+                    <br>
+                    <input th:id="|val_condition_type${columnIndex}|" th:field="*{valueConditionType}"
+                           th:errorclass="field-error"
+                           class="w-50 form-control-sm"
+                           th:placeholder="#{required.conditionSaveForm.valueConditionTypes}">
+                    <div class="field-error" th:errors="*{valueConditionType}"></div>
+                    <label th:for="|val_condition_term${columnIndex}|" class="form-check-label"></label>
+                    <br>
+                    <input th:id="|val_condition_term${columnIndex}|" th:field="*{valueConditionTerm}"
+                           th:errorclass="field-error"
+                           class="w-50 form-control-sm"
+                           th:placeholder="#{required.conditionSaveForm.valueConditionTerms}">
+                    <div class="field-error" th:errors="*{valueConditionTerm}"></div>
+                    <button class="w-25 btn btn-primary">등록</button>
+                    <hr>
+                    <div style="width:200px;"
+                         th:insert="/fragment/table::promptTable (name='value 조건 타입', items=${valueConditionTypes}, input_id=|val_condition_type${columnIndex}|, another_input_id=|val_condition_term${columnIndex}|)"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
