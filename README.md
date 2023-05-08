@@ -1,4 +1,4 @@
-# EasyToDataBase
+# FileBase
 This is a demo of a website project that provides service for google drive users to build databases with one's google drive files
 
 ### prerequisites
